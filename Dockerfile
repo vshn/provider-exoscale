@@ -7,8 +7,7 @@ RUN \
     ca-certificates \
     tzdata
 
-# TODO: Adjust binary file name
-ENTRYPOINT ["go-bootstrap"]
-COPY go-bootstrap /usr/bin/
+ENTRYPOINT ["provider-exoscale"]
+COPY provider-exoscale /usr/bin/
 
 USER 65536:0

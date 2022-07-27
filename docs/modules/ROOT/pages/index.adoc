@@ -1,11 +1,9 @@
-// TODO: Edit start page
-
 = {page-component-name}
 
 [discrete]
 == Introduction
 
-Provider Exoscale is an operator that deploys S3 objects users and buckets on Exoscale cloud provider.
+Provider Exoscale is an operator that deploys resources on exoscale.com.
 
 [discrete]
 == Documentation

@@ -19,8 +19,7 @@ var (
 	commit  = "-dirty-"
 	date    = time.Now().Format("2006-01-02")
 
-	// TODO: Adjust app name
-	appName     = "go-bootstrap"
+	appName     = "provider-exoscale"
 	appLongName = "a generic bootstrapping project"
 
 	// TODO: Adjust or clear env var prefix
