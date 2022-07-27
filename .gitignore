@@ -1,0 +1,15 @@
+# Goreleaser
+dist/
+.github/release-notes.md
+
+# Build
+provider-exoscale
+*.out
+
+# Docs
+.cache/
+.public/
+node_modules/
+
+# kind
+.kind/

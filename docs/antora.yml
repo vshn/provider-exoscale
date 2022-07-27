@@ -1,0 +1,11 @@
+# TODO: Adjust project meta
+name: provider-exoscale
+title: Provider Exoscale
+version: master
+start_page: ROOT:index.adoc
+nav:
+  - modules/ROOT/nav.adoc
+asciidoc:
+  attributes:
+    appcat: ProviderExoscale
+    releaseVersion: latest
