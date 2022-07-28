@@ -1,7 +1,7 @@
 site:
   title: Provider Exoscale
-  start_page: go-bootstrap::index.adoc
-  url: https://vshn.github.io/go-bootstrap
+  start_page: provider-exoscale::index.adoc
+  url: https://vshn.github.io/provider-exoscale
 content:
   sources:
     - url: ../antora
