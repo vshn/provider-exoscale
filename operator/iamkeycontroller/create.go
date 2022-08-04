@@ -35,7 +35,7 @@ func (p *IAMKeyPipeline) Create(ctx context.Context, mg resource.Managed) (manag
 		WithSteps(
 			pipeline.NewStepFromFunc("create IAM key", p.createIAMKeyFn(iam)),
 			pipeline.If(hasSecretRef(iam),
-				pipeline.NewStepFromFunc("ensure credentials secret", p.ensureCredentialsSecretFn(iam)),
+				pipeline.NewStepFromFunc("create credentials secret", p.createCredentialsSecretFn(iam)),
 			),
 			pipeline.NewStepFromFunc("emit event", p.emitCreationEventFn(iam)),
 		)
@@ -107,9 +107,8 @@ func (p *IAMKeyPipeline) emitCreationEventFn(obj runtime.Object) func(ctx contex
 	}
 }
 
-// ensureCredentialsSecretFn creates the secret with AIMKey's S3 credentials.
-// The secret is updated in case the keys change, and an owner reference to the AIMKey is set.
-func (p *IAMKeyPipeline) ensureCredentialsSecretFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
+// createCredentialsSecretFn creates the secret with AIMKey's S3 credentials.
+func (p *IAMKeyPipeline) createCredentialsSecretFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
 	return func(ctx context.Context) error {
 		kube := p.kube
 		exoscaleIAMKey := p.exoscaleIAMKey
@@ -132,7 +131,7 @@ func (p *IAMKeyPipeline) ensureCredentialsSecretFn(iamKey *exoscalev1.IAMKey) fu
 		if err != nil {
 			return err
 		}
-		log.V(1).Info("Ensured credential secret", "secretName", fmt.Sprintf("%s/%s", secretRef.Namespace, secretRef.Name))
+		log.V(1).Info("Created credential secret", "secretName", fmt.Sprintf("%s/%s", secretRef.Namespace, secretRef.Name))
 		return nil
 	}
 }
