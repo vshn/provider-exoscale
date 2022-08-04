@@ -1,0 +1,22 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: IAMKey
+metadata:
+  creationTimestamp: null
+  name: iam-key
+spec:
+  forProvider:
+    keyName: iam-key
+    services:
+      sos:
+        buckets:
+        - bucket.test
+    zone: CH-DK-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: my-exoscale-user-credentials
+    namespace: default
+status:
+  atProvider:
+    services:
+      sos: {}

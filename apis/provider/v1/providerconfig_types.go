@@ -23,8 +23,8 @@ type ProviderCredentials struct {
 	// Source represents location of the cluster token.
 	Source xpv1.CredentialsSource `json:"source"`
 
-	// APITokenSecretRef is the reference to the secret with the exoscale API token.
-	APITokenSecretRef corev1.SecretReference `json:"apiTokenSecretRef,omitempty"`
+	// APISecretRef is the reference to the secret with the exoscale API Key and Secret.
+	APISecretRef corev1.SecretReference `json:"apiSecretRef,omitempty"`
 
 	xpv1.CommonCredentialSelectors `json:",inline"`
 }
