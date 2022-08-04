@@ -1,0 +1,40 @@
+= Getting Started
+
+This page describes how to create a new S3 bucket after you have installed the operator.
+
+== Prerequisites
+
+* `kubectl`
+* Already running Kubernetes cluster
+* Installed Operator
+
+== Steps
+
+. Create a file with the spec
++
+.iamkey.yaml
+[source,yaml]
+----
+include::example$exoscale_iamkey.yaml[]
+----
+
+. Apply the spec in the cluster
++
+[source,bash]
+----
+kubectl apply -f iamkey.yaml
+----
+
+. Wait until the operator has provisioned the user
++
+[source,bash]
+----
+kubectl wait --for condition=Ready iamkey/my-exoscale-iam-key
+----
+
+. Inspect the credential `Secret`
++
+[source,bash]
+----
+kubectl get secret my-exoscale-iam-key -o yaml
+----

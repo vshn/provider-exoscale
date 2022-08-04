@@ -1,0 +1,49 @@
+= Installation
+
+This tutorial goes through the steps required to get the operator up and running.
+
+== Prerequisites
+
+* `kubectl`
+* A running Kubernetes cluster with cluster-admin permissions
+
+== Steps
+
+. Install Crossplane chart
++
+[source,bash,subs="attributes+"]
+----
+helm repo add crossplane https://charts.crossplane.io/stable
+helm upgrade --install crossplane crossplane/crossplane \
+  --create-namespace \
+  --namespace crossplane-system \
+  --set "args[1]='--enable-composition-revisions'" \
+  --set webhooks.enabled=true \
+  --wait
+----
+
+. Install `provider-exoscale`
++
+[source,yaml,subs="attributes+"]
+----
+kubectl apply -f - <<EOF
+apiVersion: pkg.crossplane.io/v1
+kind: Provider
+metadata:
+  labels:
+    name: provider-exoscale
+  name: provider-exoscale
+spec:
+ifeval::["{releaseVersion}" == "latest"]
+  package: ghcr.io/vshn/provider-exoscale/package:latest
+endif::[]
+ifeval::["{releaseVersion}" != "latest"]
+  package: ghcr.io/vshn/provider-exoscale/package:{releaseVersion}
+endif::[]
+EOF
+----
+
+== Conclusion
+
+Now that you have the basic Provider running, it's time to get started with deploying resources.
+See xref:tutorials/getting-started.adoc[Tutorial: Getting Started] to get started.

@@ -1,5 +1,5 @@
 name: provider-exoscale
-title: Provider Exoscale
+title: Exoscale Provider for Crossplane
 version: master
 start_page: ROOT:index.adoc
 nav:
