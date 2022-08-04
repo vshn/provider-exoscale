@@ -11,13 +11,6 @@ import (
 	"time"
 )
 
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=iamkeys,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=iamkeys/status;iamkeys/finalizers,verbs=get;update;patch
-
-// +kubebuilder:rbac:groups=core,resources=secrets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=coordination.k8s.io,resources=leases,verbs=get;list;create;update
-// +kubebuilder:rbac:groups=core,resources=events,verbs=create
-
 // SetupController adds a controller that reconciles exoscalev1.IAMKey managed resources.
 func SetupController(mgr ctrl.Manager) error {
 	name := strings.ToLower(exoscalev1.IAMKeyGroupKind)

@@ -11,15 +11,6 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 )
 
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=providerconfigs,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=providerconfigs/status;providerconfigs/finalizers,verbs=get;update;patch
-
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=providerconfigusages,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=exoscale.crossplane.io,resources=providerconfigusages/status;providerconfigusages/finalizers,verbs=get;update;patch
-
-// +kubebuilder:rbac:groups=coordination.k8s.io,resources=leases,verbs=get;list;create;update
-// +kubebuilder:rbac:groups=core,resources=events,verbs=create
-
 // SetupController adds a controller that reconciles ProviderConfigs by accounting for their current usage.
 func SetupController(mgr ctrl.Manager) error {
 	name := providerconfig.ControllerName(providerv1.ProviderConfigGroupKind)

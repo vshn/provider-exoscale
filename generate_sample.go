@@ -1,10 +1,10 @@
 //go:build generate
 
 // Clean samples dir
-//go:generate rm -rf ./package/samples/*
+//go:generate rm -rf ./samples/*
 
 // Generate sample files
-//go:generate go run generate_sample.go ./package/samples
+//go:generate go run generate_sample.go ./samples
 
 package main
 
