@@ -20,12 +20,15 @@ var (
 	date    = time.Now().Format("2006-01-02")
 
 	appName     = "provider-exoscale"
-	appLongName = "a generic bootstrapping project"
+	appLongName = "Crossplane provider that deploys resources on exoscale.com"
 
-	// TODO: Adjust or clear env var prefix
-	// envPrefix is the global prefix to use for the keys in environment variables
-	envPrefix = "BOOTSTRAP"
+	envPrefix = ""
 )
+
+func init() {
+	// Remove `-v` short option from --version flag
+	cli.VersionFlag.(*cli.BoolFlag).Aliases = nil
+}
 
 func main() {
 	ctx, stop, app := newApp()
@@ -51,21 +54,19 @@ func newApp() (context.Context, context.CancelFunc, *cli.App) {
 
 		Before: setupLogging,
 		Flags: []cli.Flag{
-			&cli.BoolFlag{
-				Name:    "debug",
-				Aliases: []string{"verbose", "d"},
-				Usage:   "sets the log level to debug",
-				EnvVars: envVars("DEBUG"),
+			&cli.IntFlag{
+				Name: "log-level", Aliases: []string{"v"}, EnvVars: envVars("LOG_LEVEL"),
+				Usage: "number of the log level verbosity",
+				Value: 0,
 			},
 			&cli.StringFlag{
-				Name:        "log-format",
+				Name: "log-format", EnvVars: envVars("LOG_FORMAT"),
 				Usage:       "sets the log format (values: [json, console])",
-				EnvVars:     envVars("LOG_FORMAT"),
 				DefaultText: "console",
 			},
 		},
 		Commands: []*cli.Command{
-			newExampleCommand(),
+			newOperatorCommand(),
 		},
 		ExitErrHandler: func(ctx *cli.Context, err error) {
 			if err != nil {
