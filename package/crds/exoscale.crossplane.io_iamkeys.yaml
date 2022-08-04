@@ -31,7 +31,7 @@ spec:
     - jsonPath: .metadata.creationTimestamp
       name: Age
       type: date
-    - jsonPath: .status.atProvider.KeyID
+    - jsonPath: .status.atProvider.keyID
       name: Key ID
       type: string
     name: v1
@@ -78,8 +78,7 @@ spec:
                       thus the IAMKey will be restricted to access only sos.
                     properties:
                       sos:
-                        description: SOS is the Object Storage Service in exoscale.
-                          Only this service is supported
+                        description: SOSSpec is the Object Storage Service in exoscale.
                         properties:
                           buckets:
                             description: Buckets is a list of buckets to which IAMKey
@@ -283,12 +282,11 @@ spec:
                       exoscale.com.
                     type: string
                   services:
-                    description: Services is the exoscale service to which IAMKey
+                    description: ServicesSpec is the exoscale service to which IAMKey
                       gets access to.
                     properties:
                       sos:
-                        description: SOS is the Object Storage Service in exoscale.
-                          Only this service is supported
+                        description: SOSSpec is the Object Storage Service in exoscale.
                         properties:
                           buckets:
                             description: Buckets is a list of buckets to which IAMKey

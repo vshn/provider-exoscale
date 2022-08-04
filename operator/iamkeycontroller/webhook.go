@@ -3,6 +3,7 @@ package iamkeycontroller
 import (
 	"context"
 	"fmt"
+	"k8s.io/apimachinery/pkg/api/equality"
 
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
@@ -22,6 +23,14 @@ func (v *IAMKeyValidator) ValidateCreate(_ context.Context, obj runtime.Object) 
 		return fmt.Errorf("an IAMKey named %q should have at least 1 allowed bucket",
 			iamKey.Name)
 	}
+	if iamKey.Spec.WriteConnectionSecretToReference.Name == "" {
+		return fmt.Errorf("an IAMKey named %q should have the name of connection secret reference",
+			iamKey.Name)
+	}
+	if iamKey.Spec.WriteConnectionSecretToReference.Namespace == "" {
+		return fmt.Errorf("an IAMKey named %q should have the namespace of connection secret reference",
+			iamKey.Name)
+	}
 	return nil
 }
 
@@ -32,40 +41,16 @@ func (v *IAMKeyValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 	v.log.V(1).Info("Validate update")
 
 	if oldIAMKey.Status.AtProvider.KeyID != "" {
-		if newIAMKey.GetKeyName() != oldIAMKey.Status.AtProvider.KeyName {
-			return fmt.Errorf("an IAMKey named %q has been created already, you cannot rename it",
+		if !equality.Semantic.DeepEqual(newIAMKey.Spec.ForProvider, oldIAMKey.Spec.ForProvider) {
+			return fmt.Errorf("an IAMKey named %q has been created already, you cannot update it",
 				oldIAMKey.Status.AtProvider.KeyName)
 		}
-		if newIAMKey.Spec.ForProvider.Zone != oldIAMKey.Spec.ForProvider.Zone {
-			return fmt.Errorf("an IAMKey named %q has been created already, you cannot change the zone",
-				oldIAMKey.Status.AtProvider.KeyName)
-		}
-		if !stringArrayEquals(newIAMKey.Spec.ForProvider.Services.SOS.Buckets, oldIAMKey.Status.AtProvider.Services.SOS.Buckets) {
-			return fmt.Errorf("a IAMKey named %q has been created already, you cannot change the bucket list",
-				oldIAMKey.Status.AtProvider.KeyName)
-		}
-		if newIAMKey.Spec.WriteConnectionSecretToReference.Name != oldIAMKey.Spec.WriteConnectionSecretToReference.Name {
-			return fmt.Errorf("an IAMKey named %q has been created already, you cannot change the connection secret name",
-				oldIAMKey.Status.AtProvider.KeyName)
-		}
-		if newIAMKey.Spec.WriteConnectionSecretToReference.Namespace != oldIAMKey.Spec.WriteConnectionSecretToReference.Namespace {
-			return fmt.Errorf("an IAMKey named %q has been created already, you cannot change the connection secret namespace",
+		if !equality.Semantic.DeepEqual(newIAMKey.Spec.WriteConnectionSecretToReference, oldIAMKey.Spec.WriteConnectionSecretToReference) {
+			return fmt.Errorf("an IAMKey named %q has been created already, you cannot update the connection secret reference",
 				oldIAMKey.Status.AtProvider.KeyName)
 		}
 	}
 	return nil
-}
-
-func stringArrayEquals(a []string, b []string) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
 }
 
 // ValidateDelete implements admission.CustomValidator.

@@ -65,9 +65,9 @@ func newIAMKeySample() *exoscalev1.IAMKey {
 			ForProvider: exoscalev1.IAMKeyParameters{
 				KeyName: "iam-key",
 				Zone:    "CH-DK-2",
-				Services: exoscalev1.Services{
-					exoscalev1.SOS{
-						Buckets: []string{"bucket.test"},
+				Services: exoscalev1.ServicesSpec{
+					exoscalev1.SOSSpec{
+						Buckets: []string{"bucket.test.1"},
 					},
 				},
 			},

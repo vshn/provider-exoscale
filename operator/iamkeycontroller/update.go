@@ -11,6 +11,6 @@ import (
 // exoscale.com does not allow any updates on IAM keys.
 func (p *IAMKeyPipeline) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
 	log := controllerruntime.LoggerFrom(ctx)
-	log.Info("Updating resource (noop)")
+	log.V(1).Info("Updating resource (noop)")
 	return managed.ExternalUpdate{}, nil
 }

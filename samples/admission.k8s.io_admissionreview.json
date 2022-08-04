@@ -52,7 +52,7 @@
           "services": {
             "sos": {
               "buckets": [
-                "bucket.test"
+                "bucket.test.1"
               ]
             }
           }
@@ -87,7 +87,7 @@
           "services": {
             "sos": {
               "buckets": [
-                "bucket.test"
+                "bucket.test.1"
               ]
             }
           }

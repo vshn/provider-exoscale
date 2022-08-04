@@ -61,6 +61,6 @@ To test and troubleshoot the webhooks on the cluster, simply apply your changes 
 3.  Send an admission request sample of the spec:
     ```bash
     # send an admission request
-    curl -k -v -H "Content-Type: application/json" --data @samples/admission.k8s.io_admissionreview.json https://localhost:9443/validate-exoscale-crossplane-io-v1-bucket
+    curl -k -v -H "Content-Type: application/json" --data @samples/admission.k8s.io_admissionreview.json https://localhost:9443/validate-exoscale-crossplane-io-v1-iamkey
     ```
 

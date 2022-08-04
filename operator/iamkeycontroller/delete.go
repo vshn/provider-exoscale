@@ -32,7 +32,7 @@ func (p *IAMKeyPipeline) deleteIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx cont
 	return func(ctx context.Context) error {
 		log := controllerruntime.LoggerFrom(ctx)
 
-		err := p.exoscaleClient.RevokeIAMAccessKey(ctx, iamKey.GetZone(), &exoscalesdk.IAMAccessKey{
+		err := p.exoscaleClient.RevokeIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, &exoscalesdk.IAMAccessKey{
 			Key: &iamKey.Status.AtProvider.KeyID,
 		})
 		if err != nil {

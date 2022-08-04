@@ -20,11 +20,11 @@ local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluste
 # for package-push:
 local-install: PACKAGE_IMG = localhost:5000/$(PROJECT_OWNER)/$(PROJECT_NAME)/package:$(IMG_TAG)
 local-install: kind-load-image crossplane-setup registry-setup $(kind_dir)/.credentials.yaml package-push  ## Install Operator in local cluster
+	kubectl apply -n crossplane-system -f $(kind_dir)/.credentials.yaml
 	yq e '.spec.metadata.annotations."local.dev/installed"="$(shell date)"' test/controllerconfig-exoscale.yaml | kubectl apply -f -
 	yq e '.spec.package=strenv(INTERNAL_PACKAGE_IMG)' test/provider-exoscale.yaml | kubectl apply -f -
 	kubectl wait --for condition=Healthy provider.pkg.crossplane.io/provider-exoscale --timeout 60s
 	kubectl -n crossplane-system wait --for condition=Ready $$(kubectl -n crossplane-system get pods -o name -l pkg.crossplane.io/provider=provider-exoscale) --timeout 60s
-	kubectl apply -n crossplane-system -f $(kind_dir)/.credentials.yaml
 
 .PHONY: crossplane-setup
 crossplane-setup: $(crossplane_sentinel) ## Installs Crossplane in kind cluster.
@@ -82,7 +82,7 @@ envtest_crd_dir ?= $(kind_dir)/crds
 $(kind_dir)/.credentials.yaml:
 	@if [ "$$EXOSCALE_API_KEY" = "" ]; then echo "Environment variable EXOSCALE_API_KEY not set"; exit 1; fi
 	@if [ "$$EXOSCALE_API_SECRET" = "" ]; then echo "Environment variable EXOSCALE_API_SECRET not set"; exit 1; fi
-	kubectl create secret generic --from-literal EXOSCALE_API_KEY=$(shell echo $$EXOSCALE_API_KEY) --from-literal EXOSCALE_API_SECRET=$(shell echo $$EXOSCALE_API_SECRET) -o yaml --dry-run=client api-secret > $@
+	kubectl create secret generic --from-literal EXOSCALE_API_KEY=$$EXOSCALE_API_KEY --from-literal EXOSCALE_API_SECRET=$$EXOSCALE_API_SECRET -o yaml --dry-run=client api-secret > $@
 
 ###
 ### Generate webhook certificates.

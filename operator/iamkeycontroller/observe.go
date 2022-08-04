@@ -8,13 +8,13 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	v2 "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/steps"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"net/url"
 	controllerruntime "sigs.k8s.io/controller-runtime"
-	"strings"
 )
 
 // Observe implements managed.ExternalClient.
@@ -28,13 +28,6 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		if KeyId, exists := iamKey.Annotations[KeyIDAnnotationKey]; exists {
 			iamKey.Status.AtProvider.KeyID = KeyId
 			delete(iamKey.Annotations, KeyIDAnnotationKey)
-			if iamKey.Annotations[BucketsAnnotationKey] != "" {
-				iamKey.Status.AtProvider.Services = exoscalev1.Services{
-					SOS: exoscalev1.SOS{
-						Buckets: strings.Split(iamKey.Annotations[BucketsAnnotationKey], ","),
-					},
-				}
-			}
 		} else {
 			// New resource, create user first
 			return managed.ExternalObservation{}, nil
@@ -47,18 +40,17 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 	}
 
 	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.If(hasSecretRef(iamKey),
-			pipeline.NewPipeline().WithNestedSteps("observe credentials secret",
-				pipeline.NewStepFromFunc("fetch credentials secret", p.fetchCredentialsSecretFn(iamKey)),
-				pipeline.NewStepFromFunc("check credentials", p.checkSecret),
-			).WithErrorHandler(p.observeCredentialsHandler),
-		),
+		pipeline.NewPipeline().WithNestedSteps("observe credentials secret",
+			pipeline.NewStepFromFunc("fetch credentials secret", p.fetchCredentialsSecretFn(iamKey)),
+			pipeline.NewStepFromFunc("check credentials", p.checkSecret),
+		).WithErrorHandler(p.observeCredentialsHandler),
 	).RunWithContext(ctx)
 	if result.IsFailed() {
 		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
 	}
 
 	iamKey.Status.AtProvider.KeyName = *p.exoscaleIAMKey.Name
+	iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(*p.exoscaleIAMKey.Resources)
 
 	iamKey.SetConditions(xpv1.Available())
 	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
@@ -69,7 +61,7 @@ func (p *IAMKeyPipeline) getIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx context
 	return func(ctx context.Context) error {
 		log := controllerruntime.LoggerFrom(ctx)
 
-		exoscaleIAMKey, err := p.exoscaleClient.GetIAMAccessKey(ctx, iamKey.GetZone(), iamKey.Status.AtProvider.KeyID)
+		exoscaleIAMKey, err := p.exoscaleClient.GetIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.Status.AtProvider.KeyID)
 		if err != nil {
 			return err
 		}
@@ -106,6 +98,19 @@ func (p *IAMKeyPipeline) observeCredentialsHandler(ctx context.Context, err erro
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Error(err, "Credentials Secret needs reconciling")
 	return nil
+}
+
+func getBuckets(iamResources []v2.IAMAccessKeyResource) []string {
+	buckets := make([]string, len(iamResources))
+	if len(iamResources) == 0 {
+		return buckets
+	}
+	for _, iamResource := range iamResources {
+		if iamResource.Domain == SOSResourceDomain {
+			buckets = append(buckets, iamResource.ResourceName)
+		}
+	}
+	return buckets
 }
 
 func isNotFound(err error) bool {

@@ -16,8 +16,6 @@ import (
 const (
 	// KeyIDAnnotationKey is the annotation key where the IAMKey ID is stored.
 	KeyIDAnnotationKey = "exoscale.crossplane.io/key-id"
-	// BucketsAnnotationKey is the annotation key where the buckets are stored.
-	BucketsAnnotationKey = "exoscale.crossplane.io/buckets"
 	// BucketResourceType is the resource type bucket to which the IAMKey has access to.
 	BucketResourceType = "bucket"
 	//SOSResourceDomain is the resource domain to which the IAMKey has access to.

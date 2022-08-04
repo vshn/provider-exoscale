@@ -34,9 +34,7 @@ func (p *IAMKeyPipeline) Create(ctx context.Context, mg resource.Managed) (manag
 	pipe := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).
 		WithSteps(
 			pipeline.NewStepFromFunc("create IAM key", p.createIAMKeyFn(iam)),
-			pipeline.If(hasSecretRef(iam),
-				pipeline.NewStepFromFunc("create credentials secret", p.createCredentialsSecretFn(iam)),
-			),
+			pipeline.NewStepFromFunc("create credentials secret", p.createCredentialsSecretFn(iam)),
 			pipeline.NewStepFromFunc("emit event", p.emitCreationEventFn(iam)),
 		)
 	result := pipe.RunWithContext(ctx)
@@ -54,7 +52,7 @@ func (p *IAMKeyPipeline) createIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx cont
 		log := controllerruntime.LoggerFrom(ctx)
 
 		var keyResources []v2.IAMAccessKeyResource
-		for _, bucket := range iamKey.Spec.ForProvider.SOS.Buckets {
+		for _, bucket := range iamKey.Spec.ForProvider.Services.SOS.Buckets {
 			keyResource := v2.IAMAccessKeyResource{
 				Domain:       SOSResourceDomain,
 				ResourceName: bucket,
@@ -63,37 +61,22 @@ func (p *IAMKeyPipeline) createIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx cont
 			keyResources = append(keyResources, keyResource)
 		}
 
-		exoscaleIAM, err := exoscaleClient.CreateIAMAccessKey(ctx, iamKey.GetZone(), iamKey.GetKeyName(), v2.CreateIAMAccessKeyWithResources(keyResources))
+		exoscaleIAM, err := exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), v2.CreateIAMAccessKeyWithResources(keyResources))
 		if err != nil {
 			return err
 		}
 
-		if err != nil {
-			return err
-		}
 		// Limitation by crossplane: The interface managed.ExternalClient doesn't allow updating the resource during creation except annotations.
 		// But we need to somehow store the key ID returned by the creation operation, because exoscale API allows multiple IAM Keys with the same display name.
 		// So we store it in an annotation since that is the only allowed place to update our resource.
 		// However, once we observe the spec again, we will copy the key ID from the annotation to the status field,
 		//  and that will become the authoritative source of truth for future reconciliations.
 		metav1.SetMetaDataAnnotation(&iamKey.ObjectMeta, KeyIDAnnotationKey, *exoscaleIAM.Key)
-		metav1.SetMetaDataAnnotation(&iamKey.ObjectMeta, BucketsAnnotationKey, getBuckets(*exoscaleIAM.Resources))
 
 		log.V(1).Info("Created IAM Key in exoscale", "keyID", *exoscaleIAM.Key, "displayName", *exoscaleIAM.Name, "tags", exoscaleIAM.Tags)
 		p.exoscaleIAMKey = exoscaleIAM
 		return nil
 	}
-}
-
-func getBuckets(iamResources []v2.IAMAccessKeyResource) string {
-	var buckets strings.Builder
-	for _, iamResource := range iamResources {
-		buckets.WriteString(",")
-		if iamResource.Domain == SOSResourceDomain {
-			buckets.WriteString(iamResource.ResourceName)
-		}
-	}
-	return buckets.String()[1:buckets.Len()]
 }
 
 func (p *IAMKeyPipeline) emitCreationEventFn(obj runtime.Object) func(ctx context.Context) error {
