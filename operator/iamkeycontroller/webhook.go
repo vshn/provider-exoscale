@@ -31,7 +31,7 @@ func (v *IAMKeyValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 	oldIAMKey := oldObj.(*exoscalev1.IAMKey)
 	v.log.V(1).Info("Validate update")
 
-	if oldIAMKey.Status.AtProvider.KeyName != "" {
+	if oldIAMKey.Status.AtProvider.KeyID != "" {
 		if newIAMKey.GetKeyName() != oldIAMKey.Status.AtProvider.KeyName {
 			return fmt.Errorf("an IAMKey named %q has been created already, you cannot rename it",
 				oldIAMKey.Status.AtProvider.KeyName)
@@ -40,7 +40,7 @@ func (v *IAMKeyValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 			return fmt.Errorf("an IAMKey named %q has been created already, you cannot change the zone",
 				oldIAMKey.Status.AtProvider.KeyName)
 		}
-		if stringArrayEquals(newIAMKey.Spec.ForProvider.Services.SOS.Buckets, oldIAMKey.Status.AtProvider.Services.SOS.Buckets) {
+		if !stringArrayEquals(newIAMKey.Spec.ForProvider.Services.SOS.Buckets, oldIAMKey.Status.AtProvider.Services.SOS.Buckets) {
 			return fmt.Errorf("a IAMKey named %q has been created already, you cannot change the bucket list",
 				oldIAMKey.Status.AtProvider.KeyName)
 		}

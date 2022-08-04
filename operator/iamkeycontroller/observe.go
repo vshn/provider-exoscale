@@ -50,13 +50,15 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		pipeline.If(hasSecretRef(iamKey),
 			pipeline.NewPipeline().WithNestedSteps("observe credentials secret",
 				pipeline.NewStepFromFunc("fetch credentials secret", p.fetchCredentialsSecretFn(iamKey)),
-				pipeline.NewStepFromFunc("compare credentials", p.checkKey),
+				pipeline.NewStepFromFunc("check credentials", p.checkSecret),
 			).WithErrorHandler(p.observeCredentialsHandler),
 		),
 	).RunWithContext(ctx)
 	if result.IsFailed() {
 		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
 	}
+
+	iamKey.Status.AtProvider.KeyName = *p.exoscaleIAMKey.Name
 
 	iamKey.SetConditions(xpv1.Available())
 	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
@@ -87,17 +89,11 @@ func (p *IAMKeyPipeline) fetchCredentialsSecretFn(iamKey *exoscalev1.IAMKey) fun
 	}
 }
 
-func (p *IAMKeyPipeline) checkKey(_ context.Context) error {
+func (p *IAMKeyPipeline) checkSecret(_ context.Context) error {
 	data := p.credentialsSecret.Data
 
 	if len(data) == 0 {
 		return fmt.Errorf("secret %q does not have any data", fmt.Sprintf("%s/%s", p.credentialsSecret.Namespace, p.credentialsSecret.Name))
-	}
-
-	key := exoscalev1.AccessKeyIDName
-	desired := *p.exoscaleIAMKey.Key
-	if observed, exists := p.credentialsSecret.Data[key]; !exists || string(observed) != desired {
-		return fmt.Errorf("secret %q is missing key ID: %s", fmt.Sprintf("%s/%s", p.credentialsSecret.Namespace, p.credentialsSecret.Name), key)
 	}
 
 	// Populate secret key from the secret credentials as exoscale IAM get operation does not return the secret key
