@@ -1,0 +1,21 @@
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: IAMKey
+metadata:
+  name: iam-key-kuttl-test
+  annotations:
+    kuttl: '00-install'
+spec:
+  forProvider:
+    keyName: iam-key-kuttl-test
+    services:
+      sos:
+        buckets:
+          - bucket.test.1
+    zone: CH-DK-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: exoscale-user-credentials-kuttl-test
+    namespace: e2e-test
+---
