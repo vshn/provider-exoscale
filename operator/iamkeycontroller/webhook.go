@@ -23,12 +23,9 @@ func (v *IAMKeyValidator) ValidateCreate(_ context.Context, obj runtime.Object) 
 		return fmt.Errorf("an IAMKey named %q should have at least 1 allowed bucket",
 			iamKey.Name)
 	}
-	if iamKey.Spec.WriteConnectionSecretToReference.Name == "" {
-		return fmt.Errorf("an IAMKey named %q should have the name of connection secret reference",
-			iamKey.Name)
-	}
-	if iamKey.Spec.WriteConnectionSecretToReference.Namespace == "" {
-		return fmt.Errorf("an IAMKey named %q should have the namespace of connection secret reference",
+	secretRef := iamKey.Spec.WriteConnectionSecretToReference
+	if secretRef == nil || secretRef.Name == "" || secretRef.Namespace == "" {
+		return fmt.Errorf("an IAMKey named %q requires a connection secret reference with name and namespace",
 			iamKey.Name)
 	}
 	return nil
@@ -43,11 +40,11 @@ func (v *IAMKeyValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 	if oldIAMKey.Status.AtProvider.KeyID != "" {
 		if !equality.Semantic.DeepEqual(newIAMKey.Spec.ForProvider, oldIAMKey.Spec.ForProvider) {
 			return fmt.Errorf("an IAMKey named %q has been created already, you cannot update it",
-				oldIAMKey.Status.AtProvider.KeyName)
+				oldIAMKey.Name)
 		}
 		if !equality.Semantic.DeepEqual(newIAMKey.Spec.WriteConnectionSecretToReference, oldIAMKey.Spec.WriteConnectionSecretToReference) {
 			return fmt.Errorf("an IAMKey named %q has been created already, you cannot update the connection secret reference",
-				oldIAMKey.Status.AtProvider.KeyName)
+				oldIAMKey.Name)
 		}
 	}
 	return nil
