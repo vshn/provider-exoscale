@@ -1,21 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
+<html lang="en" prefix="og: http://ogp.me/ns/website#">
+  <head itemscope itemtype="http://schema.org/WebSite">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Not Found :: Exoscale Provider for Crossplane</title>
-    <meta property="og:title" itemprop="name" content="Page Not Found">
-    <meta name="twitter:title" content="Page Not Found">
+    <title>Create Releases :: Exoscale Provider for Crossplane</title>
+    <meta property="og:title" itemprop="name" content="Create Releases">
+    <meta name="twitter:title" content="Create Releases">
+    <link rel="canonical" href="https://vshn.github.io/provider-exoscale/provider-exoscale/how-tos/create-releases.html">
+    <meta property="og:url" content="https://vshn.github.io/provider-exoscale/provider-exoscale/how-tos/create-releases.html">
     <meta name="generator" content="Antora 3.0.1">
-    <link rel="stylesheet" href="/provider-exoscale/_/css/site.css">
+    <link rel="stylesheet" href="../../_/css/site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Exoscale Provider for Crossplane" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="vshn_ch">
     <meta property="og:locale" content="en_US" />
-    <script>var uiRootPath = '/provider-exoscale/_'</script>
+    <script>var uiRootPath = '../../_'</script>
     <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/7105834.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="apple-touch-icon" sizes="152x152" href="/_/img/favicon-152x152.png">
@@ -28,7 +30,7 @@
 <link rel="icon" type="image/png" href="/_/img/favicon-16x16.png" sizes="16x16">
 <link rel="icon" type="image/png" href="/_/img/favicon-32x32.png" sizes="32x32">
   </head>
-  <body class="status-404">
+  <body class="article">
 <header class="header">
   <nav class="navbar">
     <div class="navbar-brand">
@@ -72,16 +74,37 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container">
+<div class="nav-container" data-component="provider-exoscale" data-version="master">
   <aside class="nav">
     <div class="panels">
-<div class="nav-panel-explore is-active" data-panel="explore">
+<div class="nav-panel-menu is-active" data-panel="menu">
+  <nav class="nav-menu">
+    <h3 class="title"><a href="../index.html">Exoscale Provider for Crossplane</a></h3>
+<ul class="nav-list">
+  <li class="nav-item" data-depth="0">
+<ul class="nav-list">
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../index.html">Introduction</a>
+  </li>
+  <li class="nav-item" data-depth="1">
+    <span class="nav-text"><a href="https://github.com/vshn/provider-exoscale/releases" target="_blank" rel="noopener">Changelog</a> 🔗</span>
+  </li>
+</ul>
+  </li>
+</ul>
+  </nav>
+</div>
+<div class="nav-panel-explore" data-panel="explore">
+  <div class="context">
+    <span class="title">Exoscale Provider for Crossplane</span>
+    <span class="version">master</span>
+  </div>
   <ul class="components">
-    <li class="component">
-      <a class="title" href="/provider-exoscale/provider-exoscale/index.html">Exoscale Provider for Crossplane</a>
+    <li class="component is-current">
+      <a class="title" href="../index.html">Exoscale Provider for Crossplane</a>
       <ul class="versions">
-        <li class="version is-latest">
-          <a href="/provider-exoscale/provider-exoscale/index.html">master</a>
+        <li class="version is-current is-latest">
+          <a href="../index.html">master</a>
         </li>
       </ul>
     </li>
@@ -93,34 +116,86 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="/provider-exoscale/provider-exoscale/index.html" class="home-link"></a>
+  <a href="../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
+  <ul>
+    <li><a href="../index.html">Exoscale Provider for Crossplane</a></li>
+    <li><a href="create-releases.html">Create Releases</a></li>
+  </ul>
 </nav>
-</div>
+  <div class="edit-this-page"><a href="https://github.com/vshn/provider-exoscale/edit/master/docs/modules/ROOT/pages/how-tos/create-releases.adoc">Edit this Page</a></div>
+  </div>
   <div class="content">
+<aside class="toc sidebar" data-title="Contents" data-levels="2">
+  <div class="toc-menu"></div>
+</aside>
 <article class="doc">
-<h1 class="page">Page Not Found</h1>
+<h1 class="page">Create Releases</h1>
+<div id="preamble">
+<div class="sectionbody">
 <div class="paragraph">
-<p>The page you&#8217;re looking for does not exist. It may have been moved.</p>
+<p>This repository contains GitHub releases.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+<div class="paragraph">
+<p>The PR template reminds you how to separate and label PRs.</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_provider_release"><a class="anchor" href="#_provider_release"></a>Provider Release</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Releasing a new version of the operator requires pushing a <strong>new Git tag</strong>, following the SemVer schema with a <strong><code>v</code> prefix</strong>.
+Optionally, for prereleases they may contain a ascending release candidate suffix with <code>-rc#</code>.</p>
+</div>
+<div class="exampleblock">
+<div class="title">Example 1. Possible Operator Git tags</div>
+<div class="content">
+<div class="ulist">
+<ul>
+<li>
+<p><code>v0.1.2</code></p>
+</li>
+<li>
+<p><code>v1.4.0</code></p>
+</li>
+<li>
+<p><code>v2.0.0-rc1</code></p>
+</li>
+<li>
+<p><code>v2.0.0-rc2</code></p>
+</li>
+</ul>
+</div>
+</div>
 </div>
 <div class="paragraph">
-<p>If you arrived on this page by clicking on a link, please notify the owner of the site that the link is broken.
-If you typed the URL of this page manually, please double check that you entered the address correctly.</p>
+<p>The changelog will be automatically created and is based on merged PRs.
+The following labels must exist on a PR to be included in the changelog:</p>
 </div>
-<div class="paragraph">
-<p>Please use the chat window to tell us how you got here so we can fix it.</p>
+<div class="ulist">
+<ul>
+<li>
+<p><code>area:operator</code></p>
+</li>
+<li>
+<p>one of [<code>bug</code>, <code>enhancement</code>, <code>documentation</code>, <code>change</code>, <code>breaking</code>, <code>dependency</code>]</p>
+</li>
+</ul>
 </div>
-<script>
-function openWidget () {
-    window.HubSpotConversations.widget.open();
-}
-if (window.HubSpotConversations) {
-    openWidget();
-}
-else {
-    window.hsConversationsOnReady = [openWidget];
-}
-</script>
+</div>
+</div>
 </article>
   </div>
 </main>
@@ -128,8 +203,8 @@ else {
 <footer class="footer">
   <p>Copyright © VSHN 2021 – All Rights Reserved. <a href="https://vshn.ch/en/privacy-policy/">Privacy Policy</a>, <a href="https://vshn.ch/en/imprint/">Imprint</a>, and <a href="https://vshn.ch/en/contact/">Contact</a>.</p>
 </footer>
-<script src="/provider-exoscale/_/js/site.js"></script>
-<script async src="/provider-exoscale/_/js/vendor/highlight.js"></script>
+<script src="../../_/js/site.js"></script>
+<script async src="../../_/js/vendor/highlight.js"></script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
