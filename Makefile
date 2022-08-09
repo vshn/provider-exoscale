@@ -89,6 +89,6 @@ run-operator: ## Run in Operator mode against your current kube context
 	go run . -v 1 operator
 
 .PHONY: clean
-clean: kind-clean ## Cleans local build artifacts
-	rm -rf docs/node_modules $(docs_out_dir) dist .cache package/*.xpkg
+clean: kind-clean .package-clean .envtest-clean .e2e-test-clean ## Cleans local build artifacts
+	rm -rf docs/node_modules $(docs_out_dir) dist .cache .work
 	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true

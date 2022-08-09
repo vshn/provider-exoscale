@@ -1,13 +1,13 @@
 kind_dir ?= $(PWD)/.kind
-kind_bin = $(kind_dir)/kind
+kind_bin = $(go_bin)/kind
 
 # Prepare kind binary
-# We need to set the Go arch since the binary is meant for the user's OS.
 $(kind_bin): export GOOS = $(shell go env GOOS)
 $(kind_bin): export GOARCH = $(shell go env GOARCH)
-$(kind_bin):
-	@mkdir -p $(kind_dir)
-	cd kind && go build -o $@ sigs.k8s.io/kind
+$(kind_bin): export GOBIN = $(go_bin)
+$(kind_bin): | $(go_bin)
+	go install sigs.k8s.io/kind@latest
+
 
 .PHONY: kind
 kind: export KUBECONFIG = $(KIND_KUBECONFIG)
@@ -33,7 +33,7 @@ kind-load-image: kind-setup build-docker ## Load the container image onto kind c
 kind-clean: export KUBECONFIG = $(KIND_KUBECONFIG)
 kind-clean: ## Removes the kind Cluster
 	@$(kind_bin) delete cluster --name $(KIND_CLUSTER) || true
-	@rm -rf $(kind_dir)
+	rm -rf $(kind_dir) $(kind_bin)
 
 $(KIND_KUBECONFIG): export KUBECONFIG = $(KIND_KUBECONFIG)
 $(KIND_KUBECONFIG): $(kind_bin)
