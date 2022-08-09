@@ -8,6 +8,7 @@ RUN \
     tzdata
 
 ENTRYPOINT ["provider-exoscale"]
+CMD ["operator"]
 COPY provider-exoscale /usr/bin/
 
 USER 65536:0

@@ -13,3 +13,7 @@ node_modules/
 
 # kind
 .kind/
+
+# Crossplane package
+/package/crossplane.yaml
+/package/*.xpkg

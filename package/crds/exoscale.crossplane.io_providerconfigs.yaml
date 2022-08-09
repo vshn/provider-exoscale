@@ -46,9 +46,9 @@ spec:
               credentials:
                 description: Credentials required to authenticate to this provider.
                 properties:
-                  apiTokenSecretRef:
-                    description: APITokenSecretRef is the reference to the secret
-                      with the exoscale API token.
+                  apiSecretRef:
+                    description: APISecretRef is the reference to the secret with
+                      the exoscale API Key and Secret.
                     properties:
                       name:
                         description: name is unique within a namespace to reference

@@ -16,6 +16,10 @@ include Makefile.vars.mk
 -include docs/antora-preview.mk docs/antora-build.mk
 # Optional kind module
 -include kind/kind.mk
+# Local Env & testing
+-include test/local.mk
+# Crossplane packaging
+-include package/package.mk
 
 .PHONY: help
 help: ## Show this help
@@ -57,7 +61,34 @@ lint: fmt vet generate ## All-in-one linting
 generate: ## Generate additional code and artifacts
 	@go generate ./...
 
+.PHONY: generate-go
+generate-go: ## Generate Go artifacts
+	@go generate ./...
+
+.PHONY: generate-docs
+generate-docs: generate-go ## Generate example code snippets for documentation
+	@yq e 'del(.metadata.creationTimestamp) | del(.metadata.generation) | del(.status)' ./samples/exoscale.crossplane.io_iamkey.yaml > $(docs_moduleroot_dir)/examples/exoscale_iamkey.yaml
+
+.PHONY: install-crd
+install-crd: export KUBECONFIG = $(KIND_KUBECONFIG)
+install-crd: generate kind-setup ## Install CRDs into cluster
+	kubectl apply -f package/crds
+
+.PHONY: install-samples
+install-samples: export KUBECONFIG = $(KIND_KUBECONFIG)
+install-samples: kind-setup ## Install samples into cluster
+	yq ./samples/exoscale*.yaml | kubectl apply -f -
+
+.PHONY: delete-samples
+delete-samples: export KUBECONFIG = $(KIND_KUBECONFIG)
+delete-samples: kind-setup
+	yq ./samples/*.yaml | kubectl delete --ignore-not-found --wait=false -f -
+
+.PHONY: run-operator
+run-operator: ## Run in Operator mode against your current kube context
+	go run . -v 1 operator
+
 .PHONY: clean
-clean: ## Cleans local build artifacts
-	rm -rf docs/node_modules $(docs_out_dir) dist .cache
-	docker rmi $(CONTAINER_IMG) || true
+clean: kind-clean ## Cleans local build artifacts
+	rm -rf docs/node_modules $(docs_out_dir) dist .cache package/*.xpkg
+	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true
