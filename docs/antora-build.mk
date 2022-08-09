@@ -1,4 +1,5 @@
 docs_out_dir := ./.public
+docs_moduleroot_dir := docs/modules/ROOT
 
 docker_opts ?= --rm --tty --user "$$(id -u)"
 

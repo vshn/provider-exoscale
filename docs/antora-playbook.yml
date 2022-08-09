@@ -1,5 +1,5 @@
 site:
-  title: Provider Exoscale
+  title: Exoscale Provider for Crossplane
   start_page: provider-exoscale::index.adoc
   url: https://vshn.github.io/provider-exoscale
 content:
