@@ -11,8 +11,9 @@ provider-exoscale
 .public/
 node_modules/
 
-# kind
+# work
 .kind/
+.work/
 
 # Crossplane package
 /package/crossplane.yaml

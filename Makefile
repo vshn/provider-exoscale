@@ -76,7 +76,7 @@ install-crd: generate kind-setup ## Install CRDs into cluster
 
 .PHONY: install-samples
 install-samples: export KUBECONFIG = $(KIND_KUBECONFIG)
-install-samples: kind-setup ## Install samples into cluster
+install-samples: kind-setup provider-config ## Install samples into cluster
 	yq ./samples/exoscale*.yaml | kubectl apply -f -
 
 .PHONY: delete-samples
@@ -89,6 +89,6 @@ run-operator: ## Run in Operator mode against your current kube context
 	go run . -v 1 operator
 
 .PHONY: clean
-clean: kind-clean ## Cleans local build artifacts
-	rm -rf docs/node_modules $(docs_out_dir) dist .cache package/*.xpkg
+clean: kind-clean .package-clean .envtest-clean .e2e-test-clean ## Cleans local build artifacts
+	rm -rf docs/node_modules $(docs_out_dir) dist .cache .work
 	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true

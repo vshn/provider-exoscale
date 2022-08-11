@@ -101,7 +101,7 @@ func (p *IAMKeyPipeline) observeCredentialsHandler(ctx context.Context, err erro
 }
 
 func getBuckets(iamResources []v2.IAMAccessKeyResource) []string {
-	buckets := make([]string, len(iamResources))
+	buckets := make([]string, 0, len(iamResources))
 	if len(iamResources) == 0 {
 		return buckets
 	}

@@ -1,0 +1,7 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+  # This will wait until resources are really gone
+  - apiVersion: exoscale.crossplane.io/v1
+    kind: IAMKey
+    name: iam-key-kuttl-test

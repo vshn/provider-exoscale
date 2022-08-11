@@ -2,12 +2,13 @@
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
 package_dir := $(notdir $(patsubst %/,%,$(dir $(mkfile_path))))
 
-crossplane_bin = $(kind_dir)/kubectl-crossplane
+crossplane_bin = $(go_bin)/kubectl-crossplane
 
 # Build kubectl-crossplane plugin
-$(crossplane_bin):
-	@mkdir -p $(kind_dir)
-	cd $(package_dir) && go build -o $@ github.com/crossplane/crossplane/cmd/crank
+$(crossplane_bin):export GOBIN = $(go_bin)
+$(crossplane_bin): | $(go_bin)
+	go install github.com/crossplane/crossplane/cmd/crank@latest
+	@mv $(go_bin)/crank $@
 
 .PHONY: package
 package: ## All-in-one packaging and releasing
@@ -25,3 +26,7 @@ package-provider: $(crossplane_bin) generate-go ## Build Crossplane package
 package-push: pkg_file = $(shell ls $(package_dir)/*.xpkg)
 package-push: package-provider ## Push Crossplane package to container registry
 	$(crossplane_bin) push provider -f $(pkg_file) $(PACKAGE_IMG)
+
+.PHONY: .package-clean
+.package-clean:
+	rm -f $(crossplane_bin) package/*.xpkg $(package_dir)/crossplane.yaml
