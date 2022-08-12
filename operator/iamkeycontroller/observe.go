@@ -10,7 +10,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	v2 "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/steps"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"net/url"
@@ -34,69 +34,61 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		}
 	}
 
-	err := p.getIAMKeyFn(iamKey)(ctx)
+	pctx := &pipelineContext{Context: ctx, iamKey: iamKey}
+	err := p.getIAMKey(pctx)
 	if err != nil {
 		return managed.ExternalObservation{}, resource.Ignore(isNotFound, err)
 	}
 
-	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.NewPipeline().WithNestedSteps("observe credentials secret",
-			pipeline.NewStepFromFunc("fetch credentials secret", p.fetchCredentialsSecretFn(iamKey)),
-			pipeline.NewStepFromFunc("check credentials", p.checkSecret),
-		).WithErrorHandler(p.observeCredentialsHandler),
-	).RunWithContext(ctx)
-	if result.IsFailed() {
-		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
+	pipe := pipeline.NewPipeline[*pipelineContext]()
+	result := pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
+		WithSteps(
+			pipe.NewStep("fetch credentials secret", p.fetchCredentialsSecret),
+			pipe.NewStep("check credentials", p.checkSecret),
+		).RunWithContext(pctx)
+
+	if result != nil {
+		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
 	}
 
-	iamKey.Status.AtProvider.KeyName = *p.exoscaleIAMKey.Name
-	iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(*p.exoscaleIAMKey.Resources)
+	iamKey.Status.AtProvider.KeyName = *pctx.iamExoscaleKey.Name
+	iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(*pctx.iamExoscaleKey.Resources)
 
 	iamKey.SetConditions(xpv1.Available())
-	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
+	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
 }
 
-// getIAMKeyFn fetches an existing IAM key from the project associated with the API Key and Secret.
-func (p *IAMKeyPipeline) getIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		log := controllerruntime.LoggerFrom(ctx)
+// getIAMKey fetches an existing IAM key from the project associated with the API Key and Secret.
+func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
+	log := controllerruntime.LoggerFrom(ctx)
 
-		exoscaleIAMKey, err := p.exoscaleClient.GetIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.Status.AtProvider.KeyID)
-		if err != nil {
-			return err
-		}
-		p.exoscaleIAMKey = exoscaleIAMKey
-		log.V(1).Info("Fetched IAM key in exoscale", "iamID", exoscaleIAMKey.Key, "keyName", exoscaleIAMKey.Name)
-		return nil
-	}
-}
-
-func (p *IAMKeyPipeline) fetchCredentialsSecretFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		secretRef := iamKey.Spec.WriteConnectionSecretToReference
-		p.credentialsSecret = &corev1.Secret{}
-
-		err := p.kube.Get(ctx, types.NamespacedName{Namespace: secretRef.Namespace, Name: secretRef.Name}, p.credentialsSecret)
+	exoscaleIAMKey, err := p.exoscaleClient.GetIAMAccessKey(ctx, ctx.iamKey.Spec.ForProvider.Zone, ctx.iamKey.Status.AtProvider.KeyID)
+	if err != nil {
 		return err
 	}
+	ctx.iamExoscaleKey = exoscaleIAMKey
+	log.V(1).Info("Fetched IAM key in exoscale", "iamID", exoscaleIAMKey.Key, "keyName", exoscaleIAMKey.Name)
+	return nil
+
 }
 
-func (p *IAMKeyPipeline) checkSecret(_ context.Context) error {
-	data := p.credentialsSecret.Data
+func (p *IAMKeyPipeline) fetchCredentialsSecret(ctx *pipelineContext) error {
+	secretRef := ctx.iamKey.Spec.WriteConnectionSecretToReference
+	ctx.credentialsSecret = &corev1.Secret{}
+	return p.kube.Get(ctx, types.NamespacedName{Namespace: secretRef.Namespace, Name: secretRef.Name}, ctx.credentialsSecret)
+
+}
+
+func (p *IAMKeyPipeline) checkSecret(ctx *pipelineContext) error {
+	data := ctx.credentialsSecret.Data
 
 	if len(data) == 0 {
-		return fmt.Errorf("secret %q does not have any data", fmt.Sprintf("%s/%s", p.credentialsSecret.Namespace, p.credentialsSecret.Name))
+		return fmt.Errorf("secret %q does not have any data", fmt.Sprintf("%s/%s", ctx.credentialsSecret.Namespace, ctx.credentialsSecret.Name))
 	}
 
 	// Populate secret key from the secret credentials as exoscale IAM get operation does not return the secret key
 	secret := string(data[exoscalev1.SecretAccessKeyName])
-	p.exoscaleIAMKey.Secret = &secret
-	return nil
-}
-
-func (p *IAMKeyPipeline) observeCredentialsHandler(ctx context.Context, err error) error {
-	log := controllerruntime.LoggerFrom(ctx)
-	log.V(1).Error(err, "Credentials Secret needs reconciling")
+	ctx.iamExoscaleKey.Secret = &secret
 	return nil
 }
 

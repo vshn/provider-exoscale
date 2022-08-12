@@ -1,6 +1,7 @@
 package bucketcontroller
 
 import (
+	"context"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -11,18 +12,22 @@ import (
 
 // ProvisioningPipeline provisions Buckets using S3 client.
 type ProvisioningPipeline struct {
-	recorder event.Recorder
-	kube     client.Client
+	recorder    event.Recorder
+	kube        client.Client
+	minioClient *minio.Client
+}
 
-	minio *minio.Client
+type pipelineContext struct {
+	context.Context
+	bucket *exoscalev1.Bucket
 }
 
 // NewProvisioningPipeline returns a new instance of ProvisioningPipeline.
-func NewProvisioningPipeline(kube client.Client, recorder event.Recorder, minio *minio.Client) *ProvisioningPipeline {
+func NewProvisioningPipeline(kube client.Client, recorder event.Recorder, minioClient *minio.Client) *ProvisioningPipeline {
 	return &ProvisioningPipeline{
-		kube:     kube,
-		recorder: recorder,
-		minio:    minio,
+		kube:        kube,
+		recorder:    recorder,
+		minioClient: minioClient,
 	}
 }
 

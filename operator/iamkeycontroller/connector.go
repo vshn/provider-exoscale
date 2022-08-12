@@ -6,14 +6,18 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
-	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/commoncontroller"
-	"github.com/vshn/provider-exoscale/operator/steps"
+	"github.com/vshn/provider-exoscale/operator/controllerutil"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
 type IAMKeyConnector struct {
-	commoncontroller.GenericConnector
+	controllerutil.GenericConnector
+}
+
+type connectContext struct {
+	controllerutil.GenericConnectContext
+	exoscaleClient *exoscalesdk.Client
 }
 
 // Connect implements managed.ExternalConnector.
@@ -23,24 +27,30 @@ func (c *IAMKeyConnector) Connect(ctx context.Context, mg resource.Managed) (man
 	log.V(1).Info("Connecting resource")
 
 	iamKey := fromManaged(mg)
-	pipeline.StoreInContext(ctx, exoscalev1.ProviderConfigNameKey{}, iamKey.GetProviderConfigName())
-	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.NewStepFromFunc("fetch provider config", c.FetchProviderConfig),
-		pipeline.NewStepFromFunc("fetch API secret", c.FetchSecret),
-		pipeline.NewStepFromFunc("fetch API secret", c.ValidateSecret),
-		pipeline.NewStepFromFunc("read API secret", c.createExoscaleClient),
-	).RunWithContext(ctx)
-	if result.IsFailed() {
-		return nil, result.Err()
+
+	pctx := &connectContext{
+		GenericConnectContext: controllerutil.GenericConnectContext{Context: ctx, ProviderConfigName: iamKey.GetProviderConfigName()},
 	}
-	exoscaleClient := pipeline.MustLoadFromContext(ctx, exoscalev1.ExoscaleClientKey{}).(*exoscalesdk.Client)
-	return NewPipeline(c.Kube, c.Recorder, exoscaleClient), nil
+	pipe := pipeline.NewPipeline[*controllerutil.GenericConnectContext]()
+	pipe.WithBeforeHooks(pipelineutil.DebugLogger(&pctx.GenericConnectContext)).
+		WithSteps(
+			pipe.NewStep("fetch provider config", c.FetchProviderConfig),
+			pipe.NewStep("fetch secret", c.FetchSecret),
+			pipe.NewStep("validate secret", c.ValidateSecret),
+			pipe.NewStep("create exoscale client", c.createExoscaleClientFn(pctx)),
+		)
+	result := pipe.RunWithContext(&pctx.GenericConnectContext)
+	if result != nil {
+		return nil, result
+	}
+
+	return NewPipeline(c.Kube, c.Recorder, pctx.exoscaleClient), nil
 }
 
-func (c *IAMKeyConnector) createExoscaleClient(ctx context.Context) error {
-	apiKey := pipeline.MustLoadFromContext(ctx, exoscalev1.APIKeyKey{}).(string)
-	apiSecret := pipeline.MustLoadFromContext(ctx, exoscalev1.APISecretKey{}).(string)
-	exoscaleClient, err := exoscalesdk.NewClient(apiKey, apiSecret)
-	pipeline.StoreInContext(ctx, exoscalev1.ExoscaleClientKey{}, exoscaleClient)
-	return err
+func (c *IAMKeyConnector) createExoscaleClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
+	return func(_ *controllerutil.GenericConnectContext) error {
+		var err error
+		ctx.exoscaleClient, err = exoscalesdk.NewClient(ctx.ApiKey, ctx.ApiSecret)
+		return err
+	}
 }

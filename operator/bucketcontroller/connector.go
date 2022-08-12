@@ -3,8 +3,8 @@ package bucketcontroller
 import (
 	"context"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/commoncontroller"
-	"github.com/vshn/provider-exoscale/operator/steps"
+	"github.com/vshn/provider-exoscale/operator/controllerutil"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"net/url"
 	"strings"
 
@@ -19,7 +19,13 @@ import (
 )
 
 type bucketConnector struct {
-	commoncontroller.GenericConnector
+	controllerutil.GenericConnector
+}
+
+type connectContext struct {
+	controllerutil.GenericConnectContext
+	MinioClient *minio.Client
+	EndpointURL string
 }
 
 // Connect implements managed.ExternalConnecter.
@@ -36,44 +42,48 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return &NoopClient{}, nil
 	}
 
-	pipeline.StoreInContext(ctx, exoscalev1.ProviderConfigNameKey{}, bucket.GetProviderConfigName())
-	pipeline.StoreInContext(ctx, exoscalev1.EndpointKey{}, bucket.Spec.ForProvider.EndpointURL)
-	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.NewStepFromFunc("fetch provider config", c.FetchProviderConfig),
-		pipeline.NewStepFromFunc("fetch API secret", c.FetchSecret),
-		pipeline.NewStepFromFunc("fetch API secret", c.ValidateSecret),
-		pipeline.NewStepFromFunc("read API secret", c.createS3Client),
-	).RunWithContext(ctx)
-
-	if result.IsFailed() {
-		return nil, result.Err()
+	pctx := &connectContext{
+		GenericConnectContext: controllerutil.GenericConnectContext{
+			Context:            ctx,
+			ProviderConfigName: bucket.GetProviderConfigName(),
+		},
+		EndpointURL: bucket.Spec.ForProvider.EndpointURL,
+	}
+	pipe := pipeline.NewPipeline[*controllerutil.GenericConnectContext]()
+	pipe.WithBeforeHooks(pipelineutil.DebugLogger(&pctx.GenericConnectContext)).
+		WithSteps(
+			pipe.NewStep("fetch provider config", c.FetchProviderConfig),
+			pipe.NewStep("fetch secret", c.FetchSecret),
+			pipe.NewStep("validate secret", c.ValidateSecret),
+			pipe.NewStep("create S3 client", c.createS3ClientFn(pctx)),
+		)
+	result := pipe.RunWithContext(&pctx.GenericConnectContext)
+	if result != nil {
+		return nil, result
 	}
 
-	minioClient := pipeline.MustLoadFromContext(ctx, exoscalev1.MinioClientKey{}).(*minio.Client)
-	return NewProvisioningPipeline(c.Kube, c.Recorder, minioClient), nil
+	return NewProvisioningPipeline(c.Kube, c.Recorder, pctx.MinioClient), nil
 }
 
-//createS3Client creates a new client using the S3 credentials from the Secret.
-func (c *bucketConnector) createS3Client(ctx context.Context) error {
-	apiKey := pipeline.MustLoadFromContext(ctx, exoscalev1.APIKeyKey{}).(string)
-	apiSecret := pipeline.MustLoadFromContext(ctx, exoscalev1.APISecretKey{}).(string)
-	endpoint := pipeline.MustLoadFromContext(ctx, exoscalev1.EndpointKey{}).(string)
+//createS3ClientFn creates a new client using the S3 credentials from the Secret.
+func (c *bucketConnector) createS3ClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
+	return func(_ *controllerutil.GenericConnectContext) error {
+		parsed, err := url.Parse(ctx.EndpointURL)
+		if err != nil {
+			return err
+		}
 
-	parsed, err := url.Parse(endpoint)
-	if err != nil {
+		host := parsed.Host
+		if parsed.Host == "" {
+			host = parsed.Path // if no scheme is given, it's parsed as a path -.-
+		}
+		ctx.MinioClient, err = minio.New(host, &minio.Options{
+			Creds:  credentials.NewStaticV4(ctx.ApiKey, ctx.ApiSecret, ""),
+			Secure: isTLSEnabled(parsed),
+		})
 		return err
 	}
 
-	host := parsed.Host
-	if parsed.Host == "" {
-		host = parsed.Path // if no scheme is given, it's parsed as a path -.-
-	}
-	s3Client, err := minio.New(host, &minio.Options{
-		Creds:  credentials.NewStaticV4(apiKey, apiSecret, ""),
-		Secure: isTLSEnabled(parsed),
-	})
-	pipeline.StoreInContext(ctx, exoscalev1.MinioClientKey{}, s3Client)
-	return err
 }
 
 // isBucketAlreadyDeleted returns true if the status conditions are in a state where one can assume that the deletion of a bucket was successful in a previous reconciliation.

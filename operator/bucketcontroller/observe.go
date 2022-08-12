@@ -18,7 +18,7 @@ func (p *ProvisioningPipeline) Observe(ctx context.Context, mg resource.Managed)
 	bucket := fromManaged(mg)
 
 	bucketName := bucket.GetBucketName()
-	exists, err := p.minio.BucketExists(ctx, bucketName)
+	exists, err := p.minioClient.BucketExists(ctx, bucketName)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot determine whether bucket exists")
 	}

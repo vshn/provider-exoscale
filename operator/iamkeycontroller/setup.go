@@ -6,7 +6,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/commoncontroller"
+	"github.com/vshn/provider-exoscale/operator/controllerutil"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"strings"
 	"time"
@@ -22,7 +22,7 @@ func SetupController(mgr ctrl.Manager) error {
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.IAMKeyGroupVersionKind),
 		managed.WithExternalConnecter(&IAMKeyConnector{
-			commoncontroller.GenericConnector{
+			controllerutil.GenericConnector{
 				Kube:     mgr.GetClient(),
 				Recorder: recorder,
 			},
