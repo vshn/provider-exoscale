@@ -284,15 +284,6 @@ spec:
                   bucketName:
                     description: BucketName is the name of the actual bucket.
                     type: string
-                  endpointURL:
-                    description: EndpointURL is the URL where the bucket is created.
-                    type: string
-                  zone:
-                    description: Zone is the name of actual zone.
-                    type: string
-                required:
-                - endpointURL
-                - zone
                 type: object
               conditions:
                 description: Conditions of the resource.

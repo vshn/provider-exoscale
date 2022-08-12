@@ -6,3 +6,12 @@ const (
 	// ExoscaleAPISecret identifies the secret in which the API Secret of the exoscale.com is expected in a Secret.
 	ExoscaleAPISecret = "EXOSCALE_API_SECRET"
 )
+
+type ProviderConfigKey struct{}
+type ApiK8sSecretKey struct{}
+type MinioClientKey struct{}
+type ExoscaleClientKey struct{}
+type APIKeyKey struct{}
+type APISecretKey struct{}
+type EndpointKey struct{}
+type ProviderConfigNameKey struct{}

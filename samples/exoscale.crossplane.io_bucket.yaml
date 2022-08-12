@@ -12,6 +12,4 @@ spec:
   providerConfigRef:
     name: provider-config
 status:
-  atProvider:
-    endpointURL: ""
-    zone: ""
+  atProvider: {}

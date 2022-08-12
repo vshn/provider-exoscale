@@ -2,35 +2,25 @@ package bucketcontroller
 
 import (
 	"context"
-	"fmt"
-	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
+	"github.com/vshn/provider-exoscale/operator/commoncontroller"
 	"github.com/vshn/provider-exoscale/operator/steps"
 	"net/url"
 	"strings"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
 	controllerruntime "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type bucketConnector struct {
-	kube     client.Client
-	recorder event.Recorder
+	commoncontroller.GenericConnector
 }
-
-type providerConfigKey struct{}
-type apiK8sSecretKey struct{}
-type minioClientKey struct{}
 
 // Connect implements managed.ExternalConnecter.
 func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -46,71 +36,44 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return &NoopClient{}, nil
 	}
 
+	pipeline.StoreInContext(ctx, exoscalev1.ProviderConfigNameKey{}, bucket.GetProviderConfigName())
+	pipeline.StoreInContext(ctx, exoscalev1.EndpointKey{}, bucket.Spec.ForProvider.EndpointURL)
 	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.NewStepFromFunc("fetch provider config", c.fetchProviderConfigFn(*bucket)),
-		pipeline.NewStepFromFunc("fetch API secret", c.fetchSecret),
-		pipeline.NewStepFromFunc("read API secret", c.createS3ClientFn(*bucket)),
+		pipeline.NewStepFromFunc("fetch provider config", c.FetchProviderConfig),
+		pipeline.NewStepFromFunc("fetch API secret", c.FetchSecret),
+		pipeline.NewStepFromFunc("fetch API secret", c.ValidateSecret),
+		pipeline.NewStepFromFunc("read API secret", c.createS3Client),
 	).RunWithContext(ctx)
 
 	if result.IsFailed() {
 		return nil, result.Err()
 	}
 
-	minioClient := pipeline.MustLoadFromContext(ctx, minioClientKey{}).(*minio.Client)
-	return NewProvisioningPipeline(c.kube, c.recorder, minioClient), nil
+	minioClient := pipeline.MustLoadFromContext(ctx, exoscalev1.MinioClientKey{}).(*minio.Client)
+	return NewProvisioningPipeline(c.Kube, c.Recorder, minioClient), nil
 }
 
-func (c *bucketConnector) fetchProviderConfigFn(bucket exoscalev1.Bucket) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		providerConfigName := bucket.GetProviderConfigName()
-		if providerConfigName == "" {
-			return fmt.Errorf(".spec.providerConfigRef.Name is required")
-		}
+//createS3Client creates a new client using the S3 credentials from the Secret.
+func (c *bucketConnector) createS3Client(ctx context.Context) error {
+	apiKey := pipeline.MustLoadFromContext(ctx, exoscalev1.APIKeyKey{}).(string)
+	apiSecret := pipeline.MustLoadFromContext(ctx, exoscalev1.APISecretKey{}).(string)
+	endpoint := pipeline.MustLoadFromContext(ctx, exoscalev1.EndpointKey{}).(string)
 
-		providerConfig := &providerv1.ProviderConfig{}
-		pipeline.StoreInContext(ctx, providerConfigKey{}, providerConfig)
-		err := c.kube.Get(ctx, types.NamespacedName{Name: providerConfigName}, providerConfig)
-		return errors.Wrap(err, "cannot get ProviderConfig")
-	}
-}
-
-func (c *bucketConnector) fetchSecret(ctx context.Context) error {
-	providerConfig := pipeline.MustLoadFromContext(ctx, providerConfigKey{}).(*providerv1.ProviderConfig)
-	secretRef := providerConfig.Spec.Credentials.APISecretRef
-	apiK8sSecret := &corev1.Secret{}
-	err := c.kube.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, apiK8sSecret)
+	parsed, err := url.Parse(endpoint)
 	if err != nil {
-		return errors.Wrap(err, "cannot get secret with API token")
+		return err
 	}
-	pipeline.StoreInContext(ctx, apiK8sSecretKey{}, apiK8sSecret)
-	return nil
-}
 
-//createS3ClientFn creates a new client using the S3 credentials from the Secret.
-func (c *bucketConnector) createS3ClientFn(bucket exoscalev1.Bucket) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		secret := pipeline.MustLoadFromContext(ctx, apiK8sSecretKey{}).(*corev1.Secret)
-		apiKey, keyExists := secret.Data[exoscalev1.ExoscaleAPIKey]
-		apiSecret, secretExists := secret.Data[exoscalev1.ExoscaleAPISecret]
-		if (keyExists && secretExists) && (string(apiKey) != "" && string(apiSecret) != "") {
-			parsed, err := url.Parse(bucket.Spec.ForProvider.EndpointURL)
-			if err != nil {
-				return err
-			}
-
-			host := parsed.Host
-			if parsed.Host == "" {
-				host = parsed.Path // if no scheme is given, it's parsed as a path -.-
-			}
-			s3Client, err := minio.New(host, &minio.Options{
-				Creds:  credentials.NewStaticV4(string(apiKey), string(apiSecret), ""),
-				Secure: isTLSEnabled(parsed),
-			})
-			pipeline.StoreInContext(ctx, minioClientKey{}, s3Client)
-			return err
-		}
-		return fmt.Errorf("%s or %s doesn't exist in secret %s/%s", exoscalev1.ExoscaleAPIKey, exoscalev1.ExoscaleAPISecret, secret.Namespace, secret.Name)
+	host := parsed.Host
+	if parsed.Host == "" {
+		host = parsed.Path // if no scheme is given, it's parsed as a path -.-
 	}
+	s3Client, err := minio.New(host, &minio.Options{
+		Creds:  credentials.NewStaticV4(apiKey, apiSecret, ""),
+		Secure: isTLSEnabled(parsed),
+	})
+	pipeline.StoreInContext(ctx, exoscalev1.MinioClientKey{}, s3Client)
+	return err
 }
 
 // isBucketAlreadyDeleted returns true if the status conditions are in a state where one can assume that the deletion of a bucket was successful in a previous reconciliation.

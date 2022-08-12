@@ -1,6 +1,7 @@
 package bucketcontroller
 
 import (
+	"github.com/vshn/provider-exoscale/operator/commoncontroller"
 	"strings"
 	"time"
 
@@ -22,8 +23,10 @@ func SetupController(mgr ctrl.Manager) error {
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.BucketGroupVersionKind),
 		managed.WithExternalConnecter(&bucketConnector{
-			kube:     mgr.GetClient(),
-			recorder: recorder,
+			commoncontroller.GenericConnector{
+				Kube:     mgr.GetClient(),
+				Recorder: recorder,
+			},
 		}),
 		managed.WithLogger(logging.NewLogrLogger(mgr.GetLogger().WithValues("controller", name))),
 		managed.WithRecorder(recorder),
