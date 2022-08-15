@@ -8,7 +8,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	v2 "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
@@ -92,7 +92,7 @@ func (p *IAMKeyPipeline) checkSecret(ctx *pipelineContext) error {
 	return nil
 }
 
-func getBuckets(iamResources []v2.IAMAccessKeyResource) []string {
+func getBuckets(iamResources []exoscalesdk.IAMAccessKeyResource) []string {
 	buckets := make([]string, 0, len(iamResources))
 	if len(iamResources) == 0 {
 		return buckets

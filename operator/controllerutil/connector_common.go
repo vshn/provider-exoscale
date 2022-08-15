@@ -34,9 +34,6 @@ type GenericConnectContext struct {
 }
 
 func (c *GenericConnector) FetchProviderConfig(ctx *GenericConnectContext) error {
-	if ctx.ProviderConfigName == "" {
-		return fmt.Errorf(".spec.providerConfigRef.Name is required")
-	}
 	ctx.providerConfig = &providerv1.ProviderConfig{}
 	err := c.Kube.Get(ctx, types.NamespacedName{Name: ctx.ProviderConfigName}, ctx.providerConfig)
 	return errors.Wrap(err, "cannot get ProviderConfig")

@@ -23,6 +23,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "secret-name",
 							Namespace: "secret-namespace",
@@ -42,6 +45,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "secret-name",
 							Namespace: "secret-namespace",
@@ -65,6 +71,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "secret-name",
 							Namespace: "secret-namespace",
@@ -88,6 +97,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: nil,
 					},
 					ForProvider: exoscalev1.IAMKeyParameters{
@@ -99,7 +111,7 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 					},
 				},
 			},
-			expectedError: "an IAMKey named \"iamkey-with-buckets\" requires a connection secret reference with name and namespace",
+			expectedError: ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNameMissing_ThenExpectError": {
 			iamKey: exoscalev1.IAMKey{
@@ -108,6 +120,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "",
 							Namespace: "secret-namespace",
@@ -122,7 +137,7 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 					},
 				},
 			},
-			expectedError: "an IAMKey named \"iamkey-with-buckets\" requires a connection secret reference with name and namespace",
+			expectedError: ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNamespaceMissing_ThenExpectError": {
 			iamKey: exoscalev1.IAMKey{
@@ -131,6 +146,9 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "secret-name",
 							Namespace: "",
@@ -145,7 +163,7 @@ func TestIAMKeyValidator_ValidateCreate(t *testing.T) {
 					},
 				},
 			},
-			expectedError: "an IAMKey named \"iamkey-with-buckets\" requires a connection secret reference with name and namespace",
+			expectedError: ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
 		},
 	}
 	for name, tc := range tests {
@@ -172,7 +190,13 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "iamkey-with-no-buckets",
 				},
-				Spec: exoscalev1.IAMKeySpec{},
+				Spec: exoscalev1.IAMKeySpec{
+					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
+					},
+				},
 				Status: exoscalev1.IAMKeyStatus{
 					ResourceStatus: xpv1.ResourceStatus{},
 					AtProvider: exoscalev1.IAMKeyObservation{
@@ -205,6 +229,9 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "name",
 							Namespace: "namespace",
@@ -231,6 +258,9 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "name",
 							Namespace: "namespace",
@@ -259,6 +289,11 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 					Name: "key-name",
 				},
 				Spec: exoscalev1.IAMKeySpec{
+					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
+					},
 					ForProvider: exoscalev1.IAMKeyParameters{
 						KeyName: "new-key-name",
 						Zone:    "CH-1",
@@ -279,6 +314,11 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 					Name: "key-name",
 				},
 				Spec: exoscalev1.IAMKeySpec{
+					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
+					},
 					ForProvider: exoscalev1.IAMKeyParameters{
 						KeyName: "old-key-name",
 						Zone:    "CH-2",
@@ -303,6 +343,9 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "new-name",
 							Namespace: "new-namespace",
@@ -329,6 +372,9 @@ func TestIAMKeyValidator_ValidateUpdate(t *testing.T) {
 				},
 				Spec: exoscalev1.IAMKeySpec{
 					ResourceSpec: xpv1.ResourceSpec{
+						ProviderConfigReference: &xpv1.Reference{
+							Name: "provider-config",
+						},
 						WriteConnectionSecretToReference: &xpv1.SecretReference{
 							Name:      "old-name",
 							Namespace: "old-namespace",

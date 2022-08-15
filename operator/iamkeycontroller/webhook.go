@@ -25,8 +25,12 @@ func (v *IAMKeyValidator) ValidateCreate(_ context.Context, obj runtime.Object) 
 	}
 	secretRef := iamKey.Spec.WriteConnectionSecretToReference
 	if secretRef == nil || secretRef.Name == "" || secretRef.Namespace == "" {
-		return fmt.Errorf("an IAMKey named %q requires a connection secret reference with name and namespace",
-			iamKey.Name)
+		return fmt.Errorf(".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required")
+	}
+
+	providerConfigRef := iamKey.Spec.ProviderConfigReference
+	if providerConfigRef == nil || providerConfigRef.Name == "" {
+		return fmt.Errorf(".spec.providerConfigRef.name is required")
 	}
 	return nil
 }
@@ -46,6 +50,10 @@ func (v *IAMKeyValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 			return fmt.Errorf("an IAMKey named %q has been created already, you cannot update the connection secret reference",
 				oldIAMKey.Name)
 		}
+	}
+	providerConfigRef := newIAMKey.Spec.ProviderConfigReference
+	if providerConfigRef == nil || providerConfigRef.Name == "" {
+		return fmt.Errorf(".spec.providerConfigRef.name is required")
 	}
 	return nil
 }

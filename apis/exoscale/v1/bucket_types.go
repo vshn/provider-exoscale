@@ -80,7 +80,7 @@ type BucketStatus struct {
 // +kubebuilder:printcolumn:name="Zone",type="string",JSONPath=".spec.forProvider.zone"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,exoscale}
-// +kubebuilder:webhook:verbs=update,path=/validate-exoscale-crossplane-io-v1-bucket,mutating=false,failurePolicy=fail,groups=exoscale.crossplane.io,resources=buckets,versions=v1,name=buckets.exoscale.crossplane.io,sideEffects=None,admissionReviewVersions=v1
+// +kubebuilder:webhook:verbs=create;update,path=/validate-exoscale-crossplane-io-v1-bucket,mutating=false,failurePolicy=fail,groups=exoscale.crossplane.io,resources=buckets,versions=v1,name=buckets.exoscale.crossplane.io,sideEffects=None,admissionReviewVersions=v1
 
 // Bucket is the API for creating S3 buckets.
 type Bucket struct {

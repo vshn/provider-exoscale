@@ -16,9 +16,13 @@ type BucketValidator struct {
 
 // ValidateCreate implements admission.CustomValidator.
 func (v *BucketValidator) ValidateCreate(_ context.Context, obj runtime.Object) error {
-	res := obj.(*exoscalev1.Bucket)
-	v.log.V(1).Info("Validate create (noop)", "name", res.Name)
-	// EndpointURL and Zone are required by the API schema, no need to check.
+	bucket := obj.(*exoscalev1.Bucket)
+	v.log.V(1).Info("Validate create", "name", bucket.Name)
+
+	providerConfigRef := bucket.Spec.ProviderConfigReference
+	if providerConfigRef == nil || providerConfigRef.Name == "" {
+		return fmt.Errorf(".spec.providerConfigRef.name is required")
+	}
 	return nil
 }
 
@@ -37,6 +41,10 @@ func (v *BucketValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 			return fmt.Errorf("a bucket named %q has been created already, you cannot change the zone",
 				oldBucket.Status.AtProvider.BucketName)
 		}
+	}
+	providerConfigRef := newBucket.Spec.ProviderConfigReference
+	if providerConfigRef == nil || providerConfigRef.Name == "" {
+		return fmt.Errorf(".spec.providerConfigRef.name is required")
 	}
 	return nil
 }

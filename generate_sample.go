@@ -66,7 +66,7 @@ func newBucketSample() *exoscalev1.Bucket {
 			},
 			ForProvider: exoscalev1.BucketParameters{
 				EndpointURL:          "sos-ch-gva-2.exo.io",
-				BucketName:           "bucket.test.1",
+				BucketName:           "bucket-test-1",
 				Zone:                 "ch-gva-2",
 				BucketDeletionPolicy: exoscalev1.DeleteIfEmpty,
 			},
@@ -94,7 +94,7 @@ func newIAMKeySample() *exoscalev1.IAMKey {
 				Zone:    "CH-DK-2",
 				Services: exoscalev1.ServicesSpec{
 					exoscalev1.SOSSpec{
-						Buckets: []string{"bucket.test.1"},
+						Buckets: []string{"bucket-test-1"},
 					},
 				},
 			},

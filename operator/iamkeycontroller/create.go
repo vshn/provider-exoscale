@@ -8,7 +8,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	v2 "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
@@ -51,9 +51,9 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 	iamKey := ctx.iamKey
 	log := controllerruntime.LoggerFrom(ctx)
 
-	var keyResources []v2.IAMAccessKeyResource
+	var keyResources []exoscalesdk.IAMAccessKeyResource
 	for _, bucket := range iamKey.Spec.ForProvider.Services.SOS.Buckets {
-		keyResource := v2.IAMAccessKeyResource{
+		keyResource := exoscalesdk.IAMAccessKeyResource{
 			Domain:       SOSResourceDomain,
 			ResourceName: bucket,
 			ResourceType: BucketResourceType,
@@ -61,7 +61,7 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 		keyResources = append(keyResources, keyResource)
 	}
 
-	exoscaleIAM, err := p.exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), v2.CreateIAMAccessKeyWithResources(keyResources))
+	exoscaleIAM, err := p.exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), exoscalesdk.CreateIAMAccessKeyWithResources(keyResources))
 	if err != nil {
 		return err
 	}

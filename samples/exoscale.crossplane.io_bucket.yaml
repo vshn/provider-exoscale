@@ -6,7 +6,7 @@ metadata:
 spec:
   forProvider:
     bucketDeletionPolicy: DeleteIfEmpty
-    bucketName: bucket.test.1
+    bucketName: bucket-test-1
     endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
   providerConfigRef:

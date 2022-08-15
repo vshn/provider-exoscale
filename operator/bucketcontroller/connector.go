@@ -37,7 +37,6 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 	bucket := fromManaged(mg)
 
 	if isBucketAlreadyDeleted(bucket) {
-		// We do this to prevent after-deletion reconciliations since there is a chance that we might not have the access credentials anymore.
 		log.V(1).Info("Bucket already deleted, skipping observation")
 		return &NoopClient{}, nil
 	}

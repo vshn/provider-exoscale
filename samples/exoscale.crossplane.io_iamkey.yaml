@@ -9,7 +9,7 @@ spec:
     services:
       sos:
         buckets:
-        - bucket.test.1
+        - bucket-test-1
     zone: CH-DK-2
   providerConfigRef:
     name: provider-config
