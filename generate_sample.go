@@ -32,9 +32,15 @@ var scheme = runtime.NewScheme()
 
 func main() {
 	failIfError(apis.AddToScheme(scheme))
+	generateBucketSample()
 	generateExoscaleIAMKeySample()
 	generateProviderConfigSample()
 	generateIAMKeyAdmissionRequest()
+}
+
+func generateBucketSample() {
+	spec := newBucketSample()
+	serialize(spec, true)
 }
 
 func generateExoscaleIAMKeySample() {
@@ -45,6 +51,27 @@ func generateExoscaleIAMKeySample() {
 func generateProviderConfigSample() {
 	spec := newProviderConfigSample()
 	serialize(spec, true)
+}
+
+func newBucketSample() *exoscalev1.Bucket {
+	return &exoscalev1.Bucket{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: exoscalev1.BucketGroupVersionKind.GroupVersion().String(),
+			Kind:       exoscalev1.BucketKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{Name: "bucket"},
+		Spec: exoscalev1.BucketSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference: &xpv1.Reference{Name: "provider-config"},
+			},
+			ForProvider: exoscalev1.BucketParameters{
+				EndpointURL:          "sos-ch-gva-2.exo.io",
+				BucketName:           "bucket-test-1",
+				Zone:                 "ch-gva-2",
+				BucketDeletionPolicy: exoscalev1.DeleteIfEmpty,
+			},
+		},
+	}
 }
 
 func newIAMKeySample() *exoscalev1.IAMKey {
@@ -67,7 +94,7 @@ func newIAMKeySample() *exoscalev1.IAMKey {
 				Zone:    "CH-DK-2",
 				Services: exoscalev1.ServicesSpec{
 					exoscalev1.SOSSpec{
-						Buckets: []string{"bucket.test.1"},
+						Buckets: []string{"bucket-test-1"},
 					},
 				},
 			},

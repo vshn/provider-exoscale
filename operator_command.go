@@ -57,11 +57,12 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 	log.Info("Setting up controllers", "config", c)
 	ctrl.SetLogger(log)
 
-	p := pipeline.NewPipeline().WithBeforeHooks([]pipeline.Listener{
-		func(step pipeline.Step) {
+	p := pipeline.NewPipeline[context.Context]()
+	p.WithBeforeHooks(
+		func(step pipeline.Step[context.Context]) {
 			log.V(1).Info(step.Name)
 		},
-	})
+	)
 	p.AddStepFromFunc("get config", func(ctx context.Context) error {
 		cfg, err := ctrl.GetConfig()
 		c.kubeconfig = cfg
@@ -87,26 +88,24 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 		c.manager = mgr
 		return err
 	})
-	p.AddStep(pipeline.NewPipeline().WithNestedSteps("register schemes",
-		pipeline.NewStepFromFunc("register API schemes", func(ctx context.Context) error {
+	p.AddStep(p.WithNestedSteps("register schemes", nil,
+		p.NewStep("register API schemes", func(ctx context.Context) error {
 			return apis.AddToScheme(c.manager.GetScheme())
 		}),
 	))
 	p.AddStepFromFunc("setup controllers", func(ctx context.Context) error {
 		return operator.SetupControllers(c.manager)
 	})
-	p.AddStep(pipeline.ToStep("setup webhook server",
+	p.AddStep(p.When(pipeline.Bool[context.Context](c.WebhookCertDir != ""), "setup webhook server",
 		func(ctx context.Context) error {
 			ws := c.manager.GetWebhookServer()
 			ws.CertDir = c.WebhookCertDir
 			ws.TLSMinVersion = "1.3"
 			return operator.SetupWebhooks(c.manager)
-		},
-		pipeline.Bool(c.WebhookCertDir != "")))
-
+		}))
 	p.AddStepFromFunc("run manager", func(ctx context.Context) error {
 		log.Info("Starting manager")
 		return c.manager.Start(ctx)
 	})
-	return p.RunWithContext(ctx.Context).Err()
+	return p.RunWithContext(ctx.Context)
 }

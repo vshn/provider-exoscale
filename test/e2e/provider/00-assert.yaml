@@ -18,7 +18,7 @@ spec:
     services:
       sos:
         buckets:
-          - bucket.test.1
+          - bucket-test-e2e
     zone: CH-DK-2
   providerConfigRef:
     name: provider-config
@@ -31,7 +31,7 @@ status:
     services:
       sos:
         buckets:
-          - bucket.test.1
+          - bucket-test-e2e
   conditions:
     - type: Ready
       status: "True"

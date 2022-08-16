@@ -7,8 +7,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
-	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/steps"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -18,38 +17,38 @@ func (p *IAMKeyPipeline) Delete(ctx context.Context, mg resource.Managed) error 
 	log.Info("Deleting resource")
 
 	iamKey := fromManaged(mg)
-	pipe := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).
+	pctx := &pipelineContext{Context: ctx, iamKey: iamKey}
+	pipe := pipeline.NewPipeline[*pipelineContext]()
+	pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
 		WithSteps(
-			pipeline.NewStepFromFunc("delete IAM key", p.deleteIAMKeyFn(iamKey)),
-			pipeline.NewStepFromFunc("emit event", p.emitDeletionEventFn(iamKey)),
+			pipe.NewStep("delete IAM key", p.deleteIAMKey),
+			pipe.NewStep("emit event", p.emitDeletionEvent),
 		)
-	result := pipe.RunWithContext(ctx)
-	return errors.Wrap(result.Err(), "cannot deprovision IAM key")
+	err := pipe.RunWithContext(pctx)
+	return errors.Wrap(err, "cannot deprovision iam key")
 }
 
-// deleteIAMKeyFn deletes the IAM key from the project associated with the API Key and Secret.
-func (p *IAMKeyPipeline) deleteIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		log := controllerruntime.LoggerFrom(ctx)
+// deleteIAMKey deletes the IAM key from the project associated with the API Key and Secret.
+func (p *IAMKeyPipeline) deleteIAMKey(ctx *pipelineContext) error {
+	log := controllerruntime.LoggerFrom(ctx)
+	iamKey := ctx.iamKey
 
-		err := p.exoscaleClient.RevokeIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, &exoscalesdk.IAMAccessKey{
-			Key: &iamKey.Status.AtProvider.KeyID,
-		})
-		if err != nil {
-			return err
-		}
-		log.V(1).Info("Deleted IAM key in exoscale", "keyID", iamKey.Status.AtProvider.KeyID)
-		return nil
+	err := p.exoscaleClient.RevokeIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, &exoscalesdk.IAMAccessKey{
+		Key: &iamKey.Status.AtProvider.KeyID,
+	})
+	if err != nil {
+		return err
 	}
+	log.V(1).Info("Deleted IAM key in exoscale", "keyID", iamKey.Status.AtProvider.KeyID)
+	return nil
+
 }
 
-func (p *IAMKeyPipeline) emitDeletionEventFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(_ context.Context) error {
-		p.recorder.Event(iamKey, event.Event{
-			Type:    event.TypeNormal,
-			Reason:  "Deleted",
-			Message: "IAMKey deleted",
-		})
-		return nil
-	}
+func (p *IAMKeyPipeline) emitDeletionEvent(ctx *pipelineContext) error {
+	p.recorder.Event(ctx.iamKey, event.Event{
+		Type:    event.TypeNormal,
+		Reason:  "Deleted",
+		Message: "IAMKey deleted",
+	})
+	return nil
 }

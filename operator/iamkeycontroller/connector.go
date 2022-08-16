@@ -2,37 +2,23 @@ package iamkeycontroller
 
 import (
 	"context"
-	"fmt"
 	pipeline "github.com/ccremer/go-command-pipeline"
-	"github.com/crossplane/crossplane-runtime/pkg/errors"
-	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
-	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
-	"github.com/vshn/provider-exoscale/operator/steps"
-	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/types"
+	"github.com/vshn/provider-exoscale/operator/controllerutil"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
-)
-
-const (
-	// ExoscaleAPIKey identifies the key in which the API Key of the exoscale.com is expected in a Secret.
-	ExoscaleAPIKey = "EXOSCALE_API_KEY"
-	// ExoscaleAPISecret identifies the secret in which the API Secret of the exoscale.com is expected in a Secret.
-	ExoscaleAPISecret = "EXOSCALE_API_SECRET"
 )
 
 type IAMKeyConnector struct {
-	kube     client.Client
-	recorder event.Recorder
+	controllerutil.GenericConnector
 }
 
-type providerConfigKey struct{}
-type apiK8sSecretKey struct{}
-type exoscaleClientKey struct{}
+type connectContext struct {
+	controllerutil.GenericConnectContext
+	exoscaleClient *exoscalesdk.Client
+}
 
 // Connect implements managed.ExternalConnector.
 func (c *IAMKeyConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
@@ -41,52 +27,30 @@ func (c *IAMKeyConnector) Connect(ctx context.Context, mg resource.Managed) (man
 	log.V(1).Info("Connecting resource")
 
 	iamKey := fromManaged(mg)
-	result := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).WithSteps(
-		pipeline.NewStepFromFunc("fetch provider config", c.fetchProviderConfigFn(*iamKey)),
-		pipeline.NewStepFromFunc("fetch API secret", c.fetchSecret),
-		pipeline.NewStepFromFunc("read API secret", c.readApiKeyAndSecret),
-	).RunWithContext(ctx)
-	if result.IsFailed() {
-		return nil, result.Err()
+
+	pctx := &connectContext{
+		GenericConnectContext: controllerutil.GenericConnectContext{Context: ctx, ProviderConfigName: iamKey.GetProviderConfigName()},
 	}
-	exoscaleClient := pipeline.MustLoadFromContext(ctx, exoscaleClientKey{}).(*exoscalesdk.Client)
-	return NewPipeline(c.kube, c.recorder, exoscaleClient), nil
+	pipe := pipeline.NewPipeline[*controllerutil.GenericConnectContext]()
+	pipe.WithBeforeHooks(pipelineutil.DebugLogger(&pctx.GenericConnectContext)).
+		WithSteps(
+			pipe.NewStep("fetch provider config", c.FetchProviderConfig),
+			pipe.NewStep("fetch secret", c.FetchSecret),
+			pipe.NewStep("validate secret", c.ValidateSecret),
+			pipe.NewStep("create exoscale client", c.createExoscaleClientFn(pctx)),
+		)
+	result := pipe.RunWithContext(&pctx.GenericConnectContext)
+	if result != nil {
+		return nil, result
+	}
+
+	return NewPipeline(c.Kube, c.Recorder, pctx.exoscaleClient), nil
 }
 
-func (c *IAMKeyConnector) fetchProviderConfigFn(iamKey exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		providerConfigName := iamKey.GetProviderConfigName()
-		if providerConfigName == "" {
-			return fmt.Errorf(".spec.providerConfigRef.Name is required")
-		}
-
-		providerConfig := &providerv1.ProviderConfig{}
-		pipeline.StoreInContext(ctx, providerConfigKey{}, providerConfig)
-		err := c.kube.Get(ctx, types.NamespacedName{Name: providerConfigName}, providerConfig)
-		return errors.Wrap(err, "cannot get ProviderConfig")
-	}
-}
-
-func (c *IAMKeyConnector) fetchSecret(ctx context.Context) error {
-	providerConfig := pipeline.MustLoadFromContext(ctx, providerConfigKey{}).(*providerv1.ProviderConfig)
-	secretRef := providerConfig.Spec.Credentials.APISecretRef
-	apiK8sSecret := &corev1.Secret{}
-	err := c.kube.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, apiK8sSecret)
-	if err != nil {
-		return errors.Wrap(err, "cannot get secret with API token")
-	}
-	pipeline.StoreInContext(ctx, apiK8sSecretKey{}, apiK8sSecret)
-	return nil
-}
-
-func (c *IAMKeyConnector) readApiKeyAndSecret(ctx context.Context) error {
-	secret := pipeline.MustLoadFromContext(ctx, apiK8sSecretKey{}).(*corev1.Secret)
-	apiKey, keyExists := secret.Data[ExoscaleAPIKey]
-	apiSecret, secretExists := secret.Data[ExoscaleAPISecret]
-	if (keyExists && secretExists) && (string(apiKey) != "" && string(apiSecret) != "") {
-		exoscaleClient, err := exoscalesdk.NewClient(string(apiKey), string(apiSecret))
-		pipeline.StoreInContext(ctx, exoscaleClientKey{}, exoscaleClient)
+func (c *IAMKeyConnector) createExoscaleClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
+	return func(_ *controllerutil.GenericConnectContext) error {
+		var err error
+		ctx.exoscaleClient, err = exoscalesdk.NewClient(ctx.ApiKey, ctx.ApiSecret)
 		return err
 	}
-	return fmt.Errorf("%s or %s doesn't exist in secret %s/%s", ExoscaleAPIKey, ExoscaleAPISecret, secret.Namespace, secret.Name)
 }

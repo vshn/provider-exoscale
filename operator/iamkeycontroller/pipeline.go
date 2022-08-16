@@ -5,7 +5,6 @@ import (
 	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 
-	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
@@ -24,11 +23,15 @@ const (
 
 // IAMKeyPipeline provisions IAMKeys on exoscale.com
 type IAMKeyPipeline struct {
-	kube     client.Client
-	recorder event.Recorder
+	kube           client.Client
+	recorder       event.Recorder
+	exoscaleClient *exoscalesdk.Client
+}
 
-	exoscaleClient    *exoscalesdk.Client
-	exoscaleIAMKey    *exoscalesdk.IAMAccessKey
+type pipelineContext struct {
+	context.Context
+	iamKey            *exoscalev1.IAMKey
+	iamExoscaleKey    *exoscalesdk.IAMAccessKey
 	credentialsSecret *corev1.Secret
 }
 
@@ -38,12 +41,6 @@ func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *
 		kube:           client,
 		recorder:       recorder,
 		exoscaleClient: exoscaleClient,
-	}
-}
-
-func hasSecretRef(iamKey *exoscalev1.IAMKey) pipeline.Predicate {
-	return func(ctx context.Context) bool {
-		return iamKey.Spec.WriteConnectionSecretToReference != nil
 	}
 }
 

@@ -8,13 +8,12 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	v2 "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/steps"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"strings"
@@ -31,92 +30,88 @@ func (p *IAMKeyPipeline) Create(ctx context.Context, mg resource.Managed) (manag
 		return managed.ExternalCreation{}, nil
 	}
 
-	pipe := pipeline.NewPipeline().WithBeforeHooks(steps.DebugLogger(ctx)).
+	pctx := &pipelineContext{Context: ctx, iamKey: iam}
+	pipe := pipeline.NewPipeline[*pipelineContext]()
+	pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
 		WithSteps(
-			pipeline.NewStepFromFunc("create IAM key", p.createIAMKeyFn(iam)),
-			pipeline.NewStepFromFunc("create credentials secret", p.createCredentialsSecretFn(iam)),
-			pipeline.NewStepFromFunc("emit event", p.emitCreationEventFn(iam)),
+			pipe.NewStep("create IAM key", p.createIAMKey),
+			pipe.NewStep("create credentials secret", p.createCredentialsSecret),
+			pipe.NewStep("emit event", p.emitCreationEvent),
 		)
-	result := pipe.RunWithContext(ctx)
-	if result.IsFailed() {
-		return managed.ExternalCreation{}, errors.Wrap(result.Err(), "cannot create IAM Key")
+	err := pipe.RunWithContext(pctx)
+	if err != nil {
+		return managed.ExternalCreation{}, errors.Wrap(err, "cannot create IAM Key")
 	}
 
-	return managed.ExternalCreation{ConnectionDetails: toConnectionDetails(p.exoscaleIAMKey)}, nil
+	return managed.ExternalCreation{ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
 }
 
-// createIAMKeyFn creates a new IAMKey in the project associated with the API Key and Secret.
-func (p *IAMKeyPipeline) createIAMKeyFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		exoscaleClient := p.exoscaleClient
-		log := controllerruntime.LoggerFrom(ctx)
+// createIAMKey creates a new IAMKey in the project associated with the API Key and Secret.
+func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
+	iamKey := ctx.iamKey
+	log := controllerruntime.LoggerFrom(ctx)
 
-		var keyResources []v2.IAMAccessKeyResource
-		for _, bucket := range iamKey.Spec.ForProvider.Services.SOS.Buckets {
-			keyResource := v2.IAMAccessKeyResource{
-				Domain:       SOSResourceDomain,
-				ResourceName: bucket,
-				ResourceType: BucketResourceType,
-			}
-			keyResources = append(keyResources, keyResource)
+	var keyResources []exoscalesdk.IAMAccessKeyResource
+	for _, bucket := range iamKey.Spec.ForProvider.Services.SOS.Buckets {
+		keyResource := exoscalesdk.IAMAccessKeyResource{
+			Domain:       SOSResourceDomain,
+			ResourceName: bucket,
+			ResourceType: BucketResourceType,
 		}
-
-		exoscaleIAM, err := exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), v2.CreateIAMAccessKeyWithResources(keyResources))
-		if err != nil {
-			return err
-		}
-
-		// Limitation by crossplane: The interface managed.ExternalClient doesn't allow updating the resource during creation except annotations.
-		// But we need to somehow store the key ID returned by the creation operation, because exoscale API allows multiple IAM Keys with the same display name.
-		// So we store it in an annotation since that is the only allowed place to update our resource.
-		// However, once we observe the spec again, we will copy the key ID from the annotation to the status field,
-		//  and that will become the authoritative source of truth for future reconciliations.
-		metav1.SetMetaDataAnnotation(&iamKey.ObjectMeta, KeyIDAnnotationKey, *exoscaleIAM.Key)
-
-		log.V(1).Info("Created IAM Key in exoscale", "keyID", *exoscaleIAM.Key, "displayName", *exoscaleIAM.Name, "tags", exoscaleIAM.Tags)
-		p.exoscaleIAMKey = exoscaleIAM
-		return nil
+		keyResources = append(keyResources, keyResource)
 	}
+
+	exoscaleIAM, err := p.exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), exoscalesdk.CreateIAMAccessKeyWithResources(keyResources))
+	if err != nil {
+		return err
+	}
+
+	// Limitation by crossplane: The interface managed.ExternalClient doesn't allow updating the resource during creation except annotations.
+	// But we need to somehow store the key ID returned by the creation operation, because exoscale API allows multiple IAM Keys with the same display name.
+	// So we store it in an annotation since that is the only allowed place to update our resource.
+	// However, once we observe the spec again, we will copy the key ID from the annotation to the status field,
+	//  and that will become the authoritative source of truth for future reconciliations.
+	metav1.SetMetaDataAnnotation(&ctx.iamKey.ObjectMeta, KeyIDAnnotationKey, *exoscaleIAM.Key)
+
+	log.V(1).Info("Created IAM Key in exoscale", "keyID", *exoscaleIAM.Key, "displayName", *exoscaleIAM.Name, "tags", exoscaleIAM.Tags)
+	ctx.iamExoscaleKey = exoscaleIAM
+	return nil
+
 }
 
-func (p *IAMKeyPipeline) emitCreationEventFn(obj runtime.Object) func(ctx context.Context) error {
-	return func(_ context.Context) error {
-		p.recorder.Event(obj, event.Event{
-			Type:    event.TypeNormal,
-			Reason:  "Created",
-			Message: "IAMKey successfully created",
-		})
-		return nil
-	}
+func (p *IAMKeyPipeline) emitCreationEvent(ctx *pipelineContext) error {
+	p.recorder.Event(ctx.iamKey, event.Event{
+		Type:    event.TypeNormal,
+		Reason:  "Created",
+		Message: "IAMKey successfully created",
+	})
+	return nil
+
 }
 
-// createCredentialsSecretFn creates the secret with AIMKey's S3 credentials.
-func (p *IAMKeyPipeline) createCredentialsSecretFn(iamKey *exoscalev1.IAMKey) func(ctx context.Context) error {
-	return func(ctx context.Context) error {
-		kube := p.kube
-		exoscaleIAMKey := p.exoscaleIAMKey
-		log := controllerruntime.LoggerFrom(ctx)
+// createCredentialsSecret creates the secret with AIMKey's S3 credentials.
+func (p *IAMKeyPipeline) createCredentialsSecret(ctx *pipelineContext) error {
+	log := controllerruntime.LoggerFrom(ctx)
+	secretRef := ctx.iamKey.Spec.WriteConnectionSecretToReference
 
-		secretRef := iamKey.Spec.WriteConnectionSecretToReference
-
-		p.credentialsSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretRef.Name, Namespace: secretRef.Namespace}}
-		_, err := controllerruntime.CreateOrUpdate(ctx, kube, p.credentialsSecret, func() error {
-			secret := p.credentialsSecret
-			secret.Labels = labels.Merge(secret.Labels, getCommonLabels(iamKey.Name))
-			if secret.Data == nil {
-				secret.Data = map[string][]byte{}
-			}
-			for k, v := range toConnectionDetails(exoscaleIAMKey) {
-				secret.Data[k] = v
-			}
-			return controllerutil.SetOwnerReference(iamKey, secret, kube.Scheme())
-		})
-		if err != nil {
-			return err
+	ctx.credentialsSecret = &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretRef.Name, Namespace: secretRef.Namespace}}
+	_, err := controllerruntime.CreateOrUpdate(ctx, p.kube, ctx.credentialsSecret, func() error {
+		secret := ctx.credentialsSecret
+		secret.Labels = labels.Merge(secret.Labels, getCommonLabels(ctx.iamKey.Name))
+		if secret.Data == nil {
+			secret.Data = map[string][]byte{}
 		}
-		log.V(1).Info("Created credential secret", "secretName", fmt.Sprintf("%s/%s", secretRef.Namespace, secretRef.Name))
-		return nil
+		for k, v := range toConnectionDetails(ctx.iamExoscaleKey) {
+			secret.Data[k] = v
+		}
+		return controllerutil.SetOwnerReference(ctx.iamKey, secret, p.kube.Scheme())
+	})
+	if err != nil {
+		return err
 	}
+	log.V(1).Info("Created credential secret", "secretName", fmt.Sprintf("%s/%s", secretRef.Namespace, secretRef.Name))
+	return nil
+
 }
 
 func getCommonLabels(instanceName string) labels.Set {
