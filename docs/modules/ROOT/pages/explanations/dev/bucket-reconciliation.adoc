@@ -1,0 +1,26 @@
+= Development: Bucket Reconciliation
+
+This page gives a brief overview how `Buckets` are managed in the provider.
+
+Note that these diagrams are on a high-level and don't visualize the path for every possible situation.
+
+== Creating Buckets
+
+image::bucket-create.drawio.svg[]
+
+- All bucket operations are done using any S3-compatible client library.
+- In exoscale.com API, bucket names in a respective zone are unique per project.
+
+== Updating Buckets
+
+image::bucket-update.drawio.svg[]
+
+- Since renaming buckets and changing region is not possible, there's nothing to update once the bucket exists.
+- Immutable fields are going through the validating webhook server first.
+  This prevents changing the spec once the bucket exists.
+
+== Deleting Buckets
+
+image::bucket-delete.drawio.svg[]
+
+- Deleting bucket is a synchronous operation.
