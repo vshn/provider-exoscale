@@ -1,0 +1,29 @@
+---
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: Bucket
+metadata:
+  annotations:
+    kuttl: '01-install'
+spec:
+  deletionPolicy: Delete
+  forProvider:
+    bucketName: provider-exoscale-e2e-test-kuttl
+    bucketDeletionPolicy: DeleteAll
+    endpointURL: sos-ch-gva-2.exo.io
+    zone: ch-gva-2
+  providerConfigRef:
+    name: provider-config
+status:
+  atProvider:
+    bucketName: provider-exoscale-e2e-test-kuttl
+  conditions:
+    - reason: Available
+      status: "True"
+      type: Ready
+    - reason: ReconcileSuccess
+      status: 'True'
+      type: Synced
+---

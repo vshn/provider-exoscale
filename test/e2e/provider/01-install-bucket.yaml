@@ -1,0 +1,16 @@
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: Bucket
+metadata:
+  annotations:
+    kuttl: '01-install'
+  name: e2e-test-bucket
+spec:
+  forProvider:
+    bucketName: provider-exoscale-e2e-test-kuttl
+    bucketDeletionPolicy: DeleteAll
+    endpointURL: sos-ch-gva-2.exo.io
+    zone: ch-gva-2
+  providerConfigRef:
+    name: provider-config
+---
