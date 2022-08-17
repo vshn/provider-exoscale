@@ -4,20 +4,20 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Getting Started :: Exoscale Provider for Crossplane</title>
-    <meta property="og:title" itemprop="name" content="Getting Started">
-    <meta name="twitter:title" content="Getting Started">
-    <link rel="canonical" href="https://vshn.github.io/provider-exoscale/provider-exoscale/tutorials/getting-started.html">
-    <meta property="og:url" content="https://vshn.github.io/provider-exoscale/provider-exoscale/tutorials/getting-started.html">
+    <title>Development: IAMKey Reconciliation :: Exoscale Provider for Crossplane</title>
+    <meta property="og:title" itemprop="name" content="Development: IAMKey Reconciliation">
+    <meta name="twitter:title" content="Development: IAMKey Reconciliation">
+    <link rel="canonical" href="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/iamkey-reconciliation.html">
+    <meta property="og:url" content="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/iamkey-reconciliation.html">
     <meta name="generator" content="Antora 3.0.1">
-    <link rel="stylesheet" href="../../_/css/site.css">
+    <link rel="stylesheet" href="../../../_/css/site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Exoscale Provider for Crossplane" />
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="vshn_ch">
     <meta property="og:locale" content="en_US" />
-    <script>var uiRootPath = '../../_'</script>
+    <script>var uiRootPath = '../../../_'</script>
     <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/7105834.js"></script>
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <link rel="apple-touch-icon" sizes="152x152" href="/_/img/favicon-152x152.png">
@@ -79,12 +79,12 @@
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
   <nav class="nav-menu">
-    <h3 class="title"><a href="../index.html">Exoscale Provider for Crossplane</a></h3>
+    <h3 class="title"><a href="../../index.html">Exoscale Provider for Crossplane</a></h3>
 <ul class="nav-list">
   <li class="nav-item" data-depth="0">
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../index.html">Introduction</a>
+    <a class="nav-link" href="../../index.html">Introduction</a>
   </li>
   <li class="nav-item" data-depth="1">
     <span class="nav-text"><a href="https://github.com/vshn/provider-exoscale/releases" target="_blank" rel="noopener">Changelog</a> 🔗</span>
@@ -96,10 +96,10 @@
     <span class="nav-text">Tutorials</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="installation.html">Installation</a>
+    <a class="nav-link" href="../../tutorials/installation.html">Installation</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="1">
-    <a class="nav-link" href="getting-started.html">Getting Started</a>
+  <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../../tutorials/getting-started.html">Getting Started</a>
   </li>
 </ul>
   </li>
@@ -108,7 +108,7 @@
     <span class="nav-text">How To</span>
 <ul class="nav-list">
   <li class="nav-item" data-depth="1">
-    <a class="nav-link" href="../how-tos/create-releases.html">Create Releases</a>
+    <a class="nav-link" href="../../how-tos/create-releases.html">Create Releases</a>
   </li>
 </ul>
   </li>
@@ -120,11 +120,11 @@
     <button class="nav-item-toggle"></button>
     <span class="nav-text">For Developers</span>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../explanations/dev/iamkey-reconciliation.html">ObjectsUser Reconciliation</a>
+  <li class="nav-item is-current-page" data-depth="2">
+    <a class="nav-link" href="iamkey-reconciliation.html">ObjectsUser Reconciliation</a>
   </li>
   <li class="nav-item" data-depth="2">
-    <a class="nav-link" href="../explanations/dev/bucket-reconciliation.html">Bucket Reconciliation</a>
+    <a class="nav-link" href="bucket-reconciliation.html">Bucket Reconciliation</a>
   </li>
 </ul>
   </li>
@@ -140,10 +140,10 @@
   </div>
   <ul class="components">
     <li class="component is-current">
-      <a class="title" href="../index.html">Exoscale Provider for Crossplane</a>
+      <a class="title" href="../../index.html">Exoscale Provider for Crossplane</a>
       <ul class="versions">
         <li class="version is-current is-latest">
-          <a href="../index.html">master</a>
+          <a href="../../index.html">master</a>
         </li>
       </ul>
     </li>
@@ -155,102 +155,96 @@
 <main class="article">
 <div class="toolbar" role="navigation">
 <button class="nav-toggle"></button>
-  <a href="../index.html" class="home-link"></a>
+  <a href="../../index.html" class="home-link"></a>
 <nav class="breadcrumbs" aria-label="breadcrumbs">
   <ul>
-    <li><a href="../index.html">Exoscale Provider for Crossplane</a></li>
-    <li>Tutorials</li>
-    <li><a href="getting-started.html">Getting Started</a></li>
+    <li><a href="../../index.html">Exoscale Provider for Crossplane</a></li>
+    <li>Explanation</li>
+    <li>For Developers</li>
+    <li><a href="iamkey-reconciliation.html">ObjectsUser Reconciliation</a></li>
   </ul>
 </nav>
-  <div class="edit-this-page"><a href="https://github.com/vshn/provider-exoscale/edit/master/docs/modules/ROOT/pages/tutorials/getting-started.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/vshn/provider-exoscale/edit/master/docs/modules/ROOT/pages/explanations/dev/iamkey-reconciliation.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Getting Started</h1>
+<h1 class="page">Development: IAMKey Reconciliation</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This page describes how to create a new S3 bucket after you have installed the operator.</p>
+<p>This page gives a brief overview how <code>IAMKeys</code> are managed in the provider.</p>
+</div>
+<div class="paragraph">
+<p>Note that these diagrams are on a high-level and don&#8217;t visualize the path for every possible situation.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_prerequisites"><a class="anchor" href="#_prerequisites"></a>Prerequisites</h2>
+<h2 id="_creating_iamkeys"><a class="anchor" href="#_creating_iamkeys"></a>Creating IAMKeys</h2>
 <div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="../../_images/iamkey-create.drawio.svg" alt="iamkey create.drawio">
+</div>
+</div>
 <div class="ulist">
 <ul>
 <li>
-<p><code>kubectl</code></p>
+<p>In exoscale.com API, display names are not unique, there can be multiple IAM keys with different IAM key IDs that share the same display name.</p>
 </li>
 <li>
-<p>Already running Kubernetes cluster</p>
+<p>During the first reconciliation we do not check if an iam key with the desired display name exists, since we don&#8217;t know the iam key ID.</p>
 </li>
 <li>
-<p>Installed Operator</p>
+<p>After the first reconciliation, the iam key ID, as generated by the exoscale.com API, is stored in the status.</p>
+</li>
+<li>
+<p>In exoscale.com API, IAM keys do not depend on buckets, therefore there are no implications once one of its bucket is deleted.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_steps"><a class="anchor" href="#_steps"></a>Steps</h2>
+<h2 id="_updating_iamkeys"><a class="anchor" href="#_updating_iamkeys"></a>Updating IAMKeys</h2>
 <div class="sectionbody">
-<div class="olist arabic">
-<ol class="arabic">
-<li>
-<p>Create a file with the spec</p>
-<div class="listingblock">
-<div class="title">iamkey.yaml</div>
+<div class="imageblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: exoscale.crossplane.io/v1
-kind: IAMKey
-metadata:
-  name: my-exoscale-iam-key
-spec:
-  forProvider:
-    keyName: iam-key
-    services:
-      sos:
-        buckets:
-          - bucket-test-1
-    zone: CH-DK-2
-  providerConfigRef:
-    name: provider-config
-  writeConnectionSecretToRef:
-    name: my-exoscale-iam-key
-    namespace: default</code></pre>
+<img src="../../_images/iamkey-update.drawio.svg" alt="iamkey update.drawio">
 </div>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>Iam key is immutable therefore it cannot be updated.</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_deleting_iamkeys"><a class="anchor" href="#_deleting_iamkeys"></a>Deleting IAMKeys</h2>
+<div class="sectionbody">
+<div class="imageblock">
+<div class="content">
+<img src="../../_images/iamkey-delete.drawio.svg" alt="iamkey delete.drawio">
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>exoscale.com API does not prevent deleting an iam keys if there are buckets still attached to it.</p>
 </li>
 <li>
-<p>Apply the spec in the cluster</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl apply -f iamkey.yaml</code></pre>
-</div>
-</div>
+<p>If the iam key cannot be deleted in exoscale.com API, the resource remains in a "deletion pending" state.</p>
 </li>
 <li>
-<p>Wait until the operator has provisioned the user</p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl wait --for condition=Ready iamkey/my-exoscale-iam-key</code></pre>
-</div>
-</div>
+<p>The credentials <code>Secret</code> is garbage collected after the resource is actually gone.</p>
 </li>
-<li>
-<p>Inspect the credential <code>Secret</code></p>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">kubectl get secret my-exoscale-iam-key -o yaml</code></pre>
-</div>
-</div>
-</li>
-</ol>
+</ul>
 </div>
 </div>
 </div>
@@ -261,8 +255,8 @@ spec:
 <footer class="footer">
   <p>Copyright © VSHN 2021 – All Rights Reserved. <a href="https://vshn.ch/en/privacy-policy/">Privacy Policy</a>, <a href="https://vshn.ch/en/imprint/">Imprint</a>, and <a href="https://vshn.ch/en/contact/">Contact</a>.</p>
 </footer>
-<script src="../../_/js/site.js"></script>
-<script async src="../../_/js/vendor/highlight.js"></script>
+<script src="../../../_/js/site.js"></script>
+<script async src="../../../_/js/vendor/highlight.js"></script>
 <script type="text/javascript" async src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 <script type="text/x-mathjax-config">
 MathJax.Hub.Config({
