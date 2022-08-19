@@ -2,6 +2,7 @@ package bucketcontroller
 
 import (
 	"context"
+	"fmt"
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -9,7 +10,10 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	"github.com/minio/minio-go/v7"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	controllerruntime "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
 // Create implements managed.ExternalClient.
@@ -23,6 +27,7 @@ func (p *ProvisioningPipeline) Create(ctx context.Context, mg resource.Managed) 
 	pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
 		WithSteps(
 			pipe.NewStep("create bucket", p.createS3Bucket),
+			pipe.NewStep("create bucket connection secret", p.createBucketConnectionSecret),
 			pipe.NewStep("emit event", p.emitCreationEvent),
 		)
 	err := pipe.RunWithContext(pctx)
@@ -49,6 +54,30 @@ func (p *ProvisioningPipeline) createS3Bucket(ctx *pipelineContext) error {
 	}
 	return nil
 
+}
+
+// createBucketConnectionSecret creates a new secret for bucket with EndpointName, ZoneName and BucketName
+// The credentials for the IAMKey cannot be saved as the Bucket entity in exoscale.com is independent of IAM keys thus
+// we might have one bucket being accessed by multiple IAM keys.
+func (p *ProvisioningPipeline) createBucketConnectionSecret(ctx *pipelineContext) error {
+	bucket := ctx.bucket
+	log := controllerruntime.LoggerFrom(ctx)
+
+	secretRef := bucket.Spec.WriteConnectionSecretToReference
+
+	credentialSecret := &corev1.Secret{ObjectMeta: metav1.ObjectMeta{Name: secretRef.Name, Namespace: secretRef.Namespace}}
+	_, err := controllerruntime.CreateOrUpdate(ctx, p.kube, credentialSecret, func() error {
+		credentialSecret.Data = map[string][]byte{}
+		credentialSecret.Data[EndpointName] = []byte(bucket.Spec.ForProvider.EndpointURL)
+		credentialSecret.Data[ZoneName] = []byte(bucket.Spec.ForProvider.Zone)
+		credentialSecret.Data[BucketName] = []byte(bucket.GetBucketName())
+		return controllerutil.SetOwnerReference(bucket, credentialSecret, p.kube.Scheme())
+	})
+	if err != nil {
+		return err
+	}
+	log.V(1).Info("Enriched credential secret", "secretName", fmt.Sprintf("%s/%s", secretRef.Namespace, secretRef.Name))
+	return nil
 }
 
 func (p *ProvisioningPipeline) emitCreationEvent(ctx *pipelineContext) error {

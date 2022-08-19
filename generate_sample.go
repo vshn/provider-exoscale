@@ -62,6 +62,10 @@ func newBucketSample() *exoscalev1.Bucket {
 		ObjectMeta: metav1.ObjectMeta{Name: "bucket"},
 		Spec: exoscalev1.BucketSpec{
 			ResourceSpec: xpv1.ResourceSpec{
+				WriteConnectionSecretToReference: &xpv1.SecretReference{
+					Name:      "bucket-credential-secret",
+					Namespace: "default",
+				},
 				ProviderConfigReference: &xpv1.Reference{Name: "provider-config"},
 			},
 			ForProvider: exoscalev1.BucketParameters{

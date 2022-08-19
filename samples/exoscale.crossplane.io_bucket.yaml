@@ -11,5 +11,8 @@ spec:
     zone: ch-gva-2
   providerConfigRef:
     name: provider-config
+  writeConnectionSecretToRef:
+    name: bucket-credential-secret
+    namespace: default
 status:
   atProvider: {}

@@ -21,7 +21,11 @@ func (v *BucketValidator) ValidateCreate(_ context.Context, obj runtime.Object) 
 
 	providerConfigRef := bucket.Spec.ProviderConfigReference
 	if providerConfigRef == nil || providerConfigRef.Name == "" {
-		return fmt.Errorf(".spec.providerConfigRef.name is required")
+		return fmt.Errorf(".spec.providerConfigRef name is required")
+	}
+	connectionSecretRef := bucket.Spec.WriteConnectionSecretToReference
+	if connectionSecretRef == nil || connectionSecretRef.Name == "" || connectionSecretRef.Namespace == "" {
+		return fmt.Errorf(".spec.writeConnectionSecretToReference name and namespace are required")
 	}
 	return nil
 }
@@ -44,7 +48,12 @@ func (v *BucketValidator) ValidateUpdate(_ context.Context, oldObj, newObj runti
 	}
 	providerConfigRef := newBucket.Spec.ProviderConfigReference
 	if providerConfigRef == nil || providerConfigRef.Name == "" {
-		return fmt.Errorf(".spec.providerConfigRef.name is required")
+		return fmt.Errorf(".spec.providerConfigRef name is required")
+	}
+	newConnectionSecretRef := newBucket.Spec.WriteConnectionSecretToReference
+	oldConnectionSecretRef := oldBucket.Spec.WriteConnectionSecretToReference
+	if newConnectionSecretRef == nil || newConnectionSecretRef.Name != oldConnectionSecretRef.Name || newConnectionSecretRef.Namespace != oldConnectionSecretRef.Namespace {
+		return fmt.Errorf(".spec.writeConnectionSecretToReference name and namespace cannot be changed")
 	}
 	return nil
 }
