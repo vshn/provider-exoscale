@@ -71,23 +71,23 @@ func TestIAMKeyValidator_ValidateCreate_RequireWriteConnectionSecretToRef(t *tes
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefMissing_ThenExpectError": {
 			connectionSecretToRef: &xpv1.SecretReference{},
-			expectedError:         ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
+			expectedError:         ".spec.writeConnectionSecretToRef name and namespace are required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNameMissing_ThenExpectError": {
 			connectionSecretToRef: &xpv1.SecretReference{
 				Namespace: "secret-namespace",
 			},
-			expectedError: ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
+			expectedError: ".spec.writeConnectionSecretToRef name and namespace are required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNamespaceMissing_ThenExpectError": {
 			connectionSecretToRef: &xpv1.SecretReference{
 				Name: "secret-name",
 			},
-			expectedError: ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
+			expectedError: ".spec.writeConnectionSecretToRef name and namespace are required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefIsNil_ThenExpectError": {
 			connectionSecretToRef: nil,
-			expectedError:         ".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required",
+			expectedError:         ".spec.writeConnectionSecretToRef name and namespace are required",
 		},
 	}
 	for name, tc := range tests {
@@ -130,17 +130,17 @@ func TestIAMKeyValidator_ValidateCreate_RequireProviderConfigToRef(t *testing.T)
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefMissing_ThenExpectError": {
 			providerConfigToRef: &xpv1.Reference{},
-			expectedError:       ".spec.providerConfigRef.name is required",
+			expectedError:       ".spec.providerConfigRef name is required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNameMissing_ThenExpectError": {
 			providerConfigToRef: &xpv1.Reference{
 				Name: "",
 			},
-			expectedError: ".spec.providerConfigRef.name is required",
+			expectedError: ".spec.providerConfigRef name is required",
 		},
 		"GivenIAMKey_WhenWriteConnectionSecretToRefNameIsNil_ThenExpectError": {
 			providerConfigToRef: nil,
-			expectedError:       ".spec.providerConfigRef.name is required",
+			expectedError:       ".spec.providerConfigRef name is required",
 		},
 	}
 	for name, tc := range tests {
@@ -185,13 +185,13 @@ func TestIAMKeyValidator_ValidateUpdate_RequireProviderConfigToRef(t *testing.T)
 		},
 		"GivenUpdatedIAMKey_WhenWriteConnectionSecretToRefMissing_ThenExpectError": {
 			providerConfigToRef: &xpv1.Reference{},
-			expectedError:       ".spec.providerConfigRef.name is required",
+			expectedError:       ".spec.providerConfigRef name is required",
 		},
 		"GivenUpdatedIAMKey_WhenWriteConnectionSecretToRefNameMissing_ThenExpectError": {
 			providerConfigToRef: &xpv1.Reference{
 				Name: "",
 			},
-			expectedError: ".spec.providerConfigRef.name is required",
+			expectedError: ".spec.providerConfigRef name is required",
 		},
 	}
 	for name, tc := range tests {

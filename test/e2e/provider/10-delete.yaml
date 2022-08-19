@@ -7,4 +7,4 @@ delete:
     name: iam-key-kuttl-test
   - apiVersion: exoscale.crossplane.io/v1
     kind: Bucket
-    name: provider-exoscale-e2e-test-kuttl
+    name: e2e-test-bucket

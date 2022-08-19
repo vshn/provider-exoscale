@@ -5,6 +5,7 @@ kind: TestAssert
 apiVersion: exoscale.crossplane.io/v1
 kind: Bucket
 metadata:
+  name: e2e-test-bucket
   annotations:
     kuttl: '01-install'
 spec:
@@ -16,6 +17,9 @@ spec:
     zone: ch-gva-2
   providerConfigRef:
     name: provider-config
+  writeConnectionSecretToRef:
+    name: exoscale-bucket-credentials-kuttl-test
+    namespace: e2e-test
 status:
   atProvider:
     bucketName: provider-exoscale-e2e-test-kuttl
@@ -27,3 +31,13 @@ status:
       status: 'True'
       type: Synced
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: exoscale-bucket-credentials-kuttl-test
+  namespace: e2e-test
+data:
+  BUCKET_NAME: cHJvdmlkZXItZXhvc2NhbGUtZTJlLXRlc3Qta3V0dGw=
+  ENDPOINT: c29zLWNoLWd2YS0yLmV4by5pbw==
+  ZONE: Y2gtZ3ZhLTI=
+type: connection.crossplane.io/v1alpha1
