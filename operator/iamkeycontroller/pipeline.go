@@ -21,6 +21,23 @@ const (
 	SOSResourceDomain = "sos"
 )
 
+var IAMKeyAllowedOperations = []string{
+	"abort-sos-multipart-upload",
+	"delete-sos-object",
+	"get-sos-bucket-acl",
+	"get-sos-bucket-cors",
+	"get-sos-bucket-location",
+	"get-sos-object",
+	"get-sos-object-acl",
+	"get-sos-presigned-url",
+	"list-sos-bucket",
+	"list-sos-bucket-multipart-uploads",
+	"put-sos-object",
+	"put-sos-object-acl",
+	"put-sos-bucket-acl",
+	"put-sos-bucket-cors",
+}
+
 // IAMKeyPipeline provisions IAMKeys on exoscale.com
 type IAMKeyPipeline struct {
 	kube           client.Client
