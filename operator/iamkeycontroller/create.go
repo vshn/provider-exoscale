@@ -61,7 +61,18 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 		keyResources = append(keyResources, keyResource)
 	}
 
-	exoscaleIAM, err := p.exoscaleClient.CreateIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, iamKey.GetKeyName(), exoscalesdk.CreateIAMAccessKeyWithResources(keyResources))
+	zone := iamKey.Spec.ForProvider.Zone
+	iamKeyName := iamKey.GetKeyName()
+	iamKeyOpts := []exoscalesdk.CreateIAMAccessKeyOpt{
+		// Allowed object storage operations on the new IAM key
+		// Some permissions are excluded such as create and list all sos buckets.
+		exoscalesdk.CreateIAMAccessKeyWithOperations(IAMKeyAllowedOperations),
+		// The tag and resource are used to limit the permissions to object storage
+		exoscalesdk.CreateIAMAccessKeyWithTags([]string{SOSResourceDomain}),
+		exoscalesdk.CreateIAMAccessKeyWithResources(keyResources),
+	}
+
+	exoscaleIAM, err := p.exoscaleClient.CreateIAMAccessKey(ctx, zone, iamKeyName, iamKeyOpts...)
 	if err != nil {
 		return err
 	}

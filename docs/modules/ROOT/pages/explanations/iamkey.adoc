@@ -1,0 +1,20 @@
+== IAMKeys permissions
+
+The IAMKeys have restricted access to exoscale API.
+The Object Storage `sos` service is the only service the keys have access to.
+The following are the allowed operations on buckets:
+
+- abort-sos-multipart-upload
+- delete-sos-object
+- get-sos-bucket-acl
+- get-sos-bucket-cors
+- get-sos-bucket-location
+- get-sos-object
+- get-sos-object-acl
+- get-sos-presigned-url
+- list-sos-bucket
+- list-sos-bucket-multipart-uploads
+- put-sos-bucket-acl
+- put-sos-bucket-cors
+- put-sos-object
+- put-sos-object-acl

@@ -12,6 +12,7 @@
 //* xref:references/example.adoc[Example Reference]
 
 .Explanation
+* xref:explanations/iamkey.adoc[IAMKeys permissions]
 * For Developers
 ** xref:explanations/dev/iamkey-reconciliation.adoc[ObjectsUser Reconciliation]
 ** xref:explanations/dev/bucket-reconciliation.adoc[Bucket Reconciliation]
