@@ -125,7 +125,7 @@ $(mc_bin): | $(go_bin)
 	go install github.com/minio/mc@latest
 
 test-e2e: export KUBECONFIG = $(KIND_KUBECONFIG)
-test-e2e: $(kuttl_bin) local-install provider-config ## E2E tests
+test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
 	kubectl create ns --save-config e2e-test --dry-run=client -o yaml | kubectl apply -f -
 	$(kuttl_bin) test ./test/e2e --config ./test/e2e/kuttl-test.yaml
 	@rm kubeconfig
