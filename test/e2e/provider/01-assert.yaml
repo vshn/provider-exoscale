@@ -20,10 +20,10 @@ status:
   atProvider:
     bucketName: provider-exoscale-e2e-test-kuttl
   conditions:
-    - reason: Available
-      status: "True"
-      type: Ready
     - reason: ReconcileSuccess
       status: 'True'
       type: Synced
+    - reason: Available
+      status: "True"
+      type: Ready
 ---
