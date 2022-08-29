@@ -3,27 +3,55 @@ apiVersion: kuttl.dev/v1beta1
 kind: TestAssert
 ---
 apiVersion: exoscale.crossplane.io/v1
-kind: Bucket
+kind: IAMKey
 metadata:
   annotations:
-    kuttl: '01-install'
+    crossplane.io/external-name: iam-key-kuttl-test
+    kuttl: '00-install'
+  finalizers:
+    - finalizer.managedresource.crossplane.io
+  name: iam-key-kuttl-test
 spec:
   deletionPolicy: Delete
   forProvider:
-    bucketName: provider-exoscale-e2e-test-kuttl
-    bucketDeletionPolicy: DeleteAll
-    endpointURL: sos-ch-gva-2.exo.io
-    zone: ch-gva-2
+    keyName: iam-key-kuttl-test
+    services:
+      sos:
+        buckets:
+          - e2e-test-bucket
+    zone: CH-DK-2
   providerConfigRef:
     name: provider-config
+  writeConnectionSecretToRef:
+    name: exoscale-user-credentials-kuttl-test
+    namespace: default
 status:
   atProvider:
-    bucketName: provider-exoscale-e2e-test-kuttl
+    keyName: iam-key-kuttl-test
+    services:
+      sos:
+        buckets:
+          - e2e-test-bucket
   conditions:
-    - reason: Available
+    - type: Ready
       status: "True"
-      type: Ready
-    - reason: ReconcileSuccess
-      status: 'True'
-      type: Synced
+      reason: Available
+    - type: Synced
+      status: "True"
+      reason: ReconcileSuccess
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    app.kubernetes.io/created-by: controller-iamkey
+    app.kubernetes.io/instance: iam-key-kuttl-test
+    app.kubernetes.io/managed-by: exoscale.crossplane.io
+  name: exoscale-user-credentials-kuttl-test
+  namespace: default
+  ownerReferences:
+    - apiVersion: exoscale.crossplane.io/v1
+      kind: IAMKey
+      name: iam-key-kuttl-test
+type: connection.crossplane.io/v1alpha1
+

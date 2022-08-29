@@ -3,4 +3,4 @@ kind: TestStep
 commands:
   # note: working dir is the where the yaml files are
   # Args: $endpoint $bucket $file_path $secret_name
-  - command: ../upload-object.sh sos-ch-gva-2.exo.io provider-exoscale-e2e-test-kuttl ../../../README.md api-secret
+  - command: ../upload-object.sh sos-ch-gva-2.exo.io e2e-test-bucket ../../../README.md api-secret

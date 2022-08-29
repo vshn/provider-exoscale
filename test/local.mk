@@ -126,9 +126,8 @@ $(mc_bin): | $(go_bin)
 
 test-e2e: export KUBECONFIG = $(KIND_KUBECONFIG)
 test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
-	kubectl create ns --save-config e2e-test --dry-run=client -o yaml | kubectl apply -f -
-	$(kuttl_bin) test ./test/e2e --config ./test/e2e/kuttl-test.yaml
-	@rm kubeconfig
+	GOBIN=$(go_bin) $(kuttl_bin) test ./test/e2e --config ./test/e2e/kuttl-test.yaml
+	@rm -f kubeconfig
 # kuttle leaves kubeconfig garbage: https://github.com/kudobuilder/kuttl/issues/297
 
 .PHONY: .e2e-test-clean

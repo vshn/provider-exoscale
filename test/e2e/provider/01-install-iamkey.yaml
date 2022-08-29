@@ -11,11 +11,11 @@ spec:
     services:
       sos:
         buckets:
-          - bucket-test-e2e
+          - e2e-test-bucket
     zone: CH-DK-2
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:
     name: exoscale-user-credentials-kuttl-test
-    namespace: e2e-test
+    namespace: default
 ---
