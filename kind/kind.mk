@@ -31,6 +31,7 @@ kind-load-image: kind-setup build-docker ## Load the container image onto kind c
 
 .PHONY: kind-clean
 kind-clean: export KUBECONFIG = $(KIND_KUBECONFIG)
+kind-clean: delete-samples
 kind-clean: ## Removes the kind Cluster
 	@$(kind_bin) delete cluster --name $(KIND_CLUSTER) || true
 	rm -rf $(kind_dir) $(kind_bin)

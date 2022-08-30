@@ -81,8 +81,8 @@ install-samples: kind-setup provider-config ## Install samples into cluster
 
 .PHONY: delete-samples
 delete-samples: export KUBECONFIG = $(KIND_KUBECONFIG)
-delete-samples: kind-setup
-	yq ./samples/*.yaml | kubectl delete --ignore-not-found --wait=false -f -
+delete-samples:
+	-yq ./samples/*.yaml | kubectl delete --ignore-not-found --wait=false -f -
 
 .PHONY: run-operator
 run-operator: ## Run in Operator mode against your current kube context
