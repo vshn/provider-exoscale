@@ -2,11 +2,11 @@ apiVersion: exoscale.crossplane.io/v1
 kind: Bucket
 metadata:
   creationTimestamp: null
-  name: bucket
+  name: bucket-local-dev
 spec:
   forProvider:
     bucketDeletionPolicy: DeleteIfEmpty
-    bucketName: bucket-test-1
+    bucketName: bucket-local-dev
     endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
   providerConfigRef:
