@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 0
 
       - name: Determine Go version from go.mod
-        run: echo "GO_VERSION=$(grep "go 1." go.mod | cut -d " " -f 2)" >> $GITHUB_ENV
+        run: echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >> $GITHUB_ENV
 
       - uses: actions/setup-go@v3
         with:
@@ -40,6 +40,9 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Push package image
+        run: make package-push -e IMG_TAG=${GITHUB_REF##*/}
+
       - name: Build changelog from PRs with labels
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v3
@@ -59,5 +62,5 @@ jobs:
           args: release --release-notes .github/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          REGISTRY: ghcr.io
-          IMAGE_NAME: ${{ github.repository }}
+          CONTAINER_REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}/controller
