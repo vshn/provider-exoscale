@@ -34,7 +34,7 @@ dockers:
     build_flag_templates:
       - "--platform=linux/arm64/v8"
     image_templates:
-      - "{{ .Env.REGISTRY }}/{{ .Env.IMAGE_NAME }}:v{{ .Version }}-arm64"
+      - "{{ .Env.CONTAINER_REGISTRY }}/{{ .Env.IMAGE_NAME }}:v{{ .Version }}-arm64"
 
 docker_manifests:
   ## ghcr.io
