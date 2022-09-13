@@ -6,7 +6,7 @@ require (
 	github.com/ccremer/go-command-pipeline v0.20.0
 	github.com/crossplane/crossplane-runtime v0.17.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
-	github.com/exoscale/egoscale v0.89.0
+	github.com/exoscale/egoscale v1.19.0
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/minio/minio-go/v7 v7.0.31
