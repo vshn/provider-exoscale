@@ -64,7 +64,7 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 	return NewProvisioningPipeline(c.Kube, c.Recorder, pctx.MinioClient), nil
 }
 
-//createS3ClientFn creates a new client using the S3 credentials from the Secret.
+// createS3ClientFn creates a new client using the S3 credentials from the Secret.
 func (c *bucketConnector) createS3ClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
 	return func(_ *controllerutil.GenericConnectContext) error {
 		parsed, err := url.Parse(ctx.EndpointURL)
