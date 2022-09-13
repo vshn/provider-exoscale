@@ -6,7 +6,7 @@ require (
 	github.com/ccremer/go-command-pipeline v0.20.0
 	github.com/crossplane/crossplane-runtime v0.17.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
-	github.com/exoscale/egoscale v0.89.0
+	github.com/exoscale/egoscale v0.90.1
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/minio/minio-go/v7 v7.0.31
@@ -46,6 +46,8 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/google/uuid v1.3.0 // indirect
+	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
+	github.com/hashicorp/go-retryablehttp v0.7.1 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
