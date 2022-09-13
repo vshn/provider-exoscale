@@ -99,9 +99,10 @@ type IAMKey struct {
 }
 
 // GetKeyName returns the IAMKey key name in the following precedence:
-//  .spec.forProvider.keyName
-//  .metadata.annotations."crossplane.io/external-name"
-//  .metadata.name
+//
+//	.spec.forProvider.keyName
+//	.metadata.annotations."crossplane.io/external-name"
+//	.metadata.name
 func (in *IAMKey) GetKeyName() string {
 	if in.Spec.ForProvider.KeyName != "" {
 		return in.Spec.ForProvider.KeyName
