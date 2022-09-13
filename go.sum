@@ -120,6 +120,8 @@ github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMU
 github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx27UK13J/0=
 github.com/ccremer/go-command-pipeline v0.19.0 h1:2Mx0FX7cRzDyN92vTyc2QyYQGW3LBzDjeJpRGxuJdPo=
 github.com/ccremer/go-command-pipeline v0.19.0/go.mod h1:uTtRkKisQugA2PNMf1V+lN2Jcv1fH5hnrAJHTRHpfJo=
+github.com/ccremer/go-command-pipeline v0.20.0 h1:2bjmhyvQsbD9ZARGtiW+hxdN2vANlVXCHU+0PoZqeME=
+github.com/ccremer/go-command-pipeline v0.20.0/go.mod h1:uTtRkKisQugA2PNMf1V+lN2Jcv1fH5hnrAJHTRHpfJo=
 github.com/cenkalti/backoff/v3 v3.0.0 h1:ske+9nBpD9qZsTBoF41nW5L+AIuFBKMeze18XQ3eG1c=
 github.com/census-instrumentation/opencensus-proto v0.2.1 h1:glEXhBS5PSLLv4IXzLA5yPRVX4bilULVyxxbrfOtDAk=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
