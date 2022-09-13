@@ -6,5 +6,8 @@
 package tools
 
 import (
-// Add any build-time dependencies here with blank imports like `_ "package"`
+	// controller-gen
+	_ "sigs.k8s.io/controller-tools/cmd/controller-gen"
+	// Crossplane generator
+	_ "github.com/crossplane/crossplane-tools/cmd/angryjet"
 )
