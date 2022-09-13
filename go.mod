@@ -3,7 +3,7 @@ module github.com/vshn/provider-exoscale
 go 1.18
 
 require (
-	github.com/ccremer/go-command-pipeline v0.19.0
+	github.com/ccremer/go-command-pipeline v0.20.0
 	github.com/crossplane/crossplane-runtime v0.17.0
 	github.com/exoscale/egoscale v0.89.0
 	github.com/go-logr/logr v1.2.3
