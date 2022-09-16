@@ -28,17 +28,6 @@ $(crossplane_sentinel): $(KIND_KUBECONFIG)
 		--wait
 	@touch $@
 
-
-$(kind_dir)/.credentials.yaml:
-	@if [ "$$EXOSCALE_API_KEY" = "" ]; then echo "Environment variable EXOSCALE_API_KEY not set"; exit 1; fi
-	@if [ "$$EXOSCALE_API_SECRET" = "" ]; then echo "Environment variable EXOSCALE_API_SECRET not set"; exit 1; fi
-	kubectl create secret generic --from-literal EXOSCALE_API_KEY=$$EXOSCALE_API_KEY --from-literal EXOSCALE_API_SECRET=$$EXOSCALE_API_SECRET -o yaml --dry-run=client api-secret > $@
-
-.PHONY: provider-config
-provider-config: export KUBECONFIG = $(KIND_KUBECONFIG)
-provider-config: $(KIND_KUBECONFIG) $(kind_dir)/.credentials.yaml
-	kubectl apply -n crossplane-system -f $(kind_dir)/.credentials.yaml -f samples/exoscale.crossplane.io_providerconfig.yaml
-
 .PHONY: registry-setup
 registry-setup: $(registry_sentinel) ## Installs an image registry required for the package image in kind cluster.
 
@@ -53,6 +42,16 @@ $(registry_sentinel): $(KIND_KUBECONFIG)
 		--set fullnameOverride=registry \
 		--wait
 	@touch $@
+
+$(kind_dir)/.credentials.yaml:
+	@if [ "$$EXOSCALE_API_KEY" = "" ]; then echo "Environment variable EXOSCALE_API_KEY not set"; exit 1; fi
+	@if [ "$$EXOSCALE_API_SECRET" = "" ]; then echo "Environment variable EXOSCALE_API_SECRET not set"; exit 1; fi
+	kubectl create secret generic --from-literal EXOSCALE_API_KEY=$$EXOSCALE_API_KEY --from-literal EXOSCALE_API_SECRET=$$EXOSCALE_API_SECRET -o yaml --dry-run=client api-secret > $@
+
+.PHONY: provider-config
+provider-config: export KUBECONFIG = $(KIND_KUBECONFIG)
+provider-config: $(KIND_KUBECONFIG) $(kind_dir)/.credentials.yaml
+	kubectl apply -n crossplane-system -f $(kind_dir)/.credentials.yaml -f samples/exoscale.crossplane.io_providerconfig.yaml
 
 ###
 ### Integration Tests
@@ -128,8 +127,10 @@ test-e2e: export KUBECONFIG = $(KIND_KUBECONFIG)
 test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
 	GOBIN=$(go_bin) $(kuttl_bin) test ./test/e2e --config ./test/e2e/kuttl-test.yaml
 	@rm -f kubeconfig
-# kuttle leaves kubeconfig garbage: https://github.com/kudobuilder/kuttl/issues/297
+# kuttl leaves kubeconfig garbage: https://github.com/kudobuilder/kuttl/issues/297
 
 .PHONY: .e2e-test-clean
 .e2e-test-clean:
+	if [ -f $(KIND_KUBECONFIG) ]; then kubectl delete buckets --all; else echo "no kubeconfig found"; fi
+	if [ -f $(KIND_KUBECONFIG) ]; then kubectl delete objectsuser --all; else echo "no kubeconfig found"; fi
 	rm -f $(kuttl_bin) $(mc_bin)

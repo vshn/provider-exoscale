@@ -7,7 +7,7 @@ metadata:
   name: e2e-test-bucket
 spec:
   forProvider:
-    bucketName: e2e-test-bucket
+    bucketName: e2e-test-kuttl-provider-exoscale
     bucketDeletionPolicy: DeleteAll
     endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
