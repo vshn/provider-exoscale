@@ -10,7 +10,7 @@ metadata:
 spec:
   deletionPolicy: Delete
   forProvider:
-    bucketName: e2e-test-bucket
+    bucketName: e2e-test-kuttl-provider-exoscale
     bucketDeletionPolicy: DeleteAll
     endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
@@ -18,7 +18,7 @@ spec:
     name: provider-config
 status:
   atProvider:
-    bucketName: e2e-test-bucket
+    bucketName: e2e-test-kuttl-provider-exoscale
   conditions:
     - reason: Available
       status: "True"

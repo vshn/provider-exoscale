@@ -10,6 +10,7 @@
       as they show up in the changelog
 - [ ] Update tests.
 - [ ] Link this PR to related issues.
+- [ ] I have run `make test-e2e` and e2e tests pass successfully
 
 <!--
 Remove items that do not apply. For completed items, change [ ] to [x].
