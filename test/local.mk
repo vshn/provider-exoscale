@@ -133,5 +133,5 @@ test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
 .e2e-test-clean: export KUBECONFIG = $(KIND_KUBECONFIG)
 .e2e-test-clean:
 	if [ -f $(KIND_KUBECONFIG) ]; then kubectl delete buckets --all; else echo "no kubeconfig found"; fi
-	if [ -f $(KIND_KUBECONFIG) ]; then kubectl delete objectsuser --all; else echo "no kubeconfig found"; fi
+	if [ -f $(KIND_KUBECONFIG) ]; then kubectl delete iamkeys --all; else echo "no kubeconfig found"; fi
 	rm -f $(kuttl_bin) $(mc_bin)
