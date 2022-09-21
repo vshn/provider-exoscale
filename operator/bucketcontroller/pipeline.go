@@ -2,6 +2,7 @@ package bucketcontroller
 
 import (
 	"context"
+
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -34,3 +35,5 @@ func NewProvisioningPipeline(kube client.Client, recorder event.Recorder, minioC
 func fromManaged(mg resource.Managed) *exoscalev1.Bucket {
 	return mg.(*exoscalev1.Bucket)
 }
+
+const lockAnnotation = exoscalev1.Group + "/lock"
