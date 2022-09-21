@@ -66,5 +66,11 @@ To test and troubleshoot the webhooks on the cluster, simply apply your changes 
 
 ### Crossplane Provider Mechanics
 
-For detailed information on how Crossplane Provider works from a development perspective check [provider mechanics documentation page](https://kb.vshn.ch/app-catalog/explanations/crossplane_provider_mechanics.html). 
+For detailed information on how Crossplane Provider works from a development perspective check [provider mechanics documentation page](https://kb.vshn.ch/app-catalog/explanations/crossplane_provider_mechanics.html).
 
+### Cleaning up e2e tests
+
+Usually `make clean` ensures that buckets and users are deleted before deleting the kind cluster, provided the operator is running in kind cluster.
+Alternatively, `make .e2e-test-clean` also removes all `buckets` and `iamkeys`.
+
+To cleanup manually on portal.exoscale.com, search for resources that begin with or contain `e2e` in the name.
