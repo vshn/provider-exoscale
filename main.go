@@ -45,10 +45,9 @@ func newApp() (context.Context, context.CancelFunc, *cli.App) {
 	logInstance := &atomic.Value{}
 	logInstance.Store(logr.Discard())
 	app := &cli.App{
-		Name:     appName,
-		Usage:    appLongName,
-		Version:  fmt.Sprintf("%s, revision=%s, date=%s", version, commit, date),
-		Compiled: compilationDate(),
+		Name:    appName,
+		Usage:   appLongName,
+		Version: fmt.Sprintf("%s, revision=%s, date=%s", version, commit, date),
 
 		EnableBashCompletion: true,
 
@@ -106,13 +105,4 @@ func envVars(suffixes ...string) []string {
 		arr[i] = env(suffixes[i])
 	}
 	return arr
-}
-
-func compilationDate() time.Time {
-	compiled, err := time.Parse(time.RFC3339, date)
-	if err != nil {
-		// an empty Time{} causes cli.App to guess it from binary's file timestamp.
-		return time.Time{}
-	}
-	return compiled
 }
