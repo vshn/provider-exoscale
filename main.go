@@ -96,7 +96,7 @@ func rootAction(hasSubcommands bool) func(context *cli.Context) error {
 
 // env combines envPrefix with given suffix delimited by underscore.
 func env(suffix string) string {
-	return envPrefix + "_" + suffix
+	return envPrefix + suffix
 }
 
 // envVars combines envPrefix with each given suffix delimited by underscore.

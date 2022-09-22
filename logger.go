@@ -41,7 +41,7 @@ func LogMetadata(c *cli.Context) error {
 }
 
 func setupLogging(c *cli.Context) error {
-	logger := newZapLogger(appName, c.Bool("debug"), usesProductionLoggingConfig(c))
+	logger := newZapLogger(appName, c.Int("log-level"), usesProductionLoggingConfig(c))
 	c.Context.Value(loggerContextKey{}).(*atomic.Value).Store(logger)
 	return nil
 }
@@ -50,16 +50,16 @@ func usesProductionLoggingConfig(c *cli.Context) bool {
 	return strings.EqualFold("JSON", c.String("log-format"))
 }
 
-func newZapLogger(name string, debug bool, useProductionConfig bool) logr.Logger {
+func newZapLogger(name string, verbosityLevel int, useProductionConfig bool) logr.Logger {
 	cfg := zap.NewDevelopmentConfig()
 	cfg.EncoderConfig.ConsoleSeparator = " | "
 	if useProductionConfig {
 		cfg = zap.NewProductionConfig()
 	}
-	if debug {
+	if verbosityLevel > 0 {
 		// Zap's levels get more verbose as the number gets smaller,
 		// bug logr's level increases with greater numbers.
-		cfg.Level = zap.NewAtomicLevelAt(zapcore.Level(-2)) // max logger.V(2)
+		cfg.Level = zap.NewAtomicLevelAt(zapcore.Level(verbosityLevel * -1))
 	} else {
 		cfg.Level = zap.NewAtomicLevelAt(zapcore.InfoLevel)
 	}
