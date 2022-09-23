@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/ccremer/go-command-pipeline v0.20.0
-	github.com/crossplane/crossplane-runtime v0.17.0
+	github.com/crossplane/crossplane-runtime v0.18.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/exoscale/egoscale v0.90.1
 	github.com/go-logr/logr v1.2.3
