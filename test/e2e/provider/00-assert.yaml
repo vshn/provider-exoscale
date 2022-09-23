@@ -5,8 +5,7 @@ kind: TestAssert
 apiVersion: exoscale.crossplane.io/v1
 kind: Bucket
 metadata:
-  annotations:
-    kuttl: '01-install'
+  name: e2e-test-bucket
 spec:
   deletionPolicy: Delete
   forProvider:

@@ -3,6 +3,8 @@ package iamkeycontroller
 import (
 	"context"
 	"fmt"
+	"strings"
+
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -14,9 +16,9 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
-	"strings"
 )
 
 // Create implements managed.ExternalClient.
@@ -115,6 +117,7 @@ func (p *IAMKeyPipeline) createCredentialsSecret(ctx *pipelineContext) error {
 		for k, v := range toConnectionDetails(ctx.iamExoscaleKey) {
 			secret.Data[k] = v
 		}
+		secret.Immutable = pointer.Bool(true)
 		return controllerutil.SetOwnerReference(ctx.iamKey, secret, p.kube.Scheme())
 	})
 	if err != nil {
