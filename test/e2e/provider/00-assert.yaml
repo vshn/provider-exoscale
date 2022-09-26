@@ -6,6 +6,8 @@ apiVersion: exoscale.crossplane.io/v1
 kind: Bucket
 metadata:
   name: e2e-test-bucket
+  annotations:
+    exoscale.crossplane.io/lock: claimed
 spec:
   deletionPolicy: Delete
   forProvider:
