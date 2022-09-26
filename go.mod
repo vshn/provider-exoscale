@@ -9,7 +9,7 @@ require (
 	github.com/exoscale/egoscale v0.90.1
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
-	github.com/minio/minio-go/v7 v7.0.36
+	github.com/minio/minio-go/v7 v7.0.38
 	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.14.1
 	go.uber.org/zap v1.23.0
