@@ -3,8 +3,6 @@ apiVersion: exoscale.crossplane.io/v1
 kind: IAMKey
 metadata:
   name: e2e-test-kuttl-iam-key
-  annotations:
-    kuttl: '00-install'
 spec:
   forProvider:
     keyName: e2e-test-kuttl-iam-key

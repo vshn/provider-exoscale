@@ -7,7 +7,6 @@ kind: IAMKey
 metadata:
   annotations:
     crossplane.io/external-name: e2e-test-kuttl-iam-key
-    kuttl: '00-install'
   finalizers:
     - finalizer.managedresource.crossplane.io
   name: e2e-test-kuttl-iam-key
@@ -54,3 +53,4 @@ metadata:
       kind: IAMKey
       name: e2e-test-kuttl-iam-key
 type: connection.crossplane.io/v1alpha1
+immutable: true
