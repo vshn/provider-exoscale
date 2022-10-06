@@ -1,15 +1,15 @@
 package iamkeycontroller
 
 import (
+	"strings"
+	"time"
+
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/controllerutil"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"strings"
-	"time"
 )
 
 // SetupController adds a controller that reconciles exoscalev1.IAMKey managed resources.
@@ -22,10 +22,8 @@ func SetupController(mgr ctrl.Manager) error {
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.IAMKeyGroupVersionKind),
 		managed.WithExternalConnecter(&IAMKeyConnector{
-			controllerutil.GenericConnector{
-				Kube:     mgr.GetClient(),
-				Recorder: recorder,
-			},
+			Kube:     mgr.GetClient(),
+			Recorder: recorder,
 		}),
 		managed.WithLogger(logging.NewLogrLogger(mgr.GetLogger().WithValues("controller", name))),
 		managed.WithRecorder(recorder),
