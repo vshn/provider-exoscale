@@ -2,11 +2,8 @@ package postgresqlcontroller
 
 import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
-	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
-	"github.com/exoscale/egoscale/v2/oapi"
-
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -24,12 +21,6 @@ func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *
 		kube:     client,
 		recorder: recorder,
 		exo:      exoscaleClient,
-	}
-}
-
-func toConnectionDetails(instance *oapi.DbaasServicePg) managed.ConnectionDetails {
-	return map[string][]byte{
-		// TODO: fill in secrets
 	}
 }
 

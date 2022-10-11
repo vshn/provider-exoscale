@@ -1,8 +1,11 @@
 package mapper
 
 import (
+	"fmt"
+	"net/url"
 	"strings"
 
+	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/minio/minio-go/v7/pkg/set"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
@@ -112,3 +115,22 @@ func HasSameTerminationProtection(pgInstance *exoscalev1.PostgreSQL, pgExo *oapi
 }
 
 var variantAiven = oapi.EnumPgVariantAiven
+
+// ToConnectionDetails parses the connection details from the given observation.
+func (PostgreSQLMapper) ToConnectionDetails(pgExo oapi.DbaasServicePg, ca string) (managed.ConnectionDetails, error) {
+	raw := pointer.StringDeref(pgExo.Uri, "")
+	parsed, err := url.Parse(raw)
+	if err != nil {
+		return nil, fmt.Errorf("cannot parse connection URL: %w", err)
+	}
+	password, _ := parsed.User.Password()
+	return map[string][]byte{
+		"POSTGRESQL_USER":     []byte(parsed.User.Username()),
+		"POSTGRESQL_PASSWORD": []byte(password),
+		"POSTGRESQL_URL":      []byte(raw),
+		"POSTGRESQL_DB":       []byte(strings.TrimPrefix(parsed.Path, "/")),
+		"POSTGRESQL_HOST":     []byte(parsed.Hostname()),
+		"POSTGRESQL_PORT":     []byte(parsed.Port()),
+		"ca.crt":              []byte(ca),
+	}, nil
+}

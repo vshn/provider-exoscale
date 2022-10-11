@@ -59,7 +59,7 @@ func (v *Validator) validateIpFilter(obj exoscalev1.PostgreSQLParameters) error 
 
 func (v *Validator) validateMaintenanceSchedule(obj exoscalev1.PostgreSQLParameters) error {
 	if _, _, _, err := obj.Maintenance.TimeOfDay.Parse(); err != nil {
-		return fmt.Errorf("invalid time format (hh:mm): %w", err)
+		return err
 	}
 	return nil
 }

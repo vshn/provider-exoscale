@@ -19,6 +19,9 @@ spec:
     zone: ch-dk-2
   providerConfigRef:
     name: provider-config
+  writeConnectionSecretToRef:
+    name: postgresql-local-dev-details
+    namespace: default
 status:
   atProvider:
     backup: {}

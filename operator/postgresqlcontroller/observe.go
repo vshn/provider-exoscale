@@ -22,20 +22,37 @@ func (p *Pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	resp, err := p.exo.GetDbaasServicePgWithResponse(ctx, oapi.DbaasServiceName(pgInstance.GetInstanceName()))
 	if err != nil {
-		var urlErr *url.Error
-		if errors.As(err, &urlErr) && urlErr.Err.Error() == "resource not found" {
-			return managed.ExternalObservation{}, nil
-		}
-		return managed.ExternalObservation{}, errors.Wrap(err, "cannot observe instance")
+		return ignoreNotFound(err)
 	}
 	pgExo := *resp.JSON200
 	log.V(2).Info("Response", "raw", resp.JSON200)
+	log.V(1).Info("Retrieved instance", "state", pgExo.State)
 	mpr := mapper.PostgreSQLMapper{}
 	err = mpr.ToStatus(resp.JSON200, &pgInstance.Status.AtProvider)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot parse instance status")
 	}
 	isUpToDate := mpr.IsResourceUpToDate(pgInstance, resp.JSON200)
+	setConditionFromState(pgExo, pgInstance)
+
+	ca, err := p.exo.GetDatabaseCACertificate(ctx, pgInstance.Spec.ForProvider.Zone)
+	if err != nil {
+		return managed.ExternalObservation{}, errors.Wrap(err, "cannot retrieve CA certificate")
+	}
+
+	connDetails, err := mpr.ToConnectionDetails(pgExo, ca)
+	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: isUpToDate, ConnectionDetails: connDetails}, errors.Wrap(err, "cannot read connection details")
+}
+
+func ignoreNotFound(err error) (managed.ExternalObservation, error) {
+	var urlErr *url.Error
+	if errors.As(err, &urlErr) && urlErr.Err.Error() == "resource not found" {
+		return managed.ExternalObservation{}, nil
+	}
+	return managed.ExternalObservation{}, errors.Wrap(err, "cannot observe instance")
+}
+
+func setConditionFromState(pgExo oapi.DbaasServicePg, pgInstance *exoscalev1.PostgreSQL) {
 	switch *pgExo.State {
 	case oapi.EnumServiceStateRunning:
 		pgInstance.SetConditions(exoscalev1.Running())
@@ -46,6 +63,4 @@ func (p *Pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	case oapi.EnumServiceStateRebalancing:
 		pgInstance.SetConditions(exoscalev1.Rebalancing())
 	}
-	log.V(1).Info("Retrieved instance", "state", pgExo.State)
-	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: isUpToDate}, nil
 }
