@@ -12,7 +12,8 @@ spec:
     maintenance:
       dayOfWeek: monday
       timeOfDay: "12:00:00"
-    pgSettings: null
+    pgSettings:
+      timezone: Europe/Zurich
     size:
       plan: hobbyist-2
     version: "14"

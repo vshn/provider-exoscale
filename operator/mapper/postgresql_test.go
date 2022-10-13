@@ -204,3 +204,38 @@ func TestPostgreSQLMapper_ToConnectionDetails(t *testing.T) {
 		})
 	}
 }
+
+func TestHasSamePGSettings(t *testing.T) {
+	tests := map[string]struct {
+		givenSpec    string
+		observedSpec map[string]interface{}
+		expected     bool
+	}{
+		"BothEmpty":       {givenSpec: "", observedSpec: nil, expected: true},
+		"Null":            {givenSpec: "null", observedSpec: nil, expected: true},
+		"EmptyObserved":   {givenSpec: `{"key":"value"}`, observedSpec: map[string]interface{}{}, expected: false},
+		"EmptySpec":       {givenSpec: ``, observedSpec: map[string]interface{}{"key": "value"}, expected: false},
+		"EmptySpecObject": {givenSpec: `{}`, observedSpec: nil, expected: true},
+		"SameString":      {givenSpec: `{"string":"value"}`, observedSpec: map[string]interface{}{"string": "value"}, expected: true},
+		"SameNumber":      {givenSpec: `{"number":0.5}`, observedSpec: map[string]interface{}{"number": 0.5}, expected: true},
+		"SameBoolean":     {givenSpec: `{"bool":true}`, observedSpec: map[string]interface{}{"bool": true}, expected: true},
+		"NestedNull":      {givenSpec: `{"null":null}`, observedSpec: map[string]interface{}{"null": nil}, expected: true},
+		"MultipleValues": {
+			givenSpec:    `{"bool":true,"number":0.01, "string": ""}`,
+			observedSpec: map[string]interface{}{"bool": true, "number": 0.01, "string": ""},
+			expected:     true,
+		},
+		// we don't need to test for nested objects, since that is not supported by Postgresql
+		// https://www.postgresql.org/docs/14/config-setting.html
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			instance := &exoscalev1.PostgreSQL{}
+			instance.Spec.ForProvider.PGSettings.Raw = []byte(tc.givenSpec)
+			exo := &oapi.DbaasServicePg{PgSettings: &tc.observedSpec}
+
+			result := HasSamePGSettings(instance, exo)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}

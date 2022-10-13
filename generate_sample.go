@@ -74,6 +74,7 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 					},
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
+				PGSettings: runtime.RawExtension{Raw: []byte(`{"timezone":"Europe/Zurich"}`)},
 			},
 		},
 	}

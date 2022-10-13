@@ -3,8 +3,10 @@ package mapper
 import (
 	"fmt"
 	"net/url"
+	"reflect"
 	"strings"
 
+	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/minio/minio-go/v7/pkg/set"
@@ -19,7 +21,8 @@ type PostgreSQLMapper struct{}
 func (PostgreSQLMapper) FromSpec(spec exoscalev1.PostgreSQLParameters, into *oapi.CreateDbaasServicePgJSONBody) error {
 	backupSchedule, backupErr := toBackupSchedule(spec.Backup.TimeOfDay)
 	maintenanceSchedule := toMaintenanceSchedule(spec.Maintenance)
-	if err := firstOf(backupErr); err != nil {
+	pgSettings, parseErr := ToMap(spec.PGSettings)
+	if err := firstOf(backupErr, parseErr); err != nil {
 		return err
 	}
 
@@ -30,6 +33,7 @@ func (PostgreSQLMapper) FromSpec(spec exoscalev1.PostgreSQLParameters, into *oap
 	into.TerminationProtection = pointer.Bool(spec.TerminationProtection)
 	into.Maintenance = &maintenanceSchedule
 	into.IpFilter = toSlicePtr(spec.IPFilter)
+	into.PgSettings = &pgSettings
 	return nil
 }
 
@@ -43,7 +47,9 @@ func (PostgreSQLMapper) ToStatus(pg *oapi.DbaasServicePg, into *exoscalev1.Postg
 	}
 	into.IPFilter = *pg.IpFilter
 	into.Backup = toBackupSpec(pg.BackupSchedule)
-	return nil
+	parsed, err := ToRawExtension(pg.PgSettings)
+	into.PGSettings = parsed
+	return errors.Wrap(err, "cannot marshal json")
 }
 
 // IsResourceUpToDate returns true if the observed response body matches the desired spec.
@@ -58,6 +64,7 @@ func (PostgreSQLMapper) IsResourceUpToDate(pgInstance *exoscalev1.PostgreSQL, pg
 		HasSameBackupSchedule,
 		HasSameSizing,
 		HasSameTerminationProtection,
+		HasSamePGSettings,
 	} {
 		same := fn(pgInstance, pgExo)
 		if !same {
@@ -112,6 +119,20 @@ func HasSameSizing(pgInstance *exoscalev1.PostgreSQL, pgExo *oapi.DbaasServicePg
 // HasSameTerminationProtection returns true if the termination protection flags are the same.
 func HasSameTerminationProtection(pgInstance *exoscalev1.PostgreSQL, pgExo *oapi.DbaasServicePg) bool {
 	return pgInstance.Spec.ForProvider.TerminationProtection == pointer.BoolDeref(pgExo.TerminationProtection, false)
+}
+
+// HasSamePGSettings returns true if the pg settings spec are the same as defined in the exoscale payload.
+func HasSamePGSettings(pgInstance *exoscalev1.PostgreSQL, pgExo *oapi.DbaasServicePg) bool {
+	spec, err := ToMap(pgInstance.Spec.ForProvider.PGSettings)
+	if err != nil {
+		// we have to assume they're not the same
+		return false
+	}
+	if len(spec) == 0 && (pgExo.PgSettings == nil || len(*pgExo.PgSettings) == 0) {
+		// both are effectively empty
+		return true
+	}
+	return reflect.DeepEqual(spec, *pgExo.PgSettings)
 }
 
 var variantAiven = oapi.EnumPgVariantAiven

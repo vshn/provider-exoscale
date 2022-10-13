@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/mapper"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -42,6 +43,7 @@ func (v *Validator) validateSpec(obj *exoscalev1.PostgreSQL) error {
 	for _, validatorFn := range []func(exoscalev1.PostgreSQLParameters) error{
 		v.validateIpFilter,
 		v.validateMaintenanceSchedule,
+		v.validatePGSettings,
 	} {
 		if err := validatorFn(obj.Spec.ForProvider); err != nil {
 			return err
@@ -60,6 +62,25 @@ func (v *Validator) validateIpFilter(obj exoscalev1.PostgreSQLParameters) error 
 func (v *Validator) validateMaintenanceSchedule(obj exoscalev1.PostgreSQLParameters) error {
 	if _, _, _, err := obj.Maintenance.TimeOfDay.Parse(); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (v *Validator) validatePGSettings(obj exoscalev1.PostgreSQLParameters) error {
+	settings, err := mapper.ToMap(obj.PGSettings)
+	if err != nil {
+		return fmt.Errorf("pgSettings with value %q cannot be converted: %w", obj.PGSettings.Raw, err)
+	}
+	for k, raw := range settings {
+		switch raw.(type) {
+		case string:
+		case int64:
+		case float64:
+		case bool:
+			continue
+		default:
+			return fmt.Errorf("value in key %q in pgSettings is not a supported type (only strings, boolean and numbers): %v", k, raw)
+		}
 	}
 	return nil
 }

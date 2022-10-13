@@ -5,6 +5,8 @@ import (
 
 	"github.com/exoscale/egoscale/v2/oapi"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/json"
 	"k8s.io/utils/pointer"
 )
 
@@ -60,4 +62,21 @@ func toBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {
 	}
 	hour, min := pointer.Int64Deref(schedule.BackupHour, 0), pointer.Int64Deref(schedule.BackupMinute, 0)
 	return exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay(fmt.Sprintf("%02d:%02d:00", hour, min))}
+}
+
+func ToMap(raw runtime.RawExtension) (map[string]interface{}, error) {
+	m := make(map[string]interface{}, 0)
+	if len(raw.Raw) == 0 {
+		return m, nil
+	}
+	err := json.Unmarshal(raw.Raw, &m)
+	return m, err
+}
+
+func ToRawExtension(m *map[string]interface{}) (runtime.RawExtension, error) {
+	if m == nil {
+		return runtime.RawExtension{}, nil
+	}
+	raw, err := json.Marshal(*m)
+	return runtime.RawExtension{Raw: raw}, err
 }
