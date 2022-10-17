@@ -107,7 +107,6 @@ func newBucketSample() *exoscalev1.Bucket {
 				ProviderConfigReference: &xpv1.Reference{Name: "provider-config"},
 			},
 			ForProvider: exoscalev1.BucketParameters{
-				EndpointURL:          "sos-ch-gva-2.exo.io",
 				BucketName:           "bucket-local-dev",
 				Zone:                 "ch-gva-2",
 				BucketDeletionPolicy: exoscalev1.DeleteIfEmpty,

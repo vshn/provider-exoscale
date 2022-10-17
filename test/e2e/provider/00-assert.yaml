@@ -13,7 +13,6 @@ spec:
   forProvider:
     bucketName: e2e-test-kuttl-provider-exoscale
     bucketDeletionPolicy: DeleteAll
-    endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
   providerConfigRef:
     name: provider-config
@@ -27,4 +26,6 @@ status:
     - reason: ReconcileSuccess
       status: 'True'
       type: Synced
+  endpoint: sos-ch-gva-2.exo.io
+  endpointURL: https://sos-ch-gva-2.exo.io
 ---
