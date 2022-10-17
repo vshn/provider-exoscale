@@ -17,10 +17,14 @@ import (
 // PostgreSQLMapper is a mapper to convert exoscale's SDK resources to Kubernetes API specs.
 type PostgreSQLMapper struct{}
 
-// FromSpec places the given spec into the request body.
-func (PostgreSQLMapper) FromSpec(spec exoscalev1.PostgreSQLParameters, into *oapi.CreateDbaasServicePgJSONBody) error {
+// FromSpecToCreateBody places the given spec into the request body.
+func (PostgreSQLMapper) FromSpecToCreateBody(spec exoscalev1.PostgreSQLParameters, into *oapi.CreateDbaasServicePgJSONBody) error {
+	/**
+	NOTE: If you change anything below, also update FromSpecToUpdateBody().
+	Unfortunately the generated openapi-types in exoscale are unusable for reusing same properties.
+	*/
 	backupSchedule, backupErr := toBackupSchedule(spec.Backup.TimeOfDay)
-	maintenanceSchedule := toMaintenanceSchedule(spec.Maintenance)
+	maintenanceSchedule := toMaintenanceScheduleCreateRequest(spec.Maintenance)
 	pgSettings, parseErr := ToMap(spec.PGSettings)
 	if err := firstOf(backupErr, parseErr); err != nil {
 		return err
@@ -37,6 +41,30 @@ func (PostgreSQLMapper) FromSpec(spec exoscalev1.PostgreSQLParameters, into *oap
 	return nil
 }
 
+// FromSpecToUpdateBody places the given spec into the request body.
+func (PostgreSQLMapper) FromSpecToUpdateBody(spec exoscalev1.PostgreSQLParameters, into *oapi.UpdateDbaasServicePgJSONRequestBody) error {
+	/**
+	NOTE: If you change anything below, also update FromSpecToCreateBody().
+	Unfortunately the generated openapi-types in exoscale are unusable for reusing same properties.
+	*/
+	backupSchedule, backupErr := toBackupSchedule(spec.Backup.TimeOfDay)
+	maintenanceSchedule := toMaintenanceScheduleUpdateRequest(spec.Maintenance)
+	pgSettings, parseErr := ToMap(spec.PGSettings)
+	if err := firstOf(backupErr, parseErr); err != nil {
+		return err
+	}
+
+	into.Plan = pointer.String(spec.Size.Plan)
+	into.BackupSchedule = &backupSchedule
+	into.Variant = &variantAiven
+	// into.Version = pointer.String(spec.Version) -> Version cannot be changed
+	into.TerminationProtection = pointer.Bool(spec.TerminationProtection)
+	into.Maintenance = &maintenanceSchedule
+	into.IpFilter = toSlicePtr(spec.IPFilter)
+	into.PgSettings = &pgSettings
+	return nil
+}
+
 // ToStatus fills the status fields from the given response body.
 func (PostgreSQLMapper) ToStatus(pg *oapi.DbaasServicePg, into *exoscalev1.PostgreSQLObservation) error {
 	into.NoteStates = toNodeStates(pg.NodeStates)
@@ -45,6 +73,7 @@ func (PostgreSQLMapper) ToStatus(pg *oapi.DbaasServicePg, into *exoscalev1.Postg
 		DayOfWeek: pg.Maintenance.Dow,
 		TimeOfDay: exoscalev1.TimeOfDay(pg.Maintenance.Time),
 	}
+	into.Size.Plan = pg.Plan
 	into.IPFilter = *pg.IpFilter
 	into.Backup = toBackupSpec(pg.BackupSchedule)
 	parsed, err := ToRawExtension(pg.PgSettings)

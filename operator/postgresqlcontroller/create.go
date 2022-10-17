@@ -21,7 +21,7 @@ func (p *Pipeline) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	spec := pgInstance.Spec.ForProvider
 	mpr := &mapper.PostgreSQLMapper{}
 	body := oapi.CreateDbaasServicePgJSONBody{}
-	err := mpr.FromSpec(spec, &body)
+	err := mpr.FromSpecToCreateBody(spec, &body)
 	if err != nil {
 		return managed.ExternalCreation{}, errors.Wrap(err, "cannot map spec to API request")
 	}

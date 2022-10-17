@@ -64,24 +64,24 @@ func Test_toBackupSchedule(t *testing.T) {
 func Test_toMaintenanceSchedule(t *testing.T) {
 	tests := map[string]struct {
 		givenSpec      exoscalev1.MaintenanceSpec
-		expectedResult MaintenanceSchedule
+		expectedResult MaintenanceScheduleCreateRequest
 	}{
 		"Disabled": {
 			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "0:00:00", DayOfWeek: "never"},
-			expectedResult: MaintenanceSchedule{Time: "0:00:00", Dow: "never"},
+			expectedResult: MaintenanceScheduleCreateRequest{Time: "0:00:00", Dow: "never"},
 		},
 		"SameWeekDay": {
 			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "0:00:00", DayOfWeek: "monday"},
-			expectedResult: MaintenanceSchedule{Time: "0:00:00", Dow: "monday"},
+			expectedResult: MaintenanceScheduleCreateRequest{Time: "0:00:00", Dow: "monday"},
 		},
 		"SameTime": {
 			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "12:34:56", DayOfWeek: "monday"},
-			expectedResult: MaintenanceSchedule{Time: "12:34:56", Dow: "monday"},
+			expectedResult: MaintenanceScheduleCreateRequest{Time: "12:34:56", Dow: "monday"},
 		},
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			result := toMaintenanceSchedule(tc.givenSpec)
+			result := toMaintenanceScheduleCreateRequest(tc.givenSpec)
 			assert.Equal(t, tc.expectedResult, result)
 		})
 	}
