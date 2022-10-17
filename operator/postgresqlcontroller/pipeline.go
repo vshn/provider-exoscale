@@ -13,17 +13,17 @@ import (
 
 // Pipeline provisions IAMKeys on exoscale.com
 type Pipeline struct {
-	kube           client.Client
-	recorder       event.Recorder
-	exoscaleClient *exoscalesdk.Client
+	kube     client.Client
+	recorder event.Recorder
+	exo      *exoscalesdk.Client
 }
 
 // NewPipeline returns a new instance of Pipeline.
 func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *exoscalesdk.Client) *Pipeline {
 	return &Pipeline{
-		kube:           client,
-		recorder:       recorder,
-		exoscaleClient: exoscaleClient,
+		kube:     client,
+		recorder: recorder,
+		exo:      exoscaleClient,
 	}
 }
 
