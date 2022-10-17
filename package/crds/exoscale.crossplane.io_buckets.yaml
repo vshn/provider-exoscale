@@ -91,9 +91,8 @@ spec:
                       name across the platform or zone.
                     type: string
                   endpointURL:
-                    description: EndpointURL is the URL where to create the bucket.
-                      If the scheme is omitted (`http/s`), HTTPS is assumed. Changing
-                      the endpoint after initial creation might have no effect.
+                    description: 'Deprecated: Only here for compatibility with legacy
+                      Bucket objects'
                     type: string
                   zone:
                     description: Zone is the name of the zone where the bucket shall
@@ -318,6 +317,10 @@ spec:
                   - type
                   type: object
                 type: array
+              endpoint:
+                type: string
+              endpointURL:
+                type: string
             type: object
         required:
         - spec
