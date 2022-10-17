@@ -2,6 +2,7 @@ package bucketcontroller
 
 import (
 	"context"
+	"fmt"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/controllerutil"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
@@ -23,9 +24,9 @@ type bucketConnector struct {
 }
 
 type connectContext struct {
+	bucket *exoscalev1.Bucket
 	controllerutil.GenericConnectContext
 	MinioClient *minio.Client
-	EndpointURL string
 }
 
 // Connect implements managed.ExternalConnecter.
@@ -41,12 +42,14 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return &NoopClient{}, nil
 	}
 
+	bucket.Status.Endpoint = fmt.Sprintf("sos-%s.exo.io", bucket.Spec.ForProvider.Zone)
+	bucket.Status.EndpointURL = fmt.Sprintf("https://%s", bucket.Status.Endpoint)
 	pctx := &connectContext{
+		bucket: bucket,
 		GenericConnectContext: controllerutil.GenericConnectContext{
 			Context:            ctx,
 			ProviderConfigName: bucket.GetProviderConfigName(),
 		},
-		EndpointURL: bucket.Spec.ForProvider.EndpointURL,
 	}
 	pipe := pipeline.NewPipeline[*controllerutil.GenericConnectContext]()
 	pipe.WithBeforeHooks(pipelineutil.DebugLogger(&pctx.GenericConnectContext)).
@@ -67,7 +70,7 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 // createS3ClientFn creates a new client using the S3 credentials from the Secret.
 func (c *bucketConnector) createS3ClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
 	return func(_ *controllerutil.GenericConnectContext) error {
-		parsed, err := url.Parse(ctx.EndpointURL)
+		parsed, err := url.Parse(ctx.bucket.Status.EndpointURL)
 		if err != nil {
 			return err
 		}
