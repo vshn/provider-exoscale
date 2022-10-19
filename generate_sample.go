@@ -10,16 +10,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/vshn/provider-exoscale/apis"
-	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
 	"io"
-	admissionv1 "k8s.io/api/admission/v1"
-	authv1 "k8s.io/api/authentication/v1"
 	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	exoscaleoapi "github.com/exoscale/egoscale/v2/oapi"
+	"github.com/vshn/provider-exoscale/apis"
+	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
+	admissionv1 "k8s.io/api/admission/v1"
+	authv1 "k8s.io/api/authentication/v1"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -36,6 +38,44 @@ func main() {
 	generateExoscaleIAMKeySample()
 	generateProviderConfigSample()
 	generateIAMKeyAdmissionRequest()
+	generatePostgresqlSample()
+}
+
+func generatePostgresqlSample() {
+	spec := newPostgresqlSample()
+	serialize(spec, true)
+}
+
+func newPostgresqlSample() *exoscalev1.PostgreSQL {
+	return &exoscalev1.PostgreSQL{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: exoscalev1.PostgreSQLGroupVersionKind.GroupVersion().String(),
+			Kind:       exoscalev1.PostgreSQLKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{Name: "postgresql-local-dev"},
+		Spec: exoscalev1.PostgreSQLSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference: &xpv1.Reference{Name: "provider-config"},
+			},
+			ForProvider: exoscalev1.PostgreSQLParameters{
+				Maintenance: exoscalev1.MaintenanceSpec{
+					TimeOfDay: "12:00:00",
+					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+				},
+				Backup: exoscalev1.BackupSpec{
+					TimeOfDay: "13:00:00",
+				},
+				Zone: "ch-dk-2",
+				DBaaSParameters: exoscalev1.DBaaSParameters{
+					Version: "14",
+					Size: exoscalev1.SizeSpec{
+						Plan: "hobbyist-2",
+					},
+					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
+				},
+			},
+		},
+	}
 }
 
 func generateBucketSample() {
@@ -93,7 +133,7 @@ func newIAMKeySample() *exoscalev1.IAMKey {
 				KeyName: "iam-key-local-dev",
 				Zone:    "CH-DK-2",
 				Services: exoscalev1.ServicesSpec{
-					exoscalev1.SOSSpec{
+					SOS: exoscalev1.SOSSpec{
 						Buckets: []string{"bucket-local-dev"},
 					},
 				},

@@ -1,0 +1,27 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: PostgreSQL
+metadata:
+  creationTimestamp: null
+  name: postgresql-local-dev
+spec:
+  forProvider:
+    backup:
+      timeOfDay: "13:00:00"
+    ipFilter:
+    - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    pgSettings: null
+    size:
+      plan: hobbyist-2
+    version: "14"
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+status:
+  atProvider:
+    backup: {}
+    maintenance: {}
+    pgSettings: null
+    size: {}
