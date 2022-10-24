@@ -55,7 +55,8 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 		ObjectMeta: metav1.ObjectMeta{Name: "postgresql-local-dev"},
 		Spec: exoscalev1.PostgreSQLSpec{
 			ResourceSpec: xpv1.ResourceSpec{
-				ProviderConfigReference: &xpv1.Reference{Name: "provider-config"},
+				ProviderConfigReference:          &xpv1.Reference{Name: "provider-config"},
+				WriteConnectionSecretToReference: &xpv1.SecretReference{Name: "postgresql-local-dev-details", Namespace: "default"},
 			},
 			ForProvider: exoscalev1.PostgreSQLParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
@@ -73,6 +74,7 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 					},
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
+				PGSettings: runtime.RawExtension{Raw: []byte(`{"timezone":"Europe/Zurich"}`)},
 			},
 		},
 	}

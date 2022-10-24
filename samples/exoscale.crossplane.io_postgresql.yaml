@@ -12,13 +12,17 @@ spec:
     maintenance:
       dayOfWeek: monday
       timeOfDay: "12:00:00"
-    pgSettings: null
+    pgSettings:
+      timezone: Europe/Zurich
     size:
       plan: hobbyist-2
     version: "14"
     zone: ch-dk-2
   providerConfigRef:
     name: provider-config
+  writeConnectionSecretToRef:
+    name: postgresql-local-dev-details
+    namespace: default
 status:
   atProvider:
     backup: {}

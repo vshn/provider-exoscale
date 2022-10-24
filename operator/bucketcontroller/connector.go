@@ -2,11 +2,13 @@ package bucketcontroller
 
 import (
 	"context"
-	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/controllerutil"
-	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"net/url"
 	"strings"
+
+	"github.com/crossplane/crossplane-runtime/pkg/event"
+	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -19,13 +21,8 @@ import (
 )
 
 type bucketConnector struct {
-	controllerutil.GenericConnector
-}
-
-type connectContext struct {
-	controllerutil.GenericConnectContext
-	MinioClient *minio.Client
-	EndpointURL string
+	Kube     client.Client
+	Recorder event.Recorder
 }
 
 // Connect implements managed.ExternalConnecter.
@@ -41,48 +38,29 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return &NoopClient{}, nil
 	}
 
-	pctx := &connectContext{
-		GenericConnectContext: controllerutil.GenericConnectContext{
-			Context:            ctx,
-			ProviderConfigName: bucket.GetProviderConfigName(),
-		},
-		EndpointURL: bucket.Spec.ForProvider.EndpointURL,
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, bucket.GetProviderConfigName())
+	if err != nil {
+		return nil, err
 	}
-	pipe := pipeline.NewPipeline[*controllerutil.GenericConnectContext]()
-	pipe.WithBeforeHooks(pipelineutil.DebugLogger(&pctx.GenericConnectContext)).
-		WithSteps(
-			pipe.NewStep("fetch provider config", c.FetchProviderConfig),
-			pipe.NewStep("fetch secret", c.FetchSecret),
-			pipe.NewStep("validate secret", c.ValidateSecret),
-			pipe.NewStep("create S3 client", c.createS3ClientFn(pctx)),
-		)
-	result := pipe.RunWithContext(&pctx.GenericConnectContext)
-	if result != nil {
-		return nil, result
-	}
-
-	return NewProvisioningPipeline(c.Kube, c.Recorder, pctx.MinioClient), nil
+	mc, err := c.createS3Client(exo, bucket.Spec.ForProvider.EndpointURL)
+	return NewProvisioningPipeline(c.Kube, c.Recorder, mc), nil
 }
 
-// createS3ClientFn creates a new client using the S3 credentials from the Secret.
-func (c *bucketConnector) createS3ClientFn(ctx *connectContext) func(genericConnectContext *controllerutil.GenericConnectContext) error {
-	return func(_ *controllerutil.GenericConnectContext) error {
-		parsed, err := url.Parse(ctx.EndpointURL)
-		if err != nil {
-			return err
-		}
-
-		host := parsed.Host
-		if parsed.Host == "" {
-			host = parsed.Path // if no scheme is given, it's parsed as a path -.-
-		}
-		ctx.MinioClient, err = minio.New(host, &minio.Options{
-			Creds:  credentials.NewStaticV4(ctx.ApiKey, ctx.ApiSecret, ""),
-			Secure: isTLSEnabled(parsed),
-		})
-		return err
+// createS3Client creates a new client using the S3 credentials from the Secret.
+func (c *bucketConnector) createS3Client(connector *pipelineutil.ExoscaleConnector, endpointURL string) (*minio.Client, error) {
+	parsed, err := url.Parse(endpointURL)
+	if err != nil {
+		return nil, err
 	}
 
+	host := parsed.Host
+	if parsed.Host == "" {
+		host = parsed.Path // if no scheme is given, it's parsed as a path -.-
+	}
+	return minio.New(host, &minio.Options{
+		Creds:  credentials.NewStaticV4(connector.ApiKey, connector.ApiSecret, ""),
+		Secure: isTLSEnabled(parsed),
+	})
 }
 
 // isBucketAlreadyDeleted returns true if the status conditions are in a state where one can assume that the deletion of a bucket was successful in a previous reconciliation.
