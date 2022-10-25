@@ -3,13 +3,10 @@
 [![Build](https://img.shields.io/github/workflow/status/vshn/provider-exoscale/Test)][build]
 ![Go version](https://img.shields.io/github/go-mod/go-version/vshn/provider-exoscale)
 [![Version](https://img.shields.io/github/v/release/vshn/provider-exoscale)][releases]
-[![Maintainability](https://img.shields.io/codeclimate/maintainability/vshn/provider-exoscale)][codeclimate]
-[![Coverage](https://img.shields.io/codeclimate/coverage/vshn/provider-exoscale)][codeclimate]
 [![GitHub downloads](https://img.shields.io/github/downloads/vshn/provider-exoscale/total)][releases]
 
 [build]: https://github.com/vshn/provider-exoscale/actions?query=workflow%3ATest
 [releases]: https://github.com/vshn/provider-exoscale/releases
-[codeclimate]: https://codeclimate.com/github/vshn/provider-exoscale
 
 Crossplane provider for managing resources on exoscale.com.
 
