@@ -43,7 +43,7 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return nil, err
 	}
 	mc, err := c.createS3Client(exo, bucket.Spec.ForProvider.EndpointURL)
-	return NewProvisioningPipeline(c.Kube, c.Recorder, mc), nil
+	return NewProvisioningPipeline(c.Kube, c.Recorder, mc), err
 }
 
 // createS3Client creates a new client using the S3 credentials from the Secret.
