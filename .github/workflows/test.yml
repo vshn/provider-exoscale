@@ -3,7 +3,7 @@ name: Test
 on:
   pull_request:
     branches:
-      - master
+      - "*"
     paths-ignore:
       - docs/**
   push:
@@ -13,13 +13,13 @@ on:
       - docs/**
 
 jobs:
-  test:
+  go-unit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
       - name: Determine Go version from go.mod
-        run: echo "GO_VERSION=$(grep "go 1." go.mod | cut -d " " -f 2)" >> $GITHUB_ENV
+        run: echo "GO_VERSION=$(go mod edit -json | jq -r .Go)" >> $GITHUB_ENV
 
       - uses: actions/setup-go@v3
         with:
@@ -34,11 +34,3 @@ jobs:
 
       - name: Run tests
         run: make test-integration
-
-      - name: Upload code coverage report to Code Climate
-        uses: paambaati/codeclimate-action@v3.2.0
-        env:
-          CC_TEST_REPORTER_ID: 0c11e52e8ba078f0637b0ae8ec26c00105a08ad23edcb5e4900d385611afb72b
-        with:
-          coverageLocations: cover.out:gocov
-          prefix: github.com/${{ github.repository }}

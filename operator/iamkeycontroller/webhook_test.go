@@ -1,9 +1,11 @@
 package iamkeycontroller
 
 import (
+	"context"
+	"testing"
+
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"testing"
 
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/assert"
@@ -46,7 +48,7 @@ func TestIAMKeyValidator_ValidateCreate_RequireBuckets(t *testing.T) {
 				},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateCreate(nil, &iamKey)
+			err := validator.ValidateCreate(context.TODO(), &iamKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -106,7 +108,7 @@ func TestIAMKeyValidator_ValidateCreate_RequireWriteConnectionSecretToRef(t *tes
 				},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateCreate(nil, &iamKey)
+			err := validator.ValidateCreate(context.TODO(), &iamKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -162,7 +164,7 @@ func TestIAMKeyValidator_ValidateCreate_RequireProviderConfigToRef(t *testing.T)
 				},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateCreate(nil, &iamKey)
+			err := validator.ValidateCreate(context.TODO(), &iamKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -222,7 +224,7 @@ func TestIAMKeyValidator_ValidateUpdate_RequireProviderConfigToRef(t *testing.T)
 				Status: exoscalev1.IAMKeyStatus{ResourceStatus: xpv1.ResourceStatus{}, AtProvider: exoscalev1.IAMKeyObservation{KeyID: "key-id"}},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateUpdate(nil, &oldIAMKey, &newIAMKey)
+			err := validator.ValidateUpdate(context.TODO(), &oldIAMKey, &newIAMKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -293,7 +295,7 @@ func TestIAMKeyValidator_ValidateUpdate_RequireForProviderImmutable(t *testing.T
 				Status: exoscalev1.IAMKeyStatus{AtProvider: exoscalev1.IAMKeyObservation{KeyID: "key-id"}},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateUpdate(nil, &oldIAMKey, &newIAMKey)
+			err := validator.ValidateUpdate(context.TODO(), &oldIAMKey, &newIAMKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -358,7 +360,7 @@ func TestIAMKeyValidator_ValidateUpdate_RequireConnectionSecretToRefImmutable(t 
 				Status: exoscalev1.IAMKeyStatus{AtProvider: exoscalev1.IAMKeyObservation{KeyID: "key-id"}},
 			}
 			validator := &IAMKeyValidator{log: logr.Discard()}
-			err := validator.ValidateUpdate(nil, &oldIAMKey, &newIAMKey)
+			err := validator.ValidateUpdate(context.TODO(), &oldIAMKey, &newIAMKey)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {

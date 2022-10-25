@@ -1,8 +1,10 @@
 package bucketcontroller
 
 import (
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	"context"
 	"testing"
+
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/assert"
@@ -36,7 +38,7 @@ func TestBucketValidator_ValidateCreate_RequireProviderConfig(t *testing.T) {
 				},
 			}
 			v := &BucketValidator{log: logr.Discard()}
-			err := v.ValidateCreate(nil, bucket)
+			err := v.ValidateCreate(context.TODO(), bucket)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -92,7 +94,7 @@ func TestBucketValidator_ValidateUpdate_PreventBucketNameChange(t *testing.T) {
 				},
 			}
 			v := &BucketValidator{log: logr.Discard()}
-			err := v.ValidateUpdate(nil, oldBucket, newBucket)
+			err := v.ValidateUpdate(context.TODO(), oldBucket, newBucket)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -145,7 +147,7 @@ func TestBucketValidator_ValidateUpdate_RequireProviderConfig(t *testing.T) {
 				},
 			}
 			v := &BucketValidator{log: logr.Discard()}
-			err := v.ValidateUpdate(nil, oldBucket, newBucket)
+			err := v.ValidateUpdate(context.TODO(), oldBucket, newBucket)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {
@@ -190,7 +192,7 @@ func TestBucketValidator_ValidateUpdate_PreventZoneChange(t *testing.T) {
 				Status: exoscalev1.BucketStatus{AtProvider: exoscalev1.BucketObservation{BucketName: "bucket"}},
 			}
 			v := &BucketValidator{log: logr.Discard()}
-			err := v.ValidateUpdate(nil, oldBucket, newBucket)
+			err := v.ValidateUpdate(context.TODO(), oldBucket, newBucket)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {

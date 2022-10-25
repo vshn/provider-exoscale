@@ -5,6 +5,7 @@ import (
 	"time"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
+	"github.com/go-logr/logr"
 	"github.com/vshn/provider-exoscale/apis"
 	"github.com/vshn/provider-exoscale/operator"
 	"k8s.io/client-go/rest"
@@ -23,37 +24,22 @@ type operatorCommand struct {
 	kubeconfig *rest.Config
 }
 
-var operatorCommandName = "operator"
-
 func newOperatorCommand() *cli.Command {
 	command := &operatorCommand{}
 	return &cli.Command{
-		Name:   operatorCommandName,
+		Name:   "operator",
 		Usage:  "Start provider in operator mode",
-		Before: command.validate,
 		Action: command.execute,
 		Flags: []cli.Flag{
-			&cli.BoolFlag{Name: "leader-election-enabled", Value: false, EnvVars: envVars("LEADER_ELECTION_ENABLED"),
-				Usage:       "Use leader election for the controller manager.",
-				Destination: &command.LeaderElectionEnabled,
-			},
-			&cli.StringFlag{Name: "webhook-tls-cert-dir", EnvVars: []string{"WEBHOOK_TLS_CERT_DIR"}, // Env var is set by Crossplane
-				Usage:       "Directory containing the certificates for the webhook server. If empty, the webhook server is not started.",
-				Destination: &command.WebhookCertDir,
-			},
+			newLeaderElectionEnabledFlag(&command.LeaderElectionEnabled),
+			newWebhookTLSCertDirFlag(&command.WebhookCertDir),
 		},
 	}
 }
 
-func (c *operatorCommand) validate(ctx *cli.Context) error {
-	_ = LogMetadata(ctx)
-	log := AppLogger(ctx).WithName(operatorCommandName)
-	log.V(1).Info("validating config")
-	return nil
-}
-
 func (c *operatorCommand) execute(ctx *cli.Context) error {
-	log := AppLogger(ctx).WithName(operatorCommandName)
+	_ = LogMetadata(ctx)
+	log := logr.FromContextOrDiscard(ctx.Context).WithName(ctx.Command.Name)
 	log.Info("Setting up controllers", "config", c)
 	ctrl.SetLogger(log)
 

@@ -14,7 +14,8 @@
     {
       "matchPackagePatterns": [
         "golang.org/x/*",
-        "k8s.io/utils"
+        "k8s.io/utils",
+        "github.com/minio/minio-go/*"
       ],
       "groupName": "utils",
       "schedule": [
