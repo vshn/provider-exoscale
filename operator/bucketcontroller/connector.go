@@ -2,6 +2,7 @@ package bucketcontroller
 
 import (
 	"context"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -25,7 +26,15 @@ type bucketConnector struct {
 	Recorder event.Recorder
 }
 
-// Connect implements managed.ExternalConnecter.
+func getEndpoint(bucket *exoscalev1.Bucket) string {
+	return fmt.Sprintf("sos-%s.exo.io", bucket.Spec.ForProvider.Zone)
+}
+
+func getEndpointURL(bucket *exoscalev1.Bucket) string {
+	return fmt.Sprintf("https://%s", getEndpoint(bucket))
+}
+
+// Connect implements managed.ExternalConnector.
 func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	ctx = pipeline.MutableContext(ctx)
 	log := controllerruntime.LoggerFrom(ctx)
@@ -38,11 +47,14 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 		return &NoopClient{}, nil
 	}
 
+	bucket.Status.Endpoint = getEndpoint(bucket)
+	bucket.Status.EndpointURL = getEndpointURL(bucket)
+
 	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, bucket.GetProviderConfigName())
 	if err != nil {
 		return nil, err
 	}
-	mc, err := c.createS3Client(exo, bucket.Spec.ForProvider.EndpointURL)
+	mc, err := c.createS3Client(exo, bucket.Status.EndpointURL)
 	return NewProvisioningPipeline(c.Kube, c.Recorder, mc), err
 }
 

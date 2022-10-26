@@ -7,7 +7,6 @@ spec:
   forProvider:
     bucketDeletionPolicy: DeleteIfEmpty
     bucketName: bucket-local-dev
-    endpointURL: sos-ch-gva-2.exo.io
     zone: ch-gva-2
   providerConfigRef:
     name: provider-config
