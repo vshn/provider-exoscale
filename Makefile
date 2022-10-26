@@ -21,6 +21,8 @@ include Makefile.vars.mk
 # Crossplane packaging
 -include package/package.mk
 
+golangci_bin = $(go_bin)/golangci-lint
+
 .PHONY: help
 help: ## Show this help
 	@grep -E -h '\s##\s' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
@@ -53,9 +55,15 @@ vet: ## Run 'go vet' against code
 	go vet ./...
 
 .PHONY: lint
-lint: fmt vet generate ## All-in-one linting
+lint: generate fmt golangci-lint git-diff ## All-in-one linting
+
+git-diff:
 	@echo 'Check for uncommitted changes ...'
 	git diff --exit-code
+
+.PHONY: golangci-lint
+golangci-lint: $(golangci_bin) ## Run golangci linters
+	$(golangci_bin) run --timeout 5m --out-format colored-line-number ./...
 
 .PHONY: generate
 generate: ## Generate additional code and artifacts
@@ -92,3 +100,6 @@ run-operator: ## Run in Operator mode against your current kube context
 clean: .e2e-test-clean .package-clean .envtest-clean kind-clean ## Cleans local build artifacts
 	rm -rf docs/node_modules $(docs_out_dir) dist .cache .work
 	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true
+
+$(golangci_bin): | $(go_bin)
+	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go_bin)"
