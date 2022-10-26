@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Development: Bucket Reconciliation :: Exoscale Provider for Crossplane</title>
-    <meta property="og:title" itemprop="name" content="Development: Bucket Reconciliation">
-    <meta name="twitter:title" content="Development: Bucket Reconciliation">
-    <link rel="canonical" href="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/bucket-reconciliation.html">
-    <meta property="og:url" content="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/bucket-reconciliation.html">
+    <title>Development: IAMKey Reconciliation :: Exoscale Provider for Crossplane</title>
+    <meta property="og:title" itemprop="name" content="Development: IAMKey Reconciliation">
+    <meta name="twitter:title" content="Development: IAMKey Reconciliation">
+    <link rel="canonical" href="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/iamkey-reconciliation.html">
+    <meta property="og:url" content="https://vshn.github.io/provider-exoscale/provider-exoscale/explanations/dev/iamkey-reconciliation.html">
     <meta name="generator" content="Antora 3.0.1">
     <link rel="stylesheet" href="../../../../_/css/site.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css">
@@ -38,7 +38,7 @@
         <div class="vshn_logo"></div>
         <a href="https://vshn.github.io/provider-exoscale">Exoscale Provider for Crossplane
            –
-          v0.2</a>
+          v0.3</a>
       </div>
       <button class="navbar-burger" data-target="topbar-nav">
         <span></span>
@@ -75,7 +75,7 @@
   </nav>
 </header>
 <div class="body">
-<div class="nav-container" data-component="provider-exoscale" data-version="0.2">
+<div class="nav-container" data-component="provider-exoscale" data-version="0.3">
   <aside class="nav">
     <div class="panels">
 <div class="nav-panel-menu is-active" data-panel="menu">
@@ -121,13 +121,16 @@
     <a class="nav-link" href="../iamkey.html">IAMKeys permissions</a>
   </li>
   <li class="nav-item" data-depth="1">
+    <a class="nav-link" href="../dbaas-postgresql.html">DBaaS: PostgreSQL</a>
+  </li>
+  <li class="nav-item" data-depth="1">
     <button class="nav-item-toggle"></button>
     <span class="nav-text">For Developers</span>
 <ul class="nav-list">
-  <li class="nav-item" data-depth="2">
+  <li class="nav-item is-current-page" data-depth="2">
     <a class="nav-link" href="iamkey-reconciliation.html">ObjectsUser Reconciliation</a>
   </li>
-  <li class="nav-item is-current-page" data-depth="2">
+  <li class="nav-item" data-depth="2">
     <a class="nav-link" href="bucket-reconciliation.html">Bucket Reconciliation</a>
   </li>
 </ul>
@@ -140,7 +143,7 @@
 <div class="nav-panel-explore" data-panel="explore">
   <div class="context">
     <span class="title">Exoscale Provider for Crossplane</span>
-    <span class="version">0.2</span>
+    <span class="version">0.3</span>
   </div>
   <ul class="components">
     <li class="component is-current">
@@ -149,11 +152,11 @@
         <li class="version is-latest">
           <a href="../../../index.html">master</a>
         </li>
-        <li class="version">
-          <a href="../../../0.3/index.html">0.3</a>
-        </li>
         <li class="version is-current">
-          <a href="../../index.html">0.2</a>
+          <a href="../../index.html">0.3</a>
+        </li>
+        <li class="version">
+          <a href="../../../0.2/index.html">0.2</a>
         </li>
         <li class="version">
           <a href="../../../0.1/index.html">0.1</a>
@@ -174,30 +177,30 @@
     <li><a href="../../index.html">Exoscale Provider for Crossplane</a></li>
     <li>Explanation</li>
     <li>For Developers</li>
-    <li><a href="bucket-reconciliation.html">Bucket Reconciliation</a></li>
+    <li><a href="iamkey-reconciliation.html">ObjectsUser Reconciliation</a></li>
   </ul>
 </nav>
 <div class="page-versions">
-  <button class="version-menu-toggle" title="Show other versions of page">0.2</button>
+  <button class="version-menu-toggle" title="Show other versions of page">0.3</button>
   <div class="version-menu">
-    <a class="version" href="../../../explanations/dev/bucket-reconciliation.html">master</a>
-    <a class="version" href="../../../0.3/explanations/dev/bucket-reconciliation.html">0.3</a>
-    <a class="version is-current" href="bucket-reconciliation.html">0.2</a>
-    <a class="version" href="../../../0.1/explanations/dev/bucket-reconciliation.html">0.1</a>
+    <a class="version" href="../../../explanations/dev/iamkey-reconciliation.html">master</a>
+    <a class="version is-current" href="iamkey-reconciliation.html">0.3</a>
+    <a class="version" href="../../../0.2/explanations/dev/iamkey-reconciliation.html">0.2</a>
+    <a class="version" href="../../../0.1/explanations/dev/iamkey-reconciliation.html">0.1</a>
   </div>
 </div>
-  <div class="edit-this-page"><a href="https://github.com/vshn/provider-exoscale/edit/docs/v0.2/docs/modules/ROOT/pages/explanations/dev/bucket-reconciliation.adoc">Edit this Page</a></div>
+  <div class="edit-this-page"><a href="https://github.com/vshn/provider-exoscale/edit/docs/v0.3/docs/modules/ROOT/pages/explanations/dev/iamkey-reconciliation.adoc">Edit this Page</a></div>
   </div>
   <div class="content">
 <aside class="toc sidebar" data-title="Contents" data-levels="2">
   <div class="toc-menu"></div>
 </aside>
 <article class="doc">
-<h1 class="page">Development: Bucket Reconciliation</h1>
+<h1 class="page">Development: IAMKey Reconciliation</h1>
 <div id="preamble">
 <div class="sectionbody">
 <div class="paragraph">
-<p>This page gives a brief overview how <code>Buckets</code> are managed in the provider.</p>
+<p>This page gives a brief overview how <code>IAMKeys</code> are managed in the provider.</p>
 </div>
 <div class="paragraph">
 <p>Note that these diagrams are on a high-level and don&#8217;t visualize the path for every possible situation.</p>
@@ -205,58 +208,66 @@
 </div>
 </div>
 <div class="sect1">
-<h2 id="_creating_buckets"><a class="anchor" href="#_creating_buckets"></a>Creating Buckets</h2>
+<h2 id="_creating_iamkeys"><a class="anchor" href="#_creating_iamkeys"></a>Creating IAMKeys</h2>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="../../_images/bucket-create.drawio.svg" alt="bucket create.drawio">
+<img src="../../_images/iamkey-create.drawio.svg" alt="iamkey create.drawio">
 </div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>All bucket operations are done using any S3-compatible client library.</p>
+<p>In exoscale.com API, display names are not unique, there can be multiple IAM keys with different IAM key IDs that share the same display name.</p>
 </li>
 <li>
-<p>In exoscale.com API, bucket names in a respective zone are unique per project.</p>
+<p>During the first reconciliation we do not check if an iam key with the desired display name exists, since we don&#8217;t know the iam key ID.</p>
+</li>
+<li>
+<p>After the first reconciliation, the iam key ID, as generated by the exoscale.com API, is stored in the status.</p>
+</li>
+<li>
+<p>In exoscale.com API, IAM keys do not depend on buckets, therefore there are no implications once one of its bucket is deleted.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_updating_buckets"><a class="anchor" href="#_updating_buckets"></a>Updating Buckets</h2>
+<h2 id="_updating_iamkeys"><a class="anchor" href="#_updating_iamkeys"></a>Updating IAMKeys</h2>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="../../_images/bucket-update.drawio.svg" alt="bucket update.drawio">
+<img src="../../_images/iamkey-update.drawio.svg" alt="iamkey update.drawio">
 </div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Since renaming buckets and changing region is not possible, there&#8217;s nothing to update once the bucket exists.</p>
-</li>
-<li>
-<p>Immutable fields are going through the validating webhook server first.
-This prevents changing the spec once the bucket exists.</p>
+<p>Iam key is immutable therefore it cannot be updated.</p>
 </li>
 </ul>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_deleting_buckets"><a class="anchor" href="#_deleting_buckets"></a>Deleting Buckets</h2>
+<h2 id="_deleting_iamkeys"><a class="anchor" href="#_deleting_iamkeys"></a>Deleting IAMKeys</h2>
 <div class="sectionbody">
 <div class="imageblock">
 <div class="content">
-<img src="../../_images/bucket-delete.drawio.svg" alt="bucket delete.drawio">
+<img src="../../_images/iamkey-delete.drawio.svg" alt="iamkey delete.drawio">
 </div>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Deleting bucket is a synchronous operation.</p>
+<p>exoscale.com API does not prevent deleting an iam keys if there are buckets still attached to it.</p>
+</li>
+<li>
+<p>If the iam key cannot be deleted in exoscale.com API, the resource remains in a "deletion pending" state.</p>
+</li>
+<li>
+<p>The credentials <code>Secret</code> is garbage collected after the resource is actually gone.</p>
 </li>
 </ul>
 </div>
