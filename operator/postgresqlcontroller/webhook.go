@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
@@ -26,10 +27,14 @@ func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error 
 // ValidateUpdate implements admission.CustomValidator.
 func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
 	newInstance := newObj.(*exoscalev1.PostgreSQL)
-	//	oldInstance := oldObj.(*exoscalev1.PostgreSQL)
+	oldInstance := oldObj.(*exoscalev1.PostgreSQL)
 	v.log.V(1).Info("Validate update")
 
-	return v.validateSpec(newInstance)
+	err := v.validateSpec(newInstance)
+	if err != nil {
+		return err
+	}
+	return v.compare(oldInstance, newInstance)
 }
 
 // ValidateDelete implements admission.CustomValidator.
@@ -83,4 +88,47 @@ func (v *Validator) validatePGSettings(obj exoscalev1.PostgreSQLParameters) erro
 		}
 	}
 	return nil
+}
+
+func (v *Validator) compare(old, new *exoscalev1.PostgreSQL) error {
+	if !v.isCreated(old) {
+		// comparing immutable fields is only necessary after creation.
+		return nil
+	}
+	for _, compareFn := range []func(_, _ *exoscalev1.PostgreSQL) error{
+		v.compareZone,
+		v.compareVersion,
+	} {
+		if err := compareFn(old, new); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (v *Validator) compareZone(old, new *exoscalev1.PostgreSQL) error {
+	if old.Spec.ForProvider.Zone != new.Spec.ForProvider.Zone {
+		return fmt.Errorf("field is immutable after creation: %s (old), %s (changed)", old.Spec.ForProvider.Zone, new.Spec.ForProvider.Zone)
+	}
+	return nil
+}
+
+func (v *Validator) compareVersion(old, new *exoscalev1.PostgreSQL) error {
+	oldObserved := old.Status.AtProvider.Version
+	oldDesired := old.Spec.ForProvider.Version
+	newDesired := new.Spec.ForProvider.Version
+
+	if oldDesired != newDesired && oldObserved != newDesired {
+		// TODO: Better comparison of versions.
+		// For example, currently the check allows to update "14" -> "15.1" if the observed version is "15.1" , but not "14" -> "15" if observed version is "15.2".
+		// However, "14" -> "15.3" should also not be allowed if observed version is < "15.3".
+		return fmt.Errorf("field is immutable after creation: %s (old), %s (changed)", oldDesired, newDesired)
+	}
+	// we only allow version change if it matches the observed version
+	return nil
+}
+
+func (v *Validator) isCreated(obj *exoscalev1.PostgreSQL) bool {
+	cond := mapper.FindStatusCondition(obj.Status.Conditions, xpv1.Available().Type)
+	return cond != nil
 }
