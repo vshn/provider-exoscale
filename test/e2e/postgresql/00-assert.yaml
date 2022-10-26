@@ -1,0 +1,62 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: PostgreSQL
+metadata:
+  name: e2e-test-postgresql
+  annotations:
+    crossplane.io/external-name: e2e-test-postgresql
+  finalizers:
+    - finalizer.managedresource.crossplane.io
+spec:
+  forProvider:
+    backup:
+      timeOfDay: '13:00:00'
+    ipFilter:
+      - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: '12:00:00'
+    size:
+      plan: hobbyist-2
+    version: '14'
+    zone: ch-dk-2
+    pgSettings:
+      timezone: Europe/Zurich
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-postgresql-details
+    namespace: default
+status:
+  atProvider:
+    backup:
+      timeOfDay: '13:00:00'
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: '12:00:00'
+    noteStates:
+      - name: e2e-test-postgresql-1
+        role: master
+        state: running
+  conditions:
+    - message: The service is running
+      reason: Available
+      status: 'True'
+      type: Ready
+    - reason: ReconcileSuccess
+      status: 'True'
+      type: Synced
+---
+apiVersion: v1
+kind: Secret
+type: connection.crossplane.io/v1alpha1
+metadata:
+  name: e2e-test-postgresql-details
+  namespace: default
+  ownerReferences:
+    - apiVersion: exoscale.crossplane.io/v1
+      kind: PostgreSQL
+      name: e2e-test-postgresql

@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connect-postgresql
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: postgresql
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connect
+          image: docker.io/bitnami/postgresql:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+          securityContext:
+            # with an arbitrary user, "psql" complains it can't find the user ID.
+            # For e2e test using root should be ok
+            runAsUser: 0
+          args:
+            - -c
+            - echo "Testing Select...\n" && PGDATABASE="$POSTGRESQL_DB" PGUSER="$POSTGRESQL_USER" PGPASSWORD="$POSTGRESQL_PASSWORD" PGHOST="$POSTGRESQL_HOST" PGPORT="$POSTGRESQL_PORT" psql -c "select 1;"
+          env:
+            - name: PGSSLMODE
+              value: verify-ca
+          envFrom:
+            - secretRef:
+                name: e2e-test-postgresql-details
+          volumeMounts:
+            - name: ca
+              mountPath: /root/.postgresql
+      volumes:
+        - name: ca
+          secret:
+            secretName: e2e-test-postgresql-details
+            items:
+              - key: ca.crt
+                path: root.crt
