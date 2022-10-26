@@ -10,7 +10,7 @@ Changing the Zone/Datacenter doesn't automatically move an instance, thus this f
 `spec.forProvider.version`::
 This field is basically only there to set the initial version upon first creation.
 After provisioning, this field becomes effectively unused and the observed version is incremented according to the maintenance policy and available updates.
-This field is only accepts a change if it's set to the exact same version as the observed version, for every other value it's immutable.
+This field only accepts a change if it's set to the exact same version as the observed version, for every other value it's immutable.
 +
 NOTE: The behaviour of this field might change in a future release.
 
