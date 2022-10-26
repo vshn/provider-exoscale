@@ -13,6 +13,7 @@
 
 .Explanation
 * xref:explanations/iamkey.adoc[IAMKeys permissions]
+* xref:explanations/dbaas-postgresql.adoc[DBaaS: PostgreSQL]
 * For Developers
 ** xref:explanations/dev/iamkey-reconciliation.adoc[ObjectsUser Reconciliation]
 ** xref:explanations/dev/bucket-reconciliation.adoc[Bucket Reconciliation]
