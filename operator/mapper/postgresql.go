@@ -9,7 +9,6 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/exoscale/egoscale/v2/oapi"
-	"github.com/minio/minio-go/v7/pkg/set"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"k8s.io/utils/pointer"
 )
@@ -67,7 +66,7 @@ func (PostgreSQLMapper) FromSpecToUpdateBody(spec exoscalev1.PostgreSQLParameter
 
 // ToStatus fills the status fields from the given response body.
 func (PostgreSQLMapper) ToStatus(pg *oapi.DbaasServicePg, into *exoscalev1.PostgreSQLObservation) error {
-	into.NoteStates = toNodeStates(pg.NodeStates)
+	into.NodeStates = ToNodeStates(pg.NodeStates)
 	into.Version = pointer.StringDeref(pg.Version, "")
 	into.Maintenance = exoscalev1.MaintenanceSpec{
 		DayOfWeek: pg.Maintenance.Dow,
@@ -106,13 +105,7 @@ func (PostgreSQLMapper) IsResourceUpToDate(pgInstance *exoscalev1.PostgreSQL, pg
 // IsSameIPFilter returns true if both slices have the same unique elements in any order.
 // Returns true if both slices are empty or in case duplicates are found.
 func IsSameIPFilter(pgInstance *exoscalev1.PostgreSQL, pgExo *oapi.DbaasServicePg) bool {
-	f := pgInstance.Spec.ForProvider.IPFilter
-	if pgExo.IpFilter == nil {
-		return len(f) == 0
-	}
-	set1 := set.CreateStringSet(f...)
-	set2 := set.CreateStringSet(*pgExo.IpFilter...)
-	return set1.Equals(set2)
+	return IsSameStringSet(pgInstance.Spec.ForProvider.IPFilter, pgExo.IpFilter)
 }
 
 // HasSameMaintenanceSchedule returns true if both types describe the same maintenance schedule.

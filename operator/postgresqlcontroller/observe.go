@@ -35,7 +35,7 @@ func (p *Pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	isUpToDate := mpr.IsResourceUpToDate(pgInstance, resp.JSON200)
 	setConditionFromState(pgExo, pgInstance)
 
-	ca, err := p.exo.GetDatabaseCACertificate(ctx, pgInstance.Spec.ForProvider.Zone)
+	ca, err := p.exo.GetDatabaseCACertificate(ctx, pgInstance.Spec.ForProvider.Zone.String())
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot retrieve CA certificate")
 	}

@@ -60,7 +60,7 @@ func toSlicePtr(arr []string) *[]string {
 	return &arr
 }
 
-func toNodeStates(states *[]oapi.DbaasNodeState) []exoscalev1.NodeState {
+func ToNodeStates(states *[]oapi.DbaasNodeState) []exoscalev1.NodeState {
 	s := make([]exoscalev1.NodeState, len(*states))
 	for i, state := range *states {
 		s[i] = exoscalev1.NodeState{
@@ -70,6 +70,27 @@ func toNodeStates(states *[]oapi.DbaasNodeState) []exoscalev1.NodeState {
 		}
 	}
 	return s
+}
+
+func ToNotifications(notifications *[]oapi.DbaasServiceNotification) ([]exoscalev1.Notification, error) {
+	if notifications == nil {
+		return nil, nil
+	}
+
+	s := make([]exoscalev1.Notification, len(*notifications))
+	for i, notification := range *notifications {
+		metadata, err := ToRawExtension(&notification.Metadata)
+		if err != nil {
+			return nil, fmt.Errorf("unable to convert metadata: %w", err)
+		}
+		s[i] = exoscalev1.Notification{
+			Level:    notification.Level,
+			Message:  notification.Message,
+			Type:     notification.Type,
+			Metadata: metadata,
+		}
+	}
+	return s, nil
 }
 
 func toBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {

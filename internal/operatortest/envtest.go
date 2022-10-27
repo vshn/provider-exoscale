@@ -24,6 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 )
 
 var invalidNSNameCharacters = regexp.MustCompile("[^a-z0-9-]")
@@ -39,7 +40,11 @@ type Suite struct {
 	Env     *envtest.Environment
 	Logger  logr.Logger
 	Context context.Context
+	cancel  context.CancelFunc
 	Scheme  *runtime.Scheme
+	Manager manager.Manager
+
+	ExoClientMock *ClientWithResponsesInterface
 }
 
 // SetupSuite implements suite.SetupAllSuite.
@@ -48,7 +53,7 @@ func (ts *Suite) SetupSuite() {
 	ts.Logger = zapr.NewLogger(zaptest.NewLogger(ts.T()))
 	log.SetLogger(ts.Logger)
 
-	ts.Context = context.Background()
+	ts.Context, ts.cancel = context.WithCancel(context.Background())
 
 	envtestAssets, ok := os.LookupEnv("KUBEBUILDER_ASSETS")
 	if !ok {
@@ -92,6 +97,25 @@ func (ts *Suite) SetupSuite() {
 	ts.Env = testEnv
 	ts.Config = config
 	ts.Client = k8sClient
+
+	mgr, err := ctrl.NewManager(config, ctrl.Options{
+		MetricsBindAddress: "0",
+		Scheme:             ts.Scheme,
+		Port:               0,
+	})
+	ts.Require().NoError(err)
+	ts.Require().NotNil(mgr)
+	ts.Manager = mgr
+
+	ts.ExoClientMock = &ClientWithResponsesInterface{}
+
+	// start manager in background since the k8s client cache is not started otherwise.
+	// error which appears without that:
+	//   logger.go:130: 2022-11-08T10:26:16.618+0100	DEBUG	Cannot get managed resource	{"controller": "testredis", "request": "/test-create", "error": "the cache is not started, can not read objects"}
+	go func() {
+		err = mgr.Start(ts.Context)
+		ts.Require().NoError(err)
+	}()
 }
 
 func registerCommonCRDs(ts *Suite) {
@@ -110,6 +134,8 @@ func (ts *Suite) RegisterScheme(addToScheme func(s *runtime.Scheme) error) {
 // TearDownSuite implements suite.TearDownAllSuite.
 // It is used to shut down the local envtest environment.
 func (ts *Suite) TearDownSuite() {
+	ts.Logger.Info("starting tear down")
+	ts.cancel()
 	err := ts.Env.Stop()
 	ts.Require().NoErrorf(err, "error while stopping test environment")
 	ts.Logger.Info("test environment stopped")

@@ -1,0 +1,14 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestStep
+delete:
+  # This will wait until resources are really gone
+  - apiVersion: batch/v1
+    kind: Job
+    name: connect-redis
+  - apiVersion: v1
+    kind: Pod
+    labels:
+      e2e-test: redis
+  - apiVersion: exoscale.crossplane.io/v1
+    kind: Redis
+    name: e2e-test-redis

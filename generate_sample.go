@@ -39,6 +39,7 @@ func main() {
 	generateProviderConfigSample()
 	generateIAMKeyAdmissionRequest()
 	generatePostgresqlSample()
+	generateRedisSample()
 }
 
 func generatePostgresqlSample() {
@@ -68,12 +69,12 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 				},
 				Zone: "ch-dk-2",
 				DBaaSParameters: exoscalev1.DBaaSParameters{
-					Version: "14",
 					Size: exoscalev1.SizeSpec{
 						Plan: "hobbyist-2",
 					},
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
+				Version:    "14",
 				PGSettings: runtime.RawExtension{Raw: []byte(`{"timezone":"Europe/Zurich"}`)},
 			},
 		},
@@ -191,6 +192,41 @@ func generateIAMKeyAdmissionRequest() {
 		},
 	}
 	serialize(admission, false)
+}
+
+func generateRedisSample() {
+	spec := newRedisSample()
+	serialize(spec, true)
+}
+
+func newRedisSample() *exoscalev1.Redis {
+	return &exoscalev1.Redis{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: exoscalev1.RedisGroupVersionKind.GroupVersion().String(),
+			Kind:       exoscalev1.RedisKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{Name: "redis-local-dev"},
+		Spec: exoscalev1.RedisSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference:          &xpv1.Reference{Name: "provider-config"},
+				WriteConnectionSecretToReference: &xpv1.SecretReference{Name: "redis-local-dev-details", Namespace: "default"},
+			},
+			ForProvider: exoscalev1.RedisParameters{
+				Maintenance: exoscalev1.MaintenanceSpec{
+					TimeOfDay: "12:00:00",
+					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+				},
+				Zone: "ch-dk-2",
+				DBaaSParameters: exoscalev1.DBaaSParameters{
+					Size: exoscalev1.SizeSpec{
+						Plan: "hobbyist-2",
+					},
+					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
+				},
+				RedisSettings: runtime.RawExtension{Raw: []byte(`{"maxmemory_policy":"noeviction"}`)},
+			},
+		},
+	}
 }
 
 func failIfError(err error) {

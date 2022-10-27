@@ -5,17 +5,17 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.10.0
   creationTimestamp: null
-  name: postgresqls.exoscale.crossplane.io
+  name: redis.exoscale.crossplane.io
 spec:
   group: exoscale.crossplane.io
   names:
     categories:
     - crossplane
     - exoscale
-    kind: PostgreSQL
-    listKind: PostgreSQLList
-    plural: postgresqls
-    singular: postgresql
+    kind: Redis
+    listKind: RedisList
+    plural: redis
+    singular: redis
   scope: Cluster
   versions:
   - additionalPrinterColumns:
@@ -40,7 +40,7 @@ spec:
     name: v1
     schema:
       openAPIV3Schema:
-        description: PostgreSQL is the API for creating PostgreSQL.
+        description: Redis is the API for creating Redis.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -55,7 +55,7 @@ spec:
           metadata:
             type: object
           spec:
-            description: PostgreSQLSpec defines the desired state of a PostgreSQL.
+            description: RedisSpec defines the desired state of a Redis.
             properties:
               deletionPolicy:
                 default: Delete
@@ -67,19 +67,9 @@ spec:
                 - Delete
                 type: string
               forProvider:
-                description: PostgreSQLParameters are the configurable fields of a
-                  PostgreSQL.
+                description: RedisParameters are the configurable fields of a Redis
+                  instance.
                 properties:
-                  backup:
-                    description: BackupSpec contains settings to control the backups
-                      of an instance.
-                    properties:
-                      timeOfDay:
-                        description: 'TimeOfDay for doing daily backups, in UTC. Format:
-                          "hh:mm:ss".'
-                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
-                        type: string
-                    type: object
                   ipFilter:
                     description: IPFilter is a list of allowed IPv4 CIDR ranges that
                       can access the service. If no IP Filter is set, you may not
@@ -112,8 +102,8 @@ spec:
                         pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
                         type: string
                     type: object
-                  pgSettings:
-                    description: PGSettings contains additional PostgreSQL settings.
+                  redisSettings:
+                    description: RedisSettings contains additional Redis settings.
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
                   size:
@@ -126,10 +116,6 @@ spec:
                     description: TerminationProtection protects against termination
                       and powering off.
                     type: boolean
-                  version:
-                    description: Version is the (major) version identifier for the
-                      instance.
-                    type: string
                   zone:
                     description: Zone is the datacenter identifier in which the instance
                       runs in.
@@ -316,55 +302,13 @@ spec:
             - forProvider
             type: object
           status:
-            description: PostgreSQLStatus represents the observed state of a PostgreSQL.
+            description: RedisStatus represents the observed state of a Redis instance.
             properties:
               atProvider:
-                description: PostgreSQLObservation are the observable fields of a
-                  PostgreSQL.
+                description: RedisObservation are the observable fields of a Redis.
                 properties:
-                  backup:
-                    description: BackupSpec contains settings to control the backups
-                      of an instance.
-                    properties:
-                      timeOfDay:
-                        description: 'TimeOfDay for doing daily backups, in UTC. Format:
-                          "hh:mm:ss".'
-                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
-                        type: string
-                    type: object
-                  ipFilter:
-                    description: IPFilter is a list of allowed IPv4 CIDR ranges that
-                      can access the service. If no IP Filter is set, you may not
-                      be able to reach the service. A value of `0.0.0.0/0` will open
-                      the service to all addresses on the public internet.
-                    items:
-                      type: string
-                    type: array
-                  maintenance:
-                    description: MaintenanceSpec contains settings to control the
-                      maintenance of an instance.
-                    properties:
-                      dayOfWeek:
-                        description: DayOfWeek specifies at which weekday the maintenance
-                          is held place. Allowed values are [monday, tuesday, wednesday,
-                          thursday, friday, saturday, sunday, never]
-                        enum:
-                        - monday
-                        - tuesday
-                        - wednesday
-                        - thursday
-                        - friday
-                        - saturday
-                        - sunday
-                        - never
-                        type: string
-                      timeOfDay:
-                        description: 'TimeOfDay for installing updates in UTC. Format:
-                          "hh:mm:ss".'
-                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
-                        type: string
-                    type: object
                   nodeStates:
+                    description: State of individual service nodes
                     items:
                       description: NodeState describes the state of a service node.
                       properties:
@@ -379,22 +323,32 @@ spec:
                           type: string
                       type: object
                     type: array
-                  pgSettings:
+                  notifications:
+                    description: Service notifications
+                    items:
+                      description: Notification contains a service message.
+                      properties:
+                        level:
+                          description: Level of the notification.
+                          type: string
+                        message:
+                          description: Message contains the notification.
+                          type: string
+                        metadata:
+                          description: Metadata contains additional data.
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        type:
+                          description: Type of the notification.
+                          type: string
+                      type: object
+                    type: array
+                  redisSettings:
+                    description: RedisSettings contains additional Redis settings
+                      as set by the provider.
                     type: object
                     x-kubernetes-preserve-unknown-fields: true
-                  size:
-                    description: Size contains the service capacity settings.
-                    properties:
-                      plan:
-                        type: string
-                    type: object
-                  terminationProtection:
-                    description: TerminationProtection protects against termination
-                      and powering off.
-                    type: boolean
                   version:
-                    description: Version is the (major) version identifier for the
-                      instance.
                     type: string
                 type: object
               conditions:
