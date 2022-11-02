@@ -4,6 +4,7 @@ import (
 	"github.com/vshn/provider-exoscale/operator/bucketcontroller"
 	"github.com/vshn/provider-exoscale/operator/configcontroller"
 	"github.com/vshn/provider-exoscale/operator/iamkeycontroller"
+	"github.com/vshn/provider-exoscale/operator/mysqlcontroller"
 	"github.com/vshn/provider-exoscale/operator/postgresqlcontroller"
 	"github.com/vshn/provider-exoscale/operator/rediscontroller"
 
@@ -13,9 +14,10 @@ import (
 // SetupControllers creates all controllers and adds them to the supplied manager.
 func SetupControllers(mgr ctrl.Manager) error {
 	for _, setup := range []func(ctrl.Manager) error{
+		bucketcontroller.SetupController,
 		configcontroller.SetupController,
 		iamkeycontroller.SetupController,
-		bucketcontroller.SetupController,
+		mysqlcontroller.SetupController,
 		postgresqlcontroller.SetupController,
 		rediscontroller.SetupController,
 	} {
@@ -29,8 +31,9 @@ func SetupControllers(mgr ctrl.Manager) error {
 // SetupWebhooks creates all webhooks and adds them to the supplied manager.
 func SetupWebhooks(mgr ctrl.Manager) error {
 	for _, setup := range []func(ctrl.Manager) error{
-		iamkeycontroller.SetupWebhook,
 		bucketcontroller.SetupWebhook,
+		iamkeycontroller.SetupWebhook,
+		mysqlcontroller.SetupWebhook,
 		postgresqlcontroller.SetupWebhook,
 		rediscontroller.SetupWebhook,
 	} {

@@ -15,16 +15,18 @@ type MySQLParameters struct {
 	Maintenance MaintenanceSpec `json:"maintenance,omitempty"`
 	Backup      BackupSpec      `json:"backup,omitempty"`
 
-	// +kubebuilder:validation:Enum=ch-gva-2;ch-dk-2;de-fra-1;de-muc-1;at-vie-1;bg-sof-1
 	// +kubebuilder:validation:Required
 
 	// Zone is the datacenter identifier in which the instance runs in.
-	Zone string `json:"zone"`
+	Zone Zone `json:"zone"`
+
+	// Version is the (major) version identifier for the instance.
+	Version string `json:"version,omitempty"`
 
 	DBaaSParameters `json:",inline"`
 
 	// MySQLSettings contains additional MySQL settings.
-	MySQLSettings runtime.RawExtension `json:"mySQLSettings,omitempty"`
+	MySQLSettings runtime.RawExtension `json:"mysqlSettings,omitempty"`
 }
 
 // MySQLSpec defines the desired state of a MySQL.
@@ -36,10 +38,12 @@ type MySQLSpec struct {
 // MySQLObservation are the observable fields of a MySQL.
 type MySQLObservation struct {
 	DBaaSParameters `json:",inline"`
+	Version         string               `json:"version,omitempty"`
 	Maintenance     MaintenanceSpec      `json:"maintenance,omitempty"`
 	Backup          BackupSpec           `json:"backup,omitempty"`
 	NodeStates      []NodeState          `json:"nodeStates,omitempty"`
-	MySQLSettings   runtime.RawExtension `json:"mySQLSettings,omitempty"`
+	MySQLSettings   runtime.RawExtension `json:"mysqlSettings,omitempty"`
+	Notifications   []Notification       `json:"notifications,omitempty"`
 }
 
 // MySQLStatus represents the observed state of a MySQL.
@@ -53,6 +57,7 @@ type MySQLStatus struct {
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Synced",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="External Name",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
+// +kubebuilder:printcolumn:name="Plan",type="string",JSONPath=".spec.forProvider.size.plan"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,exoscale}

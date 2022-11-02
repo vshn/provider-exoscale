@@ -22,8 +22,8 @@ import (
 )
 
 type bucketConnector struct {
-	Kube     client.Client
-	Recorder event.Recorder
+	kube     client.Client
+	recorder event.Recorder
 }
 
 func getEndpoint(bucket *exoscalev1.Bucket) string {
@@ -50,12 +50,12 @@ func (c *bucketConnector) Connect(ctx context.Context, mg resource.Managed) (man
 	bucket.Status.Endpoint = getEndpoint(bucket)
 	bucket.Status.EndpointURL = getEndpointURL(bucket)
 
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, bucket.GetProviderConfigName())
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, bucket.GetProviderConfigName())
 	if err != nil {
 		return nil, err
 	}
 	mc, err := c.createS3Client(exo, bucket.Status.EndpointURL)
-	return NewProvisioningPipeline(c.Kube, c.Recorder, mc), err
+	return NewProvisioningPipeline(c.kube, c.recorder, mc), err
 }
 
 // createS3Client creates a new client using the S3 credentials from the Secret.

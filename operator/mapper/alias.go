@@ -34,7 +34,7 @@ type MaintenanceScheduleUpdateRequest = struct {
 	Time string `json:"time"`
 }
 
-func toBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
+func ToBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
 	backupHour, backupMin, _, err := day.Parse()
 	return BackupSchedule{
 		BackupHour:   pointer.Int64(backupHour),
@@ -58,6 +58,13 @@ func toMaintenanceScheduleUpdateRequest(spec exoscalev1.MaintenanceSpec) Mainten
 
 func toSlicePtr(arr []string) *[]string {
 	return &arr
+}
+
+func ToSlice(arr *[]string) []string {
+	if arr != nil {
+		return *arr
+	}
+	return []string{}
 }
 
 func ToNodeStates(states *[]oapi.DbaasNodeState) []exoscalev1.NodeState {
@@ -93,7 +100,7 @@ func ToNotifications(notifications *[]oapi.DbaasServiceNotification) ([]exoscale
 	return s, nil
 }
 
-func toBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {
+func ToBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {
 	if schedule == nil {
 		return exoscalev1.BackupSpec{}
 	}
@@ -116,4 +123,21 @@ func ToRawExtension(m *map[string]interface{}) (runtime.RawExtension, error) {
 	}
 	raw, err := json.Marshal(*m)
 	return runtime.RawExtension{Raw: raw}, err
+}
+
+func ToDBaaSParameters(tp *bool, plan string, ipf *[]string) exoscalev1.DBaaSParameters {
+	return exoscalev1.DBaaSParameters{
+		TerminationProtection: pointer.BoolDeref(tp, false),
+		Size: exoscalev1.SizeSpec{
+			Plan: plan,
+		},
+		IPFilter: ToSlice(ipf),
+	}
+}
+
+func ToMaintenance(m *oapi.DbaasServiceMaintenance) exoscalev1.MaintenanceSpec {
+	return exoscalev1.MaintenanceSpec{
+		DayOfWeek: m.Dow,
+		TimeOfDay: exoscalev1.TimeOfDay(m.Time),
+	}
 }

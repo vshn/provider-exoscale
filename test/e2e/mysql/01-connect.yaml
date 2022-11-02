@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connect-mysql
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: mysql
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connect
+          image: docker.io/bitnami/mysql:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+          args:
+            - -c
+            - echo "Testing Select...\n" && mysql -h $MYSQL_HOST -u $MYSQL_USER --password="$MYSQL_PASSWORD" -P $MYSQL_PORT $MYSQL_DB -c -e "select 1;"
+          env:
+            - name: SSL_MODE
+              value: VERIFY_CA
+          envFrom:
+            - secretRef:
+                name: e2e-test-mysql-details
+          volumeMounts:
+            - name: ca
+              mountPath: /.mysql
+      volumes:
+        - name: ca
+          secret:
+            secretName: e2e-test-mysql-details
+            items:
+              - key: ca.crt
+                path: root.crt
