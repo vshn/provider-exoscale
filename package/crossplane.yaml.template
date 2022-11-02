@@ -3,11 +3,18 @@ kind: Provider
 metadata:
   name: provider-exoscale
   annotations:
-    meta.crossplane.io/maintainer: VSHN <info@vshn.net>
+    meta.crossplane.io/maintainer: VSHN <info@vshn.ch>
     meta.crossplane.io/source: github.com/vshn/provider-exoscale
     meta.crossplane.io/license: Apache-2
     meta.crossplane.io/description: |
-      Crossplane provider for managing resources on exoscale.com
+      VSHN's Crossplane provider to manage Exoscale services in Kubernetes.
+    meta.crossplane.io/readme: |
+      `provider-exoscale` is the Crossplane infrastructure provider for
+      [Exoscale](https://www.exoscale.com/), provided by [VSHN](https://www.vshn.ch/).
+      Available resources and their fields can be found in the
+      [CRD Docs](https://marketplace.upbound.io/providers/vshn/provider-exoscale/latest/crds).
+      If you encounter an issue please create an issue in the
+      [vshn/provider-exoscale](https://github.com/vshn/provider-exoscale/issues) repo.
 spec:
   controller:
     image: ghcr.io/vshn/provider-exoscale/controller:latest

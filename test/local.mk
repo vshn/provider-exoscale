@@ -5,9 +5,7 @@ registry_sentinel = $(kind_dir)/registry_sentinel
 local-install: export KUBECONFIG = $(KIND_KUBECONFIG)
 # for ControllerConfig:
 local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluster.local:5000/$(PROJECT_OWNER)/$(PROJECT_NAME)/package:$(IMG_TAG)
-# for package-push:
-local-install: PACKAGE_IMG = localhost:5000/$(PROJECT_OWNER)/$(PROJECT_NAME)/package:$(IMG_TAG)
-local-install: kind-load-image crossplane-setup registry-setup package-push  ## Install Operator in local cluster
+local-install: kind-load-image crossplane-setup registry-setup .local-package-push  ## Install Operator in local cluster
 	yq e '.spec.metadata.annotations."local.dev/installed"="$(shell date)"' test/controllerconfig-exoscale.yaml | kubectl apply -f -
 	yq e '.spec.package=strenv(INTERNAL_PACKAGE_IMG)' test/provider-exoscale.yaml | kubectl apply -f -
 	kubectl wait --for condition=Healthy provider.pkg.crossplane.io/provider-exoscale --timeout 60s
