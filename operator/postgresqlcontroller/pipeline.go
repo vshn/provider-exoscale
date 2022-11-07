@@ -8,16 +8,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// Pipeline provisions IAMKeys on exoscale.com
-type Pipeline struct {
+// pipeline is a managed.ExternalClient and implements a crossplane reconciler for redis.
+type pipeline struct {
 	kube     client.Client
 	recorder event.Recorder
 	exo      *exoscalesdk.Client
 }
 
-// NewPipeline returns a new instance of Pipeline.
-func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *exoscalesdk.Client) *Pipeline {
-	return &Pipeline{
+// newPipeline returns a new instance of pipeline.
+func newPipeline(client client.Client, recorder event.Recorder, exoscaleClient *exoscalesdk.Client) *pipeline {
+	return &pipeline{
 		kube:     client,
 		recorder: recorder,
 		exo:      exoscaleClient,

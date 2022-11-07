@@ -9,7 +9,7 @@ import (
 )
 
 // Delete implements managed.ExternalClient.
-func (p *Pipeline) Delete(ctx context.Context, mg resource.Managed) error {
+func (p *pipeline) Delete(ctx context.Context, mg resource.Managed) error {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.Info("Deleting resource")
 

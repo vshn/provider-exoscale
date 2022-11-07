@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	exoscaleoapi "github.com/exoscale/egoscale/v2/oapi"
@@ -48,6 +49,10 @@ type BackupSpec struct {
 	// TimeOfDay for doing daily backups, in UTC.
 	// Format: "hh:mm:ss".
 	TimeOfDay TimeOfDay `json:"timeOfDay,omitempty"`
+}
+
+func (in *BackupSpec) Equals(other BackupSpec) bool {
+	return in.TimeOfDay.String() == other.TimeOfDay.String()
 }
 
 // MaintenanceSpec contains settings to control the maintenance of an instance.
@@ -107,7 +112,7 @@ type SizeSpec struct {
 }
 
 func (s SizeSpec) Equals(other SizeSpec) bool {
-	return s.Plan == other.Plan
+	return strings.EqualFold(s.Plan, other.Plan)
 }
 
 // IPFilter is a list of allowed IPv4 CIDR ranges that can access the service.
