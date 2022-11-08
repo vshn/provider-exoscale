@@ -42,13 +42,8 @@ status:
         role: master
         state: running
   conditions:
-    - message: The service is running
-      reason: Available
-      status: 'True'
-      type: Ready
-    - reason: ReconcileSuccess
-      status: 'True'
-      type: Synced
+    - status: 'True'
+    - status: 'True'
 ---
 apiVersion: v1
 kind: Secret

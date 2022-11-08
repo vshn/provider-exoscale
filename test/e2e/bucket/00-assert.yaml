@@ -20,12 +20,8 @@ status:
   atProvider:
     bucketName: e2e-test-kuttl-provider-exoscale
   conditions:
-    - reason: Available
-      status: "True"
-      type: Ready
-    - reason: ReconcileSuccess
-      status: 'True'
-      type: Synced
+    - status: 'True'
+    - status: 'True'
   endpoint: sos-ch-gva-2.exo.io
   endpointURL: https://sos-ch-gva-2.exo.io
 ---
