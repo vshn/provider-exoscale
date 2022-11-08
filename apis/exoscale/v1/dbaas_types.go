@@ -15,8 +15,6 @@ import (
 type DBaaSParameters struct {
 	// TerminationProtection protects against termination and powering off.
 	TerminationProtection bool `json:"terminationProtection,omitempty"`
-	// Version is the (major) version identifier for the instance.
-	Version string `json:"version,omitempty"`
 	// Size contains the service capacity settings.
 	Size SizeSpec `json:"size,omitempty"`
 
@@ -65,6 +63,10 @@ type MaintenanceSpec struct {
 	TimeOfDay TimeOfDay `json:"timeOfDay,omitempty"`
 }
 
+func (ms MaintenanceSpec) Equals(other MaintenanceSpec) bool {
+	return ms.DayOfWeek == other.DayOfWeek && ms.TimeOfDay.String() == other.TimeOfDay.String()
+}
+
 var timeOfDayRegex = regexp.MustCompile("^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$")
 
 // +kubebuilder:validation:Pattern="^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$"
@@ -97,6 +99,29 @@ func (t TimeOfDay) Parse() (hour, minute, second int64, err error) {
 		parts[i] = parsed
 	}
 	return parts[0], parts[1], parts[2], nil
+}
+
+// SizeSpec contains settings to control the sizing of a service.
+type SizeSpec struct {
+	Plan string `json:"plan,omitempty"`
+}
+
+func (s SizeSpec) Equals(other SizeSpec) bool {
+	return s.Plan == other.Plan
+}
+
+// IPFilter is a list of allowed IPv4 CIDR ranges that can access the service.
+// If no IP Filter is set, you may not be able to reach the service.
+// A value of `0.0.0.0/0` will open the service to all addresses on the public internet.
+type IPFilter []string
+
+// +kubebuilder:validation:Enum=ch-gva-2;ch-dk-2;de-fra-1;de-muc-1;at-vie-1;bg-sof-1
+
+// Zone is the datacenter identifier in which the instance runs in.
+type Zone string
+
+func (z Zone) String() string {
+	return string(z)
 }
 
 // Rebuilding returns a Ready condition where the service is rebuilding.

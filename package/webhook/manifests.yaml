@@ -65,3 +65,23 @@ webhooks:
     resources:
     - postgresqls
   sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
+      path: /validate-exoscale-crossplane-io-v1-redis
+  failurePolicy: Fail
+  name: redis.exoscale.crossplane.io
+  rules:
+  - apiGroups:
+    - exoscale.crossplane.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - redis
+  sideEffects: None

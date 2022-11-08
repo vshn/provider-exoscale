@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connect-redis
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: redis
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connect
+          image: docker.io/bitnami/redis:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+          args:
+            - -c
+            - echo "Testing Select...\n" && redis-cli -u $REDIS_URL KEYS *
+          envFrom:
+            - secretRef:
+                name: e2e-test-redis-details
+          volumeMounts:
+            - name: ca
+              mountPath: /root/.redis
+      volumes:
+        - name: ca
+          secret:
+            secretName: e2e-test-redis-details
+            items:
+              - key: ca.crt
+                path: root.crt

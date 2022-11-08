@@ -5,6 +5,8 @@ import (
 	"github.com/vshn/provider-exoscale/operator/configcontroller"
 	"github.com/vshn/provider-exoscale/operator/iamkeycontroller"
 	"github.com/vshn/provider-exoscale/operator/postgresqlcontroller"
+	"github.com/vshn/provider-exoscale/operator/rediscontroller"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 )
 
@@ -15,6 +17,7 @@ func SetupControllers(mgr ctrl.Manager) error {
 		iamkeycontroller.SetupController,
 		bucketcontroller.SetupController,
 		postgresqlcontroller.SetupController,
+		rediscontroller.SetupController,
 	} {
 		if err := setup(mgr); err != nil {
 			return err
@@ -29,6 +32,7 @@ func SetupWebhooks(mgr ctrl.Manager) error {
 		iamkeycontroller.SetupWebhook,
 		bucketcontroller.SetupWebhook,
 		postgresqlcontroller.SetupWebhook,
+		rediscontroller.SetupWebhook,
 	} {
 		if err := setup(mgr); err != nil {
 			return err

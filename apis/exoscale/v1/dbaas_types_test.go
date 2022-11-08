@@ -3,6 +3,7 @@ package v1
 import (
 	"testing"
 
+	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -46,6 +47,116 @@ func TestTimeOfDay_Parse(t *testing.T) {
 				assert.Equal(t, tc.expectedMinute, minute)
 				assert.Equal(t, tc.expectedSecond, second)
 			}
+		})
+	}
+}
+
+func TestMaintenanceSpec_Equals(t *testing.T) {
+	tests := map[string]struct {
+		ms    MaintenanceSpec
+		other MaintenanceSpec
+		want  bool
+	}{
+		"empty equals": {
+			ms: MaintenanceSpec{
+				DayOfWeek: "",
+				TimeOfDay: "",
+			},
+			other: MaintenanceSpec{
+				DayOfWeek: "",
+				TimeOfDay: "",
+			},
+			want: true,
+		},
+		"same equals": {
+			ms: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:00",
+			},
+			other: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:00",
+			},
+			want: true,
+		},
+		"day diff": {
+			ms: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowMonday,
+				TimeOfDay: "12:00:00",
+			},
+			other: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:00",
+			},
+			want: false,
+		},
+		"time diff": {
+			ms: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:01",
+			},
+			other: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:00",
+			},
+			want: false,
+		},
+		"date & time diff": {
+			ms: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				TimeOfDay: "12:00:01",
+			},
+			other: MaintenanceSpec{
+				DayOfWeek: oapi.DbaasServiceMaintenanceDowMonday,
+				TimeOfDay: "12:00:00",
+			},
+			want: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.ms.Equals(tt.other), "Equals(%v)", tt.other)
+		})
+	}
+}
+
+func TestSizeSpec_Equals(t *testing.T) {
+	tests := map[string]struct {
+		s     SizeSpec
+		other SizeSpec
+		want  bool
+	}{
+		"empty equals": {
+			s: SizeSpec{
+				Plan: "",
+			},
+			other: SizeSpec{
+				Plan: "",
+			},
+			want: true,
+		},
+		"empty plan differs": {
+			s: SizeSpec{
+				Plan: "",
+			},
+			other: SizeSpec{
+				Plan: "b",
+			},
+			want: false,
+		},
+		"plan differs equals": {
+			s: SizeSpec{
+				Plan: "a",
+			},
+			other: SizeSpec{
+				Plan: "b",
+			},
+			want: false,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equalf(t, tt.want, tt.s.Equals(tt.other), "Equals(%v)", tt.other)
 		})
 	}
 }

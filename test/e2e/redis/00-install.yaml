@@ -1,0 +1,21 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: Redis
+metadata:
+  name: e2e-test-redis
+spec:
+  forProvider:
+    ipFilter:
+      - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    redisSettings:
+      maxmemory_policy: noeviction
+    size:
+      plan: hobbyist-2
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-redis-details
+    namespace: default

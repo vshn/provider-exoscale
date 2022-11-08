@@ -54,7 +54,7 @@ func OpenExoscaleClient(ctx context.Context, kube client.Client, providerConfigR
 			pipe.NewStep("fetch provider config", fetchProviderConfig),
 			pipe.NewStep("fetch secret", fetchSecret),
 			pipe.NewStep("validate secret", validateSecret),
-			pipe.NewStep("create S3 client", createExoscaleClient),
+			pipe.NewStep("create exoscale client", createExoscaleClient),
 		)
 	err := pipe.RunWithContext(pctx)
 	if err != nil {

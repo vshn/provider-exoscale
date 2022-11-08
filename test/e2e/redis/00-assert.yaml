@@ -3,55 +3,53 @@ kind: TestAssert
 timeout: 600
 ---
 apiVersion: exoscale.crossplane.io/v1
-kind: PostgreSQL
+kind: Redis
 metadata:
-  name: e2e-test-postgresql
   annotations:
-    crossplane.io/external-name: e2e-test-postgresql
+    crossplane.io/external-name: e2e-test-redis
   finalizers:
     - finalizer.managedresource.crossplane.io
+  name: e2e-test-redis
 spec:
+  deletionPolicy: Delete
   forProvider:
-    backup:
-      timeOfDay: '13:00:00'
     ipFilter:
       - 0.0.0.0/0
     maintenance:
       dayOfWeek: monday
-      timeOfDay: '12:00:00'
+      timeOfDay: "12:00:00"
+    redisSettings:
+      maxmemory_policy: noeviction
     size:
       plan: hobbyist-2
-    version: '14'
     zone: ch-dk-2
-    pgSettings:
-      timezone: Europe/Zurich
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:
-    name: e2e-test-postgresql-details
+    name: e2e-test-redis-details
     namespace: default
 status:
   atProvider:
-    backup:
-      timeOfDay: '13:00:00'
-    maintenance:
-      dayOfWeek: monday
-      timeOfDay: '12:00:00'
     nodeStates:
-      - name: e2e-test-postgresql-1
+      - name: e2e-test-redis-1
         role: master
         state: running
   conditions:
-    - status: 'True'
-    - status: 'True'
+    - message: The service is running
+      reason: Available
+      status: "True"
+      type: Ready
+    - reason: ReconcileSuccess
+      status: "True"
+      type: Synced
 ---
 apiVersion: v1
 kind: Secret
 type: connection.crossplane.io/v1alpha1
 metadata:
-  name: e2e-test-postgresql-details
+  name: e2e-test-redis-details
   namespace: default
   ownerReferences:
     - apiVersion: exoscale.crossplane.io/v1
-      kind: PostgreSQL
-      name: e2e-test-postgresql
+      kind: Redis
+      name: e2e-test-redis

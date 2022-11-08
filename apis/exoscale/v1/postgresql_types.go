@@ -15,27 +15,18 @@ type PostgreSQLParameters struct {
 	Maintenance MaintenanceSpec `json:"maintenance,omitempty"`
 	Backup      BackupSpec      `json:"backup,omitempty"`
 
-	// +kubebuilder:validation:Enum=ch-gva-2;ch-dk-2;de-fra-1;de-muc-1;at-vie-1;bg-sof-1
 	// +kubebuilder:validation:Required
 
 	// Zone is the datacenter identifier in which the instance runs in.
-	Zone string `json:"zone"`
+	Zone Zone `json:"zone"`
 
 	DBaaSParameters `json:",inline"`
+	// Version is the (major) version identifier for the instance.
+	Version string `json:"version,omitempty"`
 
 	// PGSettings contains additional PostgreSQL settings.
 	PGSettings runtime.RawExtension `json:"pgSettings,omitempty"`
 }
-
-// SizeSpec contains settings to control the sizing of a service.
-type SizeSpec struct {
-	Plan string `json:"plan,omitempty"`
-}
-
-// IPFilter is a list of allowed IPv4 CIDR ranges that can access the service.
-// If no IP Filter is set, you may not be able to reach the service.
-// A value of `0.0.0.0/0` will open the service to all addresses on the public internet.
-type IPFilter []string
 
 // PostgreSQLSpec defines the desired state of a PostgreSQL.
 type PostgreSQLSpec struct {
@@ -46,10 +37,12 @@ type PostgreSQLSpec struct {
 // PostgreSQLObservation are the observable fields of a PostgreSQL.
 type PostgreSQLObservation struct {
 	DBaaSParameters `json:",inline"`
-	Maintenance     MaintenanceSpec      `json:"maintenance,omitempty"`
-	Backup          BackupSpec           `json:"backup,omitempty"`
-	NoteStates      []NodeState          `json:"noteStates,omitempty"`
-	PGSettings      runtime.RawExtension `json:"pgSettings,omitempty"`
+	// Version is the (major) version identifier for the instance.
+	Version     string               `json:"version,omitempty"`
+	Maintenance MaintenanceSpec      `json:"maintenance,omitempty"`
+	Backup      BackupSpec           `json:"backup,omitempty"`
+	NodeStates  []NodeState          `json:"nodeStates,omitempty"`
+	PGSettings  runtime.RawExtension `json:"pgSettings,omitempty"`
 }
 
 // PostgreSQLStatus represents the observed state of a PostgreSQL.
@@ -63,6 +56,7 @@ type PostgreSQLStatus struct {
 // +kubebuilder:printcolumn:name="Ready",type="string",JSONPath=".status.conditions[?(@.type=='Ready')].status"
 // +kubebuilder:printcolumn:name="Synced",type="string",JSONPath=".status.conditions[?(@.type=='Synced')].status"
 // +kubebuilder:printcolumn:name="External Name",type="string",JSONPath=".metadata.annotations.crossplane\\.io/external-name"
+// +kubebuilder:printcolumn:name="Plan",type="string",JSONPath=".spec.forProvider.size.plan"
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,exoscale}

@@ -1,0 +1,25 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: Redis
+metadata:
+  creationTimestamp: null
+  name: redis-local-dev
+spec:
+  forProvider:
+    ipFilter:
+    - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    redisSettings:
+      maxmemory_policy: noeviction
+    size:
+      plan: hobbyist-2
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: redis-local-dev-details
+    namespace: default
+status:
+  atProvider:
+    redisSettings: null
