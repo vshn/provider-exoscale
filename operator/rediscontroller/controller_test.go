@@ -86,10 +86,10 @@ func (ts *RedisControllerTestSuite) TestCreate() {
 	ts.FetchResource(types.NamespacedName{Name: mg.Spec.WriteConnectionSecretToReference.Name, Namespace: mg.Spec.WriteConnectionSecretToReference.Namespace}, secret)
 
 	ts.Assert().Equal("https://foo:bar@baz:5321", string(secret.Data["REDIS_URL"]))
-	ts.Assert().Equal("foo", string(secret.Data["username"]))
-	ts.Assert().Equal("bar", string(secret.Data["password"]))
-	ts.Assert().Equal("baz", string(secret.Data["host"]))
-	ts.Assert().Equal("5321", string(secret.Data["port"]))
+	ts.Assert().Equal("foo", string(secret.Data["REDIS_USERNAME"]))
+	ts.Assert().Equal("bar", string(secret.Data["REDIS_PASSWORD"]))
+	ts.Assert().Equal("baz", string(secret.Data["REDIS_HOST"]))
+	ts.Assert().Equal("5321", string(secret.Data["REDIS_PORT"]))
 	ts.Assert().Equal("certifyingliketheresnotomorrow", string(secret.Data["ca.crt"]))
 
 	instance := &exoscalev1.Redis{}

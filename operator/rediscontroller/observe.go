@@ -116,12 +116,12 @@ func connectionDetails(in oapi.DbaasServiceRedis, ca string) (map[string][]byte,
 	}
 	password, _ := parsed.User.Password()
 	return map[string][]byte{
-		"host":      []byte(parsed.Hostname()),
-		"port":      []byte(parsed.Port()),
-		"username":  []byte(parsed.User.Username()),
-		"password":  []byte(password),
-		"ca.crt":    []byte(ca),
-		"REDIS_URL": []byte(uri),
+		"REDIS_HOST":     []byte(parsed.Hostname()),
+		"REDIS_PORT":     []byte(parsed.Port()),
+		"REDIS_USERNAME": []byte(parsed.User.Username()),
+		"REDIS_PASSWORD": []byte(password),
+		"REDIS_URL":      []byte(uri),
+		"ca.crt":         []byte(ca),
 	}, nil
 }
 
