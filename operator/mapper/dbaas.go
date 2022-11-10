@@ -1,6 +1,7 @@
 package mapper
 
 import (
+	"github.com/hashicorp/go-version"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -49,4 +50,22 @@ func CompareSettings(a, b runtime.RawExtension) bool {
 		}
 	}
 	return true
+}
+
+// CompareMajorVersion params should follow SemVer.
+// But a version starting with 'v' is also valid, e.g v1.2.3
+func CompareMajorVersion(a, b string) (bool, error) {
+	va, err := version.NewVersion(a)
+	if err != nil {
+		return false, err
+	}
+	vb, err := version.NewVersion(b)
+	if err != nil {
+		return false, err
+	}
+	sva := va.Segments()
+	svb := vb.Segments()
+
+	// first segment is the major version (segment order MAJOR.MINOR.PATCH)
+	return sva[0] == svb[0], nil
 }

@@ -22,7 +22,7 @@ func (PostgreSQLMapper) FromSpecToCreateBody(spec exoscalev1.PostgreSQLParameter
 	NOTE: If you change anything below, also update FromSpecToUpdateBody().
 	Unfortunately the generated openapi-types in exoscale are unusable for reusing same properties.
 	*/
-	backupSchedule, backupErr := toBackupSchedule(spec.Backup.TimeOfDay)
+	backupSchedule, backupErr := ToBackupSchedule(spec.Backup.TimeOfDay)
 	maintenanceSchedule := toMaintenanceScheduleCreateRequest(spec.Maintenance)
 	pgSettings, parseErr := ToMap(spec.PGSettings)
 	if err := firstOf(backupErr, parseErr); err != nil {
@@ -46,7 +46,7 @@ func (PostgreSQLMapper) FromSpecToUpdateBody(spec exoscalev1.PostgreSQLParameter
 	NOTE: If you change anything below, also update FromSpecToCreateBody().
 	Unfortunately the generated openapi-types in exoscale are unusable for reusing same properties.
 	*/
-	backupSchedule, backupErr := toBackupSchedule(spec.Backup.TimeOfDay)
+	backupSchedule, backupErr := ToBackupSchedule(spec.Backup.TimeOfDay)
 	maintenanceSchedule := toMaintenanceScheduleUpdateRequest(spec.Maintenance)
 	pgSettings, parseErr := ToMap(spec.PGSettings)
 	if err := firstOf(backupErr, parseErr); err != nil {
@@ -74,7 +74,7 @@ func (PostgreSQLMapper) ToStatus(pg *oapi.DbaasServicePg, into *exoscalev1.Postg
 	}
 	into.Size.Plan = pg.Plan
 	into.IPFilter = *pg.IpFilter
-	into.Backup = toBackupSpec(pg.BackupSchedule)
+	into.Backup = ToBackupSpec(pg.BackupSchedule)
 	parsed, err := ToRawExtension(pg.PgSettings)
 	into.PGSettings = parsed
 	return errors.Wrap(err, "cannot marshal json")

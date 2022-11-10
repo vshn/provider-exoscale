@@ -1,0 +1,31 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: MySQL
+metadata:
+  creationTimestamp: null
+  name: mysql-local-dev
+spec:
+  forProvider:
+    backup:
+      timeOfDay: "13:00:00"
+    ipFilter:
+    - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    mysqlSettings:
+      default_time_zone: "+01:00"
+    size:
+      plan: hobbyist-2
+    version: "8"
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: mysql-local-dev-details
+    namespace: default
+status:
+  atProvider:
+    backup: {}
+    maintenance: {}
+    mysqlSettings: null
+    size: {}

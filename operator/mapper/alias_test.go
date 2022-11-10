@@ -32,7 +32,7 @@ func Test_toBackupSpec(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			result := toBackupSpec(tc.givenSchedule)
+			result := ToBackupSpec(tc.givenSchedule)
 			assert.Equal(t, tc.expectedSpec, result)
 		})
 	}
@@ -54,7 +54,7 @@ func Test_toBackupSchedule(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			result, err := toBackupSchedule(tc.givenTime)
+			result, err := ToBackupSchedule(tc.givenTime)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.expectedSchedule, result)
 		})

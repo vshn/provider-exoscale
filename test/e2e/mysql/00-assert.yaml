@@ -1,0 +1,57 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: MySQL
+metadata:
+  name: e2e-test-mysql
+  annotations:
+    crossplane.io/external-name: e2e-test-mysql
+  finalizers:
+    - finalizer.managedresource.crossplane.io
+spec:
+  forProvider:
+    backup:
+      timeOfDay: '13:00:00'
+    ipFilter:
+      - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: '12:00:00'
+    size:
+      plan: hobbyist-2
+    version: '8'
+    zone: ch-dk-2
+    mysqlSettings:
+      default_time_zone: '+01:00'
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-mysql-details
+    namespace: default
+status:
+  atProvider:
+    backup:
+      timeOfDay: '13:00:00'
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: '12:00:00'
+    nodeStates:
+      - name: e2e-test-mysql-1
+        role: master
+        state: running
+  conditions:
+    - status: 'True'
+    - status: 'True'
+---
+apiVersion: v1
+kind: Secret
+type: connection.crossplane.io/v1alpha1
+metadata:
+  name: e2e-test-mysql-details
+  namespace: default
+  ownerReferences:
+    - apiVersion: exoscale.crossplane.io/v1
+      kind: MySQL
+      name: e2e-test-mysql

@@ -42,3 +42,47 @@ func TestValidateRawExtension(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateVersion(t *testing.T) {
+	tests := map[string]struct {
+		oldObservedVersion string
+		oldSpecVersion     string
+		newDesiredVersion  string
+		expectedError      string
+	}{
+		"NoChange_SameVersion": {
+			oldSpecVersion:     "14",
+			newDesiredVersion:  "14",
+			oldObservedVersion: "14.5",
+			expectedError:      "",
+		},
+		"NoChange_DifferentObservedVersion": {
+			oldSpecVersion:     "14",
+			newDesiredVersion:  "14",
+			oldObservedVersion: "15.1",
+			expectedError:      "",
+		},
+		"Change_ToSameObservedVersion": {
+			oldSpecVersion:     "14",
+			newDesiredVersion:  "15.1",
+			oldObservedVersion: "15.1",
+			expectedError:      "",
+		},
+		"Change_ToOtherValue": {
+			oldSpecVersion:     "14",
+			newDesiredVersion:  "15.2",
+			oldObservedVersion: "15.1",
+			expectedError:      "field is immutable after creation: 14.0.0 (old), 15.2.0 (changed)",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := ValidateVersion(tc.oldObservedVersion, tc.oldSpecVersion, tc.newDesiredVersion)
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

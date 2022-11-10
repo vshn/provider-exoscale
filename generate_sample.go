@@ -38,6 +38,7 @@ func main() {
 	generateExoscaleIAMKeySample()
 	generateProviderConfigSample()
 	generateIAMKeyAdmissionRequest()
+	generateMysqlSample()
 	generatePostgresqlSample()
 	generateRedisSample()
 }
@@ -76,6 +77,45 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 				},
 				Version:    "14",
 				PGSettings: runtime.RawExtension{Raw: []byte(`{"timezone":"Europe/Zurich"}`)},
+			},
+		},
+	}
+}
+
+func generateMysqlSample() {
+	spec := newMysqlSample()
+	serialize(spec, true)
+}
+
+func newMysqlSample() *exoscalev1.MySQL {
+	return &exoscalev1.MySQL{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: exoscalev1.MySQLGroupVersionKind.GroupVersion().String(),
+			Kind:       exoscalev1.MySQLKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{Name: "mysql-local-dev"},
+		Spec: exoscalev1.MySQLSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference:          &xpv1.Reference{Name: "provider-config"},
+				WriteConnectionSecretToReference: &xpv1.SecretReference{Name: "mysql-local-dev-details", Namespace: "default"},
+			},
+			ForProvider: exoscalev1.MySQLParameters{
+				Maintenance: exoscalev1.MaintenanceSpec{
+					TimeOfDay: "12:00:00",
+					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+				},
+				Backup: exoscalev1.BackupSpec{
+					TimeOfDay: "13:00:00",
+				},
+				Zone: "ch-dk-2",
+				DBaaSParameters: exoscalev1.DBaaSParameters{
+					Size: exoscalev1.SizeSpec{
+						Plan: "hobbyist-2",
+					},
+					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
+				},
+				Version:       "8",
+				MySQLSettings: runtime.RawExtension{Raw: []byte(`{"default_time_zone":"+01:00"}`)},
 			},
 		},
 	}
