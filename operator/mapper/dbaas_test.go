@@ -4,9 +4,65 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func Test_CompareMajorVersion(t *testing.T) {
+func TestIsSameStringSet(t *testing.T) {
+	tests := map[string]struct {
+		given    []string
+		arg      []string
+		expected bool
+	}{
+		"EmptyFilter_EmptyArg": {
+			given:    []string{},
+			arg:      []string{},
+			expected: true,
+		},
+		"EmptyFilter_GivenArg": {
+			given:    []string{},
+			arg:      []string{"arg1"},
+			expected: false,
+		},
+		"GivenFilter_EmptyArg": {
+			given:    []string{"filter1"},
+			arg:      []string{},
+			expected: false,
+		},
+		"SingleValue_Same": {
+			given:    []string{"1"},
+			arg:      []string{"1"},
+			expected: true,
+		},
+		"SingleValue_Different": {
+			given:    []string{"1"},
+			arg:      []string{"2"},
+			expected: false,
+		},
+		"MultipleValues_Unordered": {
+			given:    []string{"1", "2"},
+			arg:      []string{"2", "1"},
+			expected: true,
+		},
+		"MultipleValues_Difference": {
+			given:    []string{"1", "2"},
+			arg:      []string{"3", "1"},
+			expected: false,
+		},
+		"MultipleValues_Duplicates": {
+			given:    []string{"1", "2"},
+			arg:      []string{"2", "1", "1"},
+			expected: true,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			result := IsSameStringSet(tc.given, &tc.arg)
+			assert.Equal(t, tc.expected, result)
+		})
+	}
+}
+
+func TestCompareMajorVersion(t *testing.T) {
 	tests := map[string]struct {
 		versionA      string
 		versionB      string
@@ -65,6 +121,39 @@ func Test_CompareMajorVersion(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, b, tc.expectedBool)
 			}
+		})
+	}
+}
+
+func TestCompareSettings(t *testing.T) {
+	tests := map[string]struct {
+		givenSpec    string
+		observedSpec map[string]interface{}
+		expected     bool
+	}{
+		"BothEmpty":       {givenSpec: "", observedSpec: nil, expected: true},
+		"Null":            {givenSpec: "null", observedSpec: nil, expected: true},
+		"EmptyObserved":   {givenSpec: `{"key":"value"}`, observedSpec: map[string]interface{}{}, expected: false},
+		"EmptySpec":       {givenSpec: ``, observedSpec: map[string]interface{}{"key": "value"}, expected: false},
+		"EmptySpecObject": {givenSpec: `{}`, observedSpec: nil, expected: true},
+		"SameString":      {givenSpec: `{"string":"value"}`, observedSpec: map[string]interface{}{"string": "value"}, expected: true},
+		"SameNumber":      {givenSpec: `{"number":0.5}`, observedSpec: map[string]interface{}{"number": 0.5}, expected: true},
+		"SameBoolean":     {givenSpec: `{"bool":true}`, observedSpec: map[string]interface{}{"bool": true}, expected: true},
+		"NestedNull":      {givenSpec: `{"null":null}`, observedSpec: map[string]interface{}{"null": nil}, expected: true},
+		"MultipleValues": {
+			givenSpec:    `{"bool":true,"number":0.01, "string": ""}`,
+			observedSpec: map[string]interface{}{"bool": true, "number": 0.01, "string": ""},
+			expected:     true,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			given := runtime.RawExtension{Raw: []byte(tc.givenSpec)}
+			exo, err := ToRawExtension(&tc.observedSpec)
+			assert.NoError(t, err)
+
+			result := CompareSettings(given, exo)
+			assert.Equal(t, tc.expected, result)
 		})
 	}
 }

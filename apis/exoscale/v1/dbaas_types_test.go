@@ -153,10 +153,43 @@ func TestSizeSpec_Equals(t *testing.T) {
 			},
 			want: false,
 		},
+		"plan ignores case": {
+			s: SizeSpec{
+				Plan: "a",
+			},
+			other: SizeSpec{
+				Plan: "A",
+			},
+			want: true,
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			assert.Equalf(t, tt.want, tt.s.Equals(tt.other), "Equals(%v)", tt.other)
+		})
+	}
+}
+
+func TestBackupSpec_Equals(t *testing.T) {
+	tests := map[string]struct {
+		givenSpec    BackupSpec
+		observedSpec BackupSpec
+		expected     bool
+	}{
+		"Same": {
+			givenSpec:    BackupSpec{TimeOfDay: "12:00:00"},
+			observedSpec: BackupSpec{TimeOfDay: "12:00:00"},
+			expected:     true,
+		},
+		"Different": {
+			givenSpec:    BackupSpec{TimeOfDay: "13:00:00"},
+			observedSpec: BackupSpec{TimeOfDay: "12:00:00"},
+			expected:     false,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tc.expected, tc.givenSpec.Equals(tc.observedSpec))
 		})
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
@@ -14,22 +13,21 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type PostgreSQLConnector struct {
-	Kube     client.Client
-	Recorder event.Recorder
+type connector struct {
+	kube     client.Client
+	recorder event.Recorder
 }
 
 // Connect implements managed.ExternalConnecter.
-func (c *PostgreSQLConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	ctx = pipeline.MutableContext(ctx)
+func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	log := ctrl.LoggerFrom(ctx)
 	log.V(1).Info("Connecting resource")
 
 	pgInstance := fromManaged(mg)
 
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, pgInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", pgInstance.Spec.ForProvider.Zone)))
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, pgInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", pgInstance.Spec.ForProvider.Zone)))
 	if err != nil {
 		return nil, err
 	}
-	return NewPipeline(c.Kube, c.Recorder, exo.Exoscale), nil
+	return newPipeline(c.kube, c.recorder, exo.Exoscale), nil
 }

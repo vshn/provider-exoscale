@@ -21,9 +21,9 @@ func SetupController(mgr ctrl.Manager) error {
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.PostgreSQLGroupVersionKind),
-		managed.WithExternalConnecter(&PostgreSQLConnector{
-			Kube:     mgr.GetClient(),
-			Recorder: recorder,
+		managed.WithExternalConnecter(&connector{
+			kube:     mgr.GetClient(),
+			recorder: recorder,
 		}),
 		managed.WithLogger(logging.NewLogrLogger(mgr.GetLogger().WithValues("controller", name))),
 		managed.WithRecorder(recorder),

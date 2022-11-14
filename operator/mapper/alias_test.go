@@ -8,7 +8,7 @@ import (
 	"k8s.io/utils/pointer"
 )
 
-func Test_toBackupSpec(t *testing.T) {
+func TestToBackupSpec(t *testing.T) {
 	tests := map[string]struct {
 		givenSchedule *BackupSchedule
 		expectedSpec  exoscalev1.BackupSpec
@@ -38,7 +38,7 @@ func Test_toBackupSpec(t *testing.T) {
 	}
 }
 
-func Test_toBackupSchedule(t *testing.T) {
+func TestToBackupSchedule(t *testing.T) {
 	tests := map[string]struct {
 		givenTime        exoscalev1.TimeOfDay
 		expectedSchedule BackupSchedule
@@ -57,32 +57,6 @@ func Test_toBackupSchedule(t *testing.T) {
 			result, err := ToBackupSchedule(tc.givenTime)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.expectedSchedule, result)
-		})
-	}
-}
-
-func Test_toMaintenanceSchedule(t *testing.T) {
-	tests := map[string]struct {
-		givenSpec      exoscalev1.MaintenanceSpec
-		expectedResult MaintenanceScheduleCreateRequest
-	}{
-		"Disabled": {
-			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "0:00:00", DayOfWeek: "never"},
-			expectedResult: MaintenanceScheduleCreateRequest{Time: "0:00:00", Dow: "never"},
-		},
-		"SameWeekDay": {
-			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "0:00:00", DayOfWeek: "monday"},
-			expectedResult: MaintenanceScheduleCreateRequest{Time: "0:00:00", Dow: "monday"},
-		},
-		"SameTime": {
-			givenSpec:      exoscalev1.MaintenanceSpec{TimeOfDay: "12:34:56", DayOfWeek: "monday"},
-			expectedResult: MaintenanceScheduleCreateRequest{Time: "12:34:56", Dow: "monday"},
-		},
-	}
-	for name, tc := range tests {
-		t.Run(name, func(t *testing.T) {
-			result := toMaintenanceScheduleCreateRequest(tc.givenSpec)
-			assert.Equal(t, tc.expectedResult, result)
 		})
 	}
 }

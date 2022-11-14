@@ -16,24 +16,6 @@ type BackupSchedule = struct {
 	BackupMinute *int64 `json:"backup-minute,omitempty"`
 }
 
-// MaintenanceScheduleCreateRequest is a type alias for the embedded struct in opai.CreateDbaasServicePgJSONRequestBody.
-type MaintenanceScheduleCreateRequest = struct {
-	// Day of week for installing updates
-	Dow oapi.CreateDbaasServicePgJSONBodyMaintenanceDow `json:"dow"`
-
-	// Time for installing updates, UTC
-	Time string `json:"time"`
-}
-
-// MaintenanceScheduleUpdateRequest is a type alias for the embedded struct in opai.UpdateDbaasServicePgJSONRequestBody.
-type MaintenanceScheduleUpdateRequest = struct {
-	// Day of week for installing updates
-	Dow oapi.UpdateDbaasServicePgJSONBodyMaintenanceDow `json:"dow"`
-
-	// Time for installing updates, UTC
-	Time string `json:"time"`
-}
-
 func ToBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
 	backupHour, backupMin, _, err := day.Parse()
 	return BackupSchedule{
@@ -42,21 +24,7 @@ func ToBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
 	}, err
 }
 
-func toMaintenanceScheduleCreateRequest(spec exoscalev1.MaintenanceSpec) MaintenanceScheduleCreateRequest {
-	return MaintenanceScheduleCreateRequest{
-		Dow:  oapi.CreateDbaasServicePgJSONBodyMaintenanceDow(spec.DayOfWeek),
-		Time: spec.TimeOfDay.String(),
-	}
-}
-
-func toMaintenanceScheduleUpdateRequest(spec exoscalev1.MaintenanceSpec) MaintenanceScheduleUpdateRequest {
-	return MaintenanceScheduleUpdateRequest{
-		Dow:  oapi.UpdateDbaasServicePgJSONBodyMaintenanceDow(spec.DayOfWeek),
-		Time: spec.TimeOfDay.String(),
-	}
-}
-
-func toSlicePtr(arr []string) *[]string {
+func ToSlicePtr(arr []string) *[]string {
 	return &arr
 }
 
