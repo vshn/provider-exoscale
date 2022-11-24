@@ -4,6 +4,7 @@ import (
 	"github.com/vshn/provider-exoscale/operator/bucketcontroller"
 	"github.com/vshn/provider-exoscale/operator/configcontroller"
 	"github.com/vshn/provider-exoscale/operator/iamkeycontroller"
+	"github.com/vshn/provider-exoscale/operator/kafkacontroller"
 	"github.com/vshn/provider-exoscale/operator/mysqlcontroller"
 	"github.com/vshn/provider-exoscale/operator/postgresqlcontroller"
 	"github.com/vshn/provider-exoscale/operator/rediscontroller"
@@ -20,6 +21,7 @@ func SetupControllers(mgr ctrl.Manager) error {
 		mysqlcontroller.SetupController,
 		postgresqlcontroller.SetupController,
 		rediscontroller.SetupController,
+		kafkacontroller.SetupController,
 	} {
 		if err := setup(mgr); err != nil {
 			return err
