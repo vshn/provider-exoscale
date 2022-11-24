@@ -3,6 +3,7 @@ package mapper
 import (
 	"testing"
 
+	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/stretchr/testify/assert"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"k8s.io/utils/pointer"
@@ -57,6 +58,74 @@ func TestToBackupSchedule(t *testing.T) {
 			result, err := ToBackupSchedule(tc.givenTime)
 			assert.NoError(t, err)
 			assert.EqualValues(t, tc.expectedSchedule, result)
+		})
+	}
+}
+
+func TestToNodeState(t *testing.T) {
+	roleMaster := oapi.DbaasNodeStateRoleMaster
+	roleReplica := oapi.DbaasNodeStateRoleReadReplica
+
+	tests := map[string]struct {
+		given  *[]oapi.DbaasNodeState
+		expect []exoscalev1.NodeState
+	}{
+		"Normal": {
+			given: &[]oapi.DbaasNodeState{
+				{
+					Name:  "foo",
+					Role:  &roleMaster,
+					State: "running",
+				},
+				{
+					Name:  "bar",
+					Role:  &roleReplica,
+					State: "running",
+				},
+			},
+			expect: []exoscalev1.NodeState{
+				{
+					Name:  "foo",
+					Role:  roleMaster,
+					State: "running",
+				},
+				{
+					Name:  "bar",
+					Role:  roleReplica,
+					State: "running",
+				},
+			},
+		},
+		"Nil": {},
+		"NilRole": {
+			given: &[]oapi.DbaasNodeState{
+				{
+					Name:  "foo",
+					State: "running",
+				},
+				{
+					Name:  "bar",
+					State: "leaving",
+				},
+			},
+			expect: []exoscalev1.NodeState{
+				{
+					Name:  "foo",
+					State: "running",
+				},
+				{
+					Name:  "bar",
+					State: "leaving",
+				},
+			},
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			assert.NotPanics(t, func() {
+				res := ToNodeStates(tc.given)
+				assert.EqualValues(t, tc.expect, res)
+			})
 		})
 	}
 }
