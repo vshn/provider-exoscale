@@ -36,11 +36,19 @@ func ToSlice(arr *[]string) []string {
 }
 
 func ToNodeStates(states *[]oapi.DbaasNodeState) []exoscalev1.NodeState {
+	if states == nil {
+		return nil
+	}
 	s := make([]exoscalev1.NodeState, len(*states))
 	for i, state := range *states {
+		var role oapi.DbaasNodeStateRole
+		if state.Role != nil {
+			role = *state.Role
+		}
+
 		s[i] = exoscalev1.NodeState{
 			Name:  state.Name,
-			Role:  *state.Role,
+			Role:  role,
 			State: state.State,
 		}
 	}
