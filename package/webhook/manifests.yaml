@@ -63,7 +63,7 @@ webhooks:
     - CREATE
     - UPDATE
     resources:
-    - kafka
+    - kafkas
   sideEffects: None
 - admissionReviewVersions:
   - v1

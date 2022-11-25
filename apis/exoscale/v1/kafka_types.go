@@ -59,7 +59,7 @@ type KafkaStatus struct {
 // +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster,categories={crossplane,exoscale}
-// +kubebuilder:webhook:verbs=create;update,path=/validate-exoscale-crossplane-io-v1-kafka,mutating=false,failurePolicy=fail,groups=exoscale.crossplane.io,resources=kafka,versions=v1,name=kafka.exoscale.crossplane.io,sideEffects=None,admissionReviewVersions=v1
+// +kubebuilder:webhook:verbs=create;update,path=/validate-exoscale-crossplane-io-v1-kafka,mutating=false,failurePolicy=fail,groups=exoscale.crossplane.io,resources=kafkas,versions=v1,name=kafka.exoscale.crossplane.io,sideEffects=None,admissionReviewVersions=v1
 
 // Kafka is the API for creating Kafka.
 type Kafka struct {

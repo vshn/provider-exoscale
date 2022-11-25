@@ -38,6 +38,7 @@ func SetupWebhooks(mgr ctrl.Manager) error {
 		mysqlcontroller.SetupWebhook,
 		postgresqlcontroller.SetupWebhook,
 		rediscontroller.SetupWebhook,
+		kafkacontroller.SetupWebhook,
 	} {
 		if err := setup(mgr); err != nil {
 			return err
