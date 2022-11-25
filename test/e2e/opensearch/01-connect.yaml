@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: e2e-opensearch-connector
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: opensearch
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connector-opensearch
+          image: curlimages/curl:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - echo "Staring tests\n" && curl $OPENSEARCH_URI
+          envFrom:
+            - secretRef:
+                name: e2e-test-opensearch-secret

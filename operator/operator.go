@@ -6,6 +6,7 @@ import (
 	"github.com/vshn/provider-exoscale/operator/iamkeycontroller"
 	"github.com/vshn/provider-exoscale/operator/kafkacontroller"
 	"github.com/vshn/provider-exoscale/operator/mysqlcontroller"
+	"github.com/vshn/provider-exoscale/operator/opensearchcontroller"
 	"github.com/vshn/provider-exoscale/operator/postgresqlcontroller"
 	"github.com/vshn/provider-exoscale/operator/rediscontroller"
 
@@ -22,6 +23,7 @@ func SetupControllers(mgr ctrl.Manager) error {
 		postgresqlcontroller.SetupController,
 		rediscontroller.SetupController,
 		kafkacontroller.SetupController,
+		opensearchcontroller.SetupController,
 	} {
 		if err := setup(mgr); err != nil {
 			return err
@@ -39,6 +41,7 @@ func SetupWebhooks(mgr ctrl.Manager) error {
 		postgresqlcontroller.SetupWebhook,
 		rediscontroller.SetupWebhook,
 		kafkacontroller.SetupWebhook,
+		opensearchcontroller.SetupWebhook,
 	} {
 		if err := setup(mgr); err != nil {
 			return err

@@ -1,0 +1,19 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: OpenSearch
+metadata:
+  name: e2e-test-opensearch
+spec:
+  forProvider:
+    size:
+      plan: startup-4
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    zone: at-vie-1
+    ipFilter:
+      - "0.0.0.0/0"
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-opensearch-secret
+    namespace: default

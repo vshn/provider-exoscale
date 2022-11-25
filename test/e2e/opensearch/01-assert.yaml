@@ -1,0 +1,11 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: e2e-opensearch-connector
+  namespace: default
+status:
+  conditions:
+    - type: Complete
+      status: 'True'
+  succeeded: 1
+  ready: 0

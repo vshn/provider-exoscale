@@ -42,6 +42,7 @@ func main() {
 	generatePostgresqlSample()
 	generateRedisSample()
 	generateKafkaSample()
+	generateOpensearchSample()
 }
 
 func generatePostgresqlSample() {
@@ -299,6 +300,45 @@ func newKafkaSample() *exoscalev1.Kafka {
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
 				KafkaSettings: runtime.RawExtension{Raw: []byte(`{"connections_max_idle_ms": 60000}`)},
+			},
+		},
+	}
+}
+
+func generateOpensearchSample() {
+	spec := newOpensearchSample()
+	serialize(spec, true)
+}
+
+func newOpensearchSample() *exoscalev1.OpenSearch {
+	return &exoscalev1.OpenSearch{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       exoscalev1.OpenSearchKind,
+			APIVersion: exoscalev1.OpenSearchGroupVersionKind.GroupVersion().String(),
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "opensearch-local-dev",
+		},
+		Spec: exoscalev1.OpenSearchSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference:          &xpv1.Reference{Name: "provider-config"},
+				WriteConnectionSecretToReference: &xpv1.SecretReference{Name: "opensearch-local-dev-details", Namespace: "default"},
+			},
+			ForProvider: exoscalev1.OpenSearchParameters{
+				Maintenance: exoscalev1.MaintenanceSpec{
+					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					TimeOfDay: "12:01:55",
+				},
+				DBaaSParameters: exoscalev1.DBaaSParameters{
+					TerminationProtection: false,
+					Size: exoscalev1.SizeSpec{
+						Plan: "hobbyist-2",
+					},
+					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
+				},
+				Zone:               "ch-dk-2",
+				Version:            "2",
+				OpenSearchSettings: runtime.RawExtension{},
 			},
 		},
 	}
