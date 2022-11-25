@@ -27,10 +27,7 @@ type connector struct {
 }
 
 type connection struct {
-	kube     client.Client
-	recorder event.Recorder
-
-	exo *exoscalesdk.Client
+	exo oapi.ClientWithResponsesInterface
 }
 
 // Connect implements managed.ExternalConnecter.
@@ -48,8 +45,6 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 	return connection{
-		kube:     c.kube,
-		recorder: c.recorder,
 		exo:      exo.Exoscale,
 	}, nil
 }
