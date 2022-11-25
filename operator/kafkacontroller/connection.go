@@ -45,7 +45,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 		return nil, err
 	}
 	return connection{
-		exo:      exo.Exoscale,
+		exo: exo.Exoscale,
 	}, nil
 }
 
@@ -87,7 +87,10 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("creating resource")
 
-	instance := mg.(*exoscalev1.Kafka)
+	instance, ok := mg.(*exoscalev1.Kafka)
+	if !ok {
+		return managed.ExternalCreation{}, fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
+	}
 
 	spec := instance.Spec.ForProvider
 	ipFilter := []string(spec.IPFilter)
@@ -123,7 +126,10 @@ func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("deleting resource")
 
-	instance := mg.(*exoscalev1.Kafka)
+	instance, ok := mg.(*exoscalev1.Kafka)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
+	}
 	resp, err := c.exo.DeleteDbaasServiceWithResponse(ctx, instance.GetInstanceName())
 	if err != nil {
 		return fmt.Errorf("cannot delete kafak instance: %w", err)
@@ -137,7 +143,10 @@ func (c connection) Update(ctx context.Context, mg resource.Managed) (managed.Ex
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("updating resource")
 
-	instance := mg.(*exoscalev1.Kafka)
+	instance, ok := mg.(*exoscalev1.Kafka)
+	if !ok {
+		return managed.ExternalUpdate{}, fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
+	}
 
 	spec := instance.Spec.ForProvider
 	ipFilter := []string(spec.IPFilter)
