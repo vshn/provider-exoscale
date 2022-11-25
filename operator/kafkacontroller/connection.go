@@ -2,6 +2,7 @@ package kafkacontroller
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -15,6 +16,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscaleapi "github.com/exoscale/egoscale/v2/api"
 	"github.com/exoscale/egoscale/v2/oapi"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -115,6 +117,11 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	resp, err := c.exo.CreateDbaasServiceKafkaWithResponse(ctx, oapi.DbaasServiceName(instance.GetInstanceName()), body)
 	if err != nil {
+		if errors.Is(err, exoscaleapi.ErrInvalidRequest) && strings.Contains(err.Error(), "Service name is already taken") {
+			// According to the ExternalClient Interface, create needs to be idempotent.
+			// However the exoscale client doesn't return very helpful errors, so we need to make this brittle matching to find if we get an already exits error
+			return managed.ExternalCreation{}, nil
+		}
 		return managed.ExternalCreation{}, fmt.Errorf("unable to create instance: %w", err)
 	}
 	log.V(2).Info("response", "body", string(resp.Body))
@@ -132,6 +139,9 @@ func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
 	}
 	resp, err := c.exo.DeleteDbaasServiceWithResponse(ctx, instance.GetInstanceName())
 	if err != nil {
+		if errors.Is(err, exoscaleapi.ErrNotFound) {
+			return nil
+		}
 		return fmt.Errorf("cannot delete kafak instance: %w", err)
 	}
 	log.V(2).Info("response", "body", string(resp.Body))
