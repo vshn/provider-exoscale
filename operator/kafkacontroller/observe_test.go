@@ -225,14 +225,14 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 	}
 	instance := sampleKafka("foo")
 	setting, _ := mapper.ToRawExtension(&map[string]interface{}{
-    "count": 1,
-		"foo": "bar",
+		"count": 1,
+		"foo":   "bar",
 	})
 	instance.Spec.ForProvider.KafkaSettings = setting
 	found := sampleAPIKafka("foo")
 	found.KafkaRestSettings = &map[string]interface{}{
-		"foo": "bar",
-    "count": 2,
+		"foo":   "bar",
+		"count": 2,
 	}
 
 	ctx := context.Background()
@@ -264,6 +264,7 @@ func sampleKafka(name string) exoscalev1.Kafka {
 	}
 	instance.Spec.ForProvider.Maintenance.DayOfWeek = "monday"
 	instance.Spec.ForProvider.Maintenance.TimeOfDay = "10:10:10"
+	instance.Spec.ForProvider.Zone = "ch-dk-2"
 	return instance
 }
 
