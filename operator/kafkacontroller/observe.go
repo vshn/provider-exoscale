@@ -49,7 +49,16 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 	}
 	instance.SetConditions(condition)
 
-	connDetails, err := getConnectionDetails(external)
+	caRes, err := c.exo.GetDbaasCaCertificateWithResponse(ctx)
+	if err != nil {
+		return managed.ExternalObservation{}, fmt.Errorf("cannot retrieve CA certificate: %w", err)
+	}
+	ca := ""
+	if caRes.JSON200 != nil && caRes.JSON200.Certificate != nil {
+		ca = *caRes.JSON200.Certificate
+	}
+
+	connDetails, err := getConnectionDetails(external, ca)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("failed to get kafka connection details: %w", err)
 	}
@@ -105,7 +114,7 @@ func getCondition(external *oapi.DbaasServiceKafka) (xpv1.Condition, error) {
 		return xpv1.Condition{}, fmt.Errorf("unknown state %q", state)
 	}
 }
-func getConnectionDetails(external *oapi.DbaasServiceKafka) (map[string][]byte, error) {
+func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[string][]byte, error) {
 	if external.ConnectionInfo == nil {
 		return nil, errors.New("no connection details")
 	}
@@ -143,6 +152,7 @@ func getConnectionDetails(external *oapi.DbaasServiceKafka) (map[string][]byte, 
 		"KAFKA_NODES": []byte(nodes),
 		"cert.pem":    []byte(cert),
 		"key.pem":     []byte(key),
+		"ca.crt":      []byte(ca),
 	}, nil
 }
 

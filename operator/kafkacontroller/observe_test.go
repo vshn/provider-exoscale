@@ -68,6 +68,15 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 			JSON200: found,
 		}, nil).
 		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
+		}, nil).
+		Once()
 
 	assert.NotPanics(t, func() {
 		res, err := c.Observe(ctx, &instance)
@@ -83,6 +92,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 			"KAFKA_NODES": []byte("10.10.1.1:21701 10.10.1.2:21701 10.10.1.3:21701"),
 			"cert.pem":    []byte("CERT"),
 			"key.pem":     []byte("KEY"),
+			"ca.crt":      []byte("CA"),
 		}
 		assert.Equal(t, expectedConnDetails, res.ConnectionDetails)
 	})
@@ -114,6 +124,16 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 			JSON200: found,
 		}, nil).
 		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
+		}, nil).
+		Once()
+
 	assert.NotPanics(t, func() {
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
@@ -144,6 +164,15 @@ func TestObserve_UpToDate_Condition_NotReady(t *testing.T) {
 		Return(&oapi.GetDbaasServiceKafkaResponse{
 			Body:    []byte{},
 			JSON200: found,
+		}, nil).
+		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
 		}, nil).
 		Once()
 
@@ -178,6 +207,15 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 			JSON200: found,
 		}, nil).
 		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
+		}, nil).
+		Once()
 
 	assert.NotPanics(t, func() {
 		res, err := c.Observe(ctx, &instance)
@@ -206,6 +244,15 @@ func TestObserve_Outdated(t *testing.T) {
 		Return(&oapi.GetDbaasServiceKafkaResponse{
 			Body:    []byte{},
 			JSON200: found,
+		}, nil).
+		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
 		}, nil).
 		Once()
 
@@ -240,6 +287,15 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 		Return(&oapi.GetDbaasServiceKafkaResponse{
 			Body:    []byte{},
 			JSON200: found,
+		}, nil).
+		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
 		}, nil).
 		Once()
 
