@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: e2e-test-kafka-config
+  namespace: default
+data:
+  kaf.config: |
+    clusters:
+    - name: test
+      TLS:
+        cafile: /.kafka/certs/ca.crt
+        clientfile: /.kafka/certs/cert.pem
+        clientkeyfile: /.kafka/certs/key.pem
+        insecure: false
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connect-kafka
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: kafka
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connect
+          image: golang:1.19
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+          args:
+            - -c
+            - echo "Testing create topic...\n" && go install github.com/birdayz/kaf/cmd/kaf@v0.2.3 && kaf -b $KAFKA_URI --config /.kafka/config/kaf.config -c test topic create test
+          envFrom:
+            - secretRef:
+                name: e2e-test-kafka-details
+          volumeMounts:
+            - name: certs
+              mountPath: /.kafka/certs
+            - name: config
+              mountPath: /.kafka/config
+      volumes:
+        - name: certs
+          secret:
+            secretName: e2e-test-kafka-details
+        - name: config
+          configMap:
+            name: e2e-test-kafka-config
