@@ -53,7 +53,7 @@ webhooks:
       namespace: system
       path: /validate-exoscale-crossplane-io-v1-kafka
   failurePolicy: Fail
-  name: kafka.exoscale.crossplane.io
+  name: kafkas.exoscale.crossplane.io
   rules:
   - apiGroups:
     - exoscale.crossplane.io
