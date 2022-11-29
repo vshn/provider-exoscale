@@ -8,6 +8,7 @@ import (
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
+	"k8s.io/utils/pointer"
 
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
@@ -45,6 +46,7 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 			Time: spec.Maintenance.TimeOfDay.String(),
 		},
 		Plan:                  spec.Size.Plan,
+		Version:               pointer.String(spec.Version),
 		TerminationProtection: &spec.TerminationProtection,
 	}
 

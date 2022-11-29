@@ -230,6 +230,42 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 	})
 }
 
+func TestObserve_UpToDate_WithVersion(t *testing.T) {
+	exoMock := &operatortest.ClientWithResponsesInterface{}
+	c := connection{
+		exo: exoMock,
+	}
+	instance := sampleKafka("foo")
+	instance.Spec.ForProvider.Version = "3.2"
+	found := sampleAPIKafka("foo")
+	found.Version = pointer.String("3.2.1")
+
+	ctx := context.Background()
+	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
+		Return(&oapi.GetDbaasServiceKafkaResponse{
+			Body:    []byte{},
+			JSON200: found,
+		}, nil).
+		Once()
+	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
+		}, nil).
+		Once()
+
+	assert.NotPanics(t, func() {
+		res, err := c.Observe(ctx, &instance)
+		assert.NoError(t, err)
+		require.NotNil(t, res)
+		assert.True(t, res.ResourceExists, "report resource exits")
+		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+	})
+}
+
 func TestObserve_Outdated(t *testing.T) {
 	exoMock := &operatortest.ClientWithResponsesInterface{}
 	c := connection{

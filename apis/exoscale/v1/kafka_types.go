@@ -21,6 +21,9 @@ type KafkaParameters struct {
 
 	DBaaSParameters `json:",inline"`
 
+	// Version is the (minor) version identifier for the instance (e.g. "3.2").
+	Version string `json:"version,omitempty"`
+
 	// KafkaSettings contains additional Kafka settings.
 	KafkaSettings runtime.RawExtension `json:"kafkaSettings,omitempty"`
 }

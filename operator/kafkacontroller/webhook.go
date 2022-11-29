@@ -56,7 +56,7 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 	if err != nil {
 		return err
 	}
-	return validateImmutable(oldInstance.Spec.ForProvider, newInstance.Spec.ForProvider)
+	return validateImmutable(*oldInstance, *newInstance)
 }
 
 // ValidateDelete validates a delete. Currently does not validate anything.
@@ -89,8 +89,11 @@ func validateKafkaSettings(obj exoscalev1.KafkaParameters) error {
 	return webhook.ValidateRawExtension(obj.KafkaSettings)
 }
 
-func validateImmutable(oldParams, newParams exoscalev1.KafkaParameters) error {
-	return compareZone(oldParams, newParams)
+func validateImmutable(oldInst, newInst exoscalev1.Kafka) error {
+	return multierr.Combine(
+		compareZone(oldInst.Spec.ForProvider, newInst.Spec.ForProvider),
+		compareVersion(oldInst, newInst),
+	)
 }
 
 func compareZone(oldParams, newParams exoscalev1.KafkaParameters) error {
@@ -98,4 +101,19 @@ func compareZone(oldParams, newParams exoscalev1.KafkaParameters) error {
 		return fmt.Errorf("field is immutable: %s (old), %s (changed)", oldParams.Zone, newParams.Zone)
 	}
 	return nil
+}
+
+func compareVersion(oldInst, newInst exoscalev1.Kafka) error {
+	if oldInst.Spec.ForProvider.Version == newInst.Spec.ForProvider.Version {
+		return nil
+	}
+	if newInst.Spec.ForProvider.Version == "" {
+		// Setting version to empyt string should always be fine
+		return nil
+	}
+	if oldInst.Spec.ForProvider.Version == "" {
+		// Fall back to reported version if no version was set before
+		oldInst.Spec.ForProvider.Version = oldInst.Status.AtProvider.Version
+	}
+	return webhook.ValidateVersion(oldInst.Status.AtProvider.Version, oldInst.Spec.ForProvider.Version, newInst.Spec.ForProvider.Version)
 }

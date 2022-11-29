@@ -69,5 +69,25 @@ func TestWebhook_Update(t *testing.T) {
 		err := v.ValidateUpdate(ctx, &base, &inst)
 		assert.Error(t, err)
 	})
+	t.Run("change unsupported version", func(t *testing.T) {
+		newInst := base
+		oldInst := base
+
+		oldInst.Status.AtProvider.Version = "3.2.1"
+		newInst.Spec.ForProvider.Version = "3.3"
+
+		err := v.ValidateUpdate(ctx, &oldInst, &newInst)
+		assert.Error(t, err)
+	})
+	t.Run("change supported version", func(t *testing.T) {
+		newInst := base
+		oldInst := base
+
+		oldInst.Status.AtProvider.Version = "3.2.1"
+		newInst.Spec.ForProvider.Version = "3.2"
+
+		err := v.ValidateUpdate(ctx, &oldInst, &newInst)
+		assert.NoError(t, err)
+	})
 
 }

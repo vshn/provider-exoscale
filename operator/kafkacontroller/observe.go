@@ -181,6 +181,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 			},
 			IPFilter: actualIPFilter,
 		},
+		Version:       expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
 		KafkaSettings: actualKafkaSettings,
 	}
 

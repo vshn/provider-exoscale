@@ -116,6 +116,10 @@ spec:
                     description: TerminationProtection protects against termination
                       and powering off.
                     type: boolean
+                  version:
+                    description: Version is the (minor) version identifier for the
+                      instance (e.g. "3.2").
+                    type: string
                   zone:
                     description: Zone is the datacenter identifier in which the instance
                       runs in.
