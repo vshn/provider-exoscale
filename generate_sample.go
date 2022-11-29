@@ -41,6 +41,7 @@ func main() {
 	generateMysqlSample()
 	generatePostgresqlSample()
 	generateRedisSample()
+	generateKafkaSample()
 }
 
 func generatePostgresqlSample() {
@@ -264,6 +265,40 @@ func newRedisSample() *exoscalev1.Redis {
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
 				RedisSettings: runtime.RawExtension{Raw: []byte(`{"maxmemory_policy":"noeviction"}`)},
+			},
+		},
+	}
+}
+func generateKafkaSample() {
+	spec := newKafkaSample()
+	serialize(spec, true)
+}
+
+func newKafkaSample() *exoscalev1.Kafka {
+	return &exoscalev1.Kafka{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: exoscalev1.KafkaGroupVersionKind.GroupVersion().String(),
+			Kind:       exoscalev1.KafkaKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{Name: "kafka-local-dev"},
+		Spec: exoscalev1.KafkaSpec{
+			ResourceSpec: xpv1.ResourceSpec{
+				ProviderConfigReference:          &xpv1.Reference{Name: "provider-config"},
+				WriteConnectionSecretToReference: &xpv1.SecretReference{Name: "kafka-local-dev-details", Namespace: "default"},
+			},
+			ForProvider: exoscalev1.KafkaParameters{
+				Maintenance: exoscalev1.MaintenanceSpec{
+					TimeOfDay: "12:00:00",
+					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+				},
+				Zone: "ch-dk-2",
+				DBaaSParameters: exoscalev1.DBaaSParameters{
+					Size: exoscalev1.SizeSpec{
+						Plan: "startup-2",
+					},
+					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
+				},
+				KafkaSettings: runtime.RawExtension{Raw: []byte(`{"connections_max_idle_ms": 60000}`)},
 			},
 		},
 	}
