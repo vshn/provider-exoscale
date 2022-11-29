@@ -32,21 +32,26 @@ func TestUpdate(t *testing.T) {
 	}
 	instance.Spec.ForProvider.Maintenance.DayOfWeek = "monday"
 	instance.Spec.ForProvider.Maintenance.TimeOfDay = "11:11:11"
-	ctx := context.Background()
 
-	exoMock.On("UpdateDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("bar"),
-		mock.MatchedBy(func(req oapi.UpdateDbaasServiceKafkaJSONRequestBody) bool {
-			return req.IpFilter != nil && len(*req.IpFilter) == 2 && (*req.IpFilter)[0] == "1.0.0.0/8" &&
-				req.Plan != nil && *req.Plan == "businesss-4" &&
-				req.Maintenance != nil && req.Maintenance.Dow == "monday" && req.Maintenance.Time == "11:11:11"
-		})).
-		Return(&oapi.UpdateDbaasServiceKafkaResponse{Body: []byte{}}, nil).
-		Once()
+	updateReq := mockUpdateKafkaCall(exoMock, "bar", nil)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		_, err := c.Update(ctx, &instance)
 		require.NoError(t, err)
 	})
+
+	if assert.NotNil(t, updateReq.IpFilter) {
+		assert.Len(t, *updateReq.IpFilter, 2)
+		assert.Equal(t, (*updateReq.IpFilter)[0], "1.0.0.0/8")
+	}
+	if assert.NotNil(t, updateReq.Plan) {
+		assert.Equal(t, *updateReq.Plan, "businesss-4")
+	}
+	if assert.NotNil(t, updateReq.Maintenance) {
+		assert.EqualValues(t, updateReq.Maintenance.Dow, "monday")
+		assert.Equal(t, updateReq.Maintenance.Time, "11:11:11")
+	}
 }
 
 func TestUpdate_invalidInput(t *testing.T) {
@@ -54,9 +59,23 @@ func TestUpdate_invalidInput(t *testing.T) {
 	c := connection{
 		exo: exoMock,
 	}
-	ctx := context.Background()
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		_, err := c.Update(ctx, nil)
 		assert.Error(t, err)
 	})
+}
+
+func mockUpdateKafkaCall(m *operatortest.ClientWithResponsesInterface, name string, err error) *oapi.UpdateDbaasServiceKafkaJSONRequestBody {
+	updateReq := &oapi.UpdateDbaasServiceKafkaJSONRequestBody{}
+
+	m.On("UpdateDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName(name),
+		mock.MatchedBy(func(req oapi.UpdateDbaasServiceKafkaJSONRequestBody) bool {
+			*updateReq = req
+			return true
+		})).
+		Return(&oapi.UpdateDbaasServiceKafkaResponse{Body: []byte{}}, err).
+		Once()
+
+	return updateReq
 }

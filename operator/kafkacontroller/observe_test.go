@@ -24,15 +24,12 @@ func TestObserve_NotExits(t *testing.T) {
 	c := connection{
 		exo: exoMock,
 	}
+
 	instance := sampleKafka("foo")
-
-	ctx := context.Background()
-
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{Body: []byte{}}, exoscaleapi.ErrNotFound).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", nil, exoscaleapi.ErrNotFound)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -45,6 +42,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 	c := connection{
 		exo: exoMock,
 	}
+
 	instance := sampleKafka("foo")
 	found := sampleAPIKafka("foo")
 	found.Uri = pointer.String("foobar.com:21701")
@@ -60,26 +58,13 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 	found.ConnectionInfo.AccessCert = pointer.String("CERT")
 	found.ConnectionInfo.AccessKey = pointer.String("KEY")
 
-	ctx := context.Background()
-
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
+
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
@@ -117,25 +102,13 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 		},
 	}
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
+
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
@@ -159,24 +132,11 @@ func TestObserve_UpToDate_Condition_NotReady(t *testing.T) {
 	state := oapi.EnumServiceStateRebalancing
 	found.State = &state
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -200,24 +160,11 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 	state := oapi.EnumServiceStateRunning
 	found.State = &state
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -240,24 +187,11 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 	found := sampleAPIKafka("foo")
 	found.Version = pointer.String("3.2.1")
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -275,24 +209,11 @@ func TestObserve_Outdated(t *testing.T) {
 	found := sampleAPIKafka("foo")
 	found.Maintenance.Dow = "tuesday"
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -318,24 +239,11 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 		"count": 2,
 	}
 
-	ctx := context.Background()
-	exoMock.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName("foo")).
-		Return(&oapi.GetDbaasServiceKafkaResponse{
-			Body:    []byte{},
-			JSON200: found,
-		}, nil).
-		Once()
-	exoMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(&oapi.GetDbaasCaCertificateResponse{
-			JSON200: &struct {
-				Certificate *string "json:\"certificate,omitempty\""
-			}{
-				Certificate: pointer.String("CA"),
-			},
-		}, nil).
-		Once()
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		res, err := c.Observe(ctx, &instance)
 		assert.NoError(t, err)
 		require.NotNil(t, res)
@@ -393,4 +301,25 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 	res.Version = pointer.String("3.2.1")
 
 	return &res
+}
+
+func mockGetKafkaCall(m *operatortest.ClientWithResponsesInterface, name string, found *oapi.DbaasServiceKafka, err error) {
+	m.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName(name)).
+		Return(&oapi.GetDbaasServiceKafkaResponse{
+			Body:    []byte{},
+			JSON200: found,
+		}, err).
+		Once()
+
+}
+func mockCACall(m *operatortest.ClientWithResponsesInterface) {
+	m.On("GetDbaasCaCertificateWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasCaCertificateResponse{
+			JSON200: &struct {
+				Certificate *string "json:\"certificate,omitempty\""
+			}{
+				Certificate: pointer.String("CA"),
+			},
+		}, nil).
+		Once()
 }

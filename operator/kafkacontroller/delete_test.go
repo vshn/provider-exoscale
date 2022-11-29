@@ -26,13 +26,11 @@ func TestDelete(t *testing.T) {
 			Name: "buzz",
 		},
 	}
-	ctx := context.Background()
 
-	exoMock.On("DeleteDbaasServiceWithResponse", mock.Anything, "buzz").
-		Return(&oapi.DeleteDbaasServiceResponse{Body: []byte{}}, nil).
-		Once()
+	mockDeleteKafkaCall(exoMock, "buzz", nil)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		err := c.Delete(ctx, &instance)
 		require.NoError(t, err)
 	})
@@ -42,8 +40,8 @@ func TestDelete_invalidInput(t *testing.T) {
 	c := connection{
 		exo: exoMock,
 	}
-	ctx := context.Background()
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		err := c.Delete(ctx, nil)
 		assert.Error(t, err)
 	})
@@ -58,14 +56,18 @@ func TestDelete_Idempotent(t *testing.T) {
 			Name: "buzz",
 		},
 	}
-	ctx := context.Background()
 
-	exoMock.On("DeleteDbaasServiceWithResponse", mock.Anything, "buzz").
-		Return(nil, exoscaleapi.ErrNotFound).
-		Once()
+	mockDeleteKafkaCall(exoMock, "buzz", exoscaleapi.ErrNotFound)
 
 	assert.NotPanics(t, func() {
+		ctx := context.Background()
 		err := c.Delete(ctx, &instance)
 		require.NoError(t, err)
 	})
+}
+
+func mockDeleteKafkaCall(m *operatortest.ClientWithResponsesInterface, name string, err error) {
+	m.On("DeleteDbaasServiceWithResponse", mock.Anything, name).
+		Return(&oapi.DeleteDbaasServiceResponse{Body: []byte{}}, err).
+		Once()
 }
