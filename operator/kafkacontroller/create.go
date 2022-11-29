@@ -16,10 +16,6 @@ import (
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
-type connection struct {
-	exo oapi.ClientWithResponsesInterface
-}
-
 // Create idempotently creates a Kafka instance.
 // It will not return an "already exits" error.
 func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
@@ -63,64 +59,4 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 	}
 	log.V(2).Info("response", "body", string(resp.Body))
 	return managed.ExternalCreation{}, nil
-}
-
-// Delete idempotently deletes a kafka instance.
-// It will not return a "not found" error.
-func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
-	log := controllerruntime.LoggerFrom(ctx)
-	log.V(1).Info("deleting resource")
-
-	instance, ok := mg.(*exoscalev1.Kafka)
-	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
-	}
-	resp, err := c.exo.DeleteDbaasServiceWithResponse(ctx, instance.GetInstanceName())
-	if err != nil {
-		if errors.Is(err, exoscaleapi.ErrNotFound) {
-			return nil
-		}
-		return fmt.Errorf("cannot delete kafak instance: %w", err)
-	}
-	log.V(2).Info("response", "body", string(resp.Body))
-	return nil
-}
-
-// Update the provided kafka instance.
-func (c connection) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
-	log := controllerruntime.LoggerFrom(ctx)
-	log.V(1).Info("updating resource")
-
-	instance, ok := mg.(*exoscalev1.Kafka)
-	if !ok {
-		return managed.ExternalUpdate{}, fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
-	}
-
-	spec := instance.Spec.ForProvider
-	ipFilter := []string(spec.IPFilter)
-	settings, err := mapper.ToMap(spec.KafkaSettings)
-	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("invalid kafka settings: %w", err)
-	}
-
-	body := oapi.UpdateDbaasServiceKafkaJSONRequestBody{
-		IpFilter:      &ipFilter,
-		KafkaSettings: &settings,
-		Maintenance: &struct {
-			Dow  oapi.UpdateDbaasServiceKafkaJSONBodyMaintenanceDow "json:\"dow\""
-			Time string                                             "json:\"time\""
-		}{
-			Dow:  oapi.UpdateDbaasServiceKafkaJSONBodyMaintenanceDow(spec.Maintenance.DayOfWeek),
-			Time: spec.Maintenance.TimeOfDay.String(),
-		},
-		Plan:                  &spec.Size.Plan,
-		TerminationProtection: &spec.TerminationProtection,
-	}
-
-	resp, err := c.exo.UpdateDbaasServiceKafkaWithResponse(ctx, oapi.DbaasServiceName(instance.GetInstanceName()), body)
-	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("unable to update instance: %w", err)
-	}
-	log.V(2).Info("response", "body", string(resp.Body))
-	return managed.ExternalUpdate{}, nil
 }

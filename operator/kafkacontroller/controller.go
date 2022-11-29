@@ -11,6 +11,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
+	"github.com/exoscale/egoscale/v2/oapi"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -20,6 +21,10 @@ import (
 type connector struct {
 	kube     client.Client
 	recorder event.Recorder
+}
+
+type connection struct {
+	exo oapi.ClientWithResponsesInterface
 }
 
 // Connect to the exoscale kafka provider.
