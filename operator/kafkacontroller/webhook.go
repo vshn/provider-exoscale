@@ -14,7 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// SetupWebhook adds a webhook for managed resources.
+// SetupWebhook adds a webhook for kafka resources.
 func SetupWebhook(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(&exoscalev1.Kafka{}).
@@ -24,12 +24,12 @@ func SetupWebhook(mgr ctrl.Manager) error {
 		Complete()
 }
 
-// Validator validates admission requests.
+// Validator validates kafka admission requests.
 type Validator struct {
 	log logr.Logger
 }
 
-// ValidateCreate implements admission.CustomValidator.
+// ValidateCreate validates the spec of a created kafka resource.
 func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error {
 	instance, ok := obj.(*exoscalev1.Kafka)
 	if !ok {
@@ -40,7 +40,7 @@ func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error 
 	return validateSpec(instance.Spec.ForProvider)
 }
 
-// ValidateUpdate implements admission.CustomValidator.
+// ValidateUpdate validates the spec of an updated kafka resource and checks that no immutable field has been modified.
 func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
 	newInstance, ok := newObj.(*exoscalev1.Kafka)
 	if !ok {
@@ -59,7 +59,7 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 	return validateImmutable(oldInstance.Spec.ForProvider, newInstance.Spec.ForProvider)
 }
 
-// ValidateDelete implements admission.CustomValidator.
+// ValidateDelete validates a delete. Currently does not validate anything.
 func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
 	v.log.V(2).Info("validate delete (noop)")
 	return nil

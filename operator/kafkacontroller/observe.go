@@ -19,7 +19,9 @@ import (
 	"github.com/vshn/provider-exoscale/operator/mapper"
 )
 
-// Observe implements managed.ExternalClient
+// Observe the external kafka instance.
+// Will return wether the the instance exits and if it is up-to-date.
+// Observe will also update the status to the observed state and return connection details to connect to the instance.
 func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("observing resource")
@@ -63,7 +65,7 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 		return managed.ExternalObservation{}, fmt.Errorf("failed to get kafka connection details: %w", err)
 	}
 
-	upToDate, diff := diffParamters(external, instance.Spec.ForProvider)
+	upToDate, diff := diffParameters(external, instance.Spec.ForProvider)
 
 	return managed.ExternalObservation{
 		ResourceExists:          true,
@@ -146,17 +148,17 @@ func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[stri
 	}
 
 	return map[string][]byte{
-		"KAFKA_URI":   []byte(uri),
-		"KAFKA_HOST":  []byte(host),
-		"KAFKA_PORT":  []byte(port),
-		"KAFKA_NODES": []byte(nodes),
-		"cert.pem":    []byte(cert),
-		"key.pem":     []byte(key),
-		"ca.crt":      []byte(ca),
+		"KAFKA_URI":    []byte(uri),
+		"KAFKA_HOST":   []byte(host),
+		"KAFKA_PORT":   []byte(port),
+		"KAFKA_NODES":  []byte(nodes),
+		"service.cert": []byte(cert),
+		"service.key":  []byte(key),
+		"ca.crt":       []byte(ca),
 	}, nil
 }
 
-func diffParamters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaParameters) (bool, string) {
+func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaParameters) (bool, string) {
 	actualIPFilter := []string{}
 	if external.IpFilter != nil {
 		actualIPFilter = *external.IpFilter

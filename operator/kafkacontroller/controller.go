@@ -22,7 +22,7 @@ type connector struct {
 	recorder event.Recorder
 }
 
-// Connect implements managed.ExternalConnecter.
+// Connect to the exoscale kafka provider.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	log := ctrl.LoggerFrom(ctx)
 	log.V(1).Info("connecting resource")
@@ -41,7 +41,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	}, nil
 }
 
-// SetupController adds a controller that reconciles managed resources.
+// SetupController adds a controller that reconciles kafka resources.
 func SetupController(mgr ctrl.Manager) error {
 	name := strings.ToLower(exoscalev1.KafkaGroupKind)
 	recorder := event.NewAPIRecorder(mgr.GetEventRecorderFor(name))

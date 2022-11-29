@@ -9,8 +9,8 @@ data:
     - name: test
       TLS:
         cafile: /.kafka/certs/ca.crt
-        clientfile: /.kafka/certs/cert.pem
-        clientkeyfile: /.kafka/certs/key.pem
+        clientfile: /.kafka/certs/service.cert
+        clientkeyfile: /.kafka/certs/service.key
         insecure: false
 ---
 apiVersion: batch/v1

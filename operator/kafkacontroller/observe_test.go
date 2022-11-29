@@ -86,13 +86,13 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
 		require.NotNil(t, res.ConnectionDetails)
 		expectedConnDetails := managed.ConnectionDetails{
-			"KAFKA_URI":   []byte("foobar.com:21701"),
-			"KAFKA_HOST":  []byte("foobar.com"),
-			"KAFKA_PORT":  []byte("21701"),
-			"KAFKA_NODES": []byte("10.10.1.1:21701 10.10.1.2:21701 10.10.1.3:21701"),
-			"cert.pem":    []byte("CERT"),
-			"key.pem":     []byte("KEY"),
-			"ca.crt":      []byte("CA"),
+			"KAFKA_URI":    []byte("foobar.com:21701"),
+			"KAFKA_HOST":   []byte("foobar.com"),
+			"KAFKA_PORT":   []byte("21701"),
+			"KAFKA_NODES":  []byte("10.10.1.1:21701 10.10.1.2:21701 10.10.1.3:21701"),
+			"service.cert": []byte("CERT"),
+			"service.key":  []byte("KEY"),
+			"ca.crt":       []byte("CA"),
 		}
 		assert.Equal(t, expectedConnDetails, res.ConnectionDetails)
 	})

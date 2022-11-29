@@ -20,7 +20,8 @@ type connection struct {
 	exo oapi.ClientWithResponsesInterface
 }
 
-// Create implements managed.ExternalClient
+// Create idempotently creates a Kafka instance.
+// It will not return an "already exits" error.
 func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.ExternalCreation, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("creating resource")
@@ -64,7 +65,8 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 	return managed.ExternalCreation{}, nil
 }
 
-// Delete implements managed.ExternalClient
+// Delete idempotently deletes a kafka instance.
+// It will not return a "not found" error.
 func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("deleting resource")
@@ -84,7 +86,7 @@ func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
 	return nil
 }
 
-// Update implements managed.ExternalClient
+// Update the provided kafka instance.
 func (c connection) Update(ctx context.Context, mg resource.Managed) (managed.ExternalUpdate, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("updating resource")
