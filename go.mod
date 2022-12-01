@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/hashicorp/go-version v1.6.0
-	github.com/minio/minio-go/v7 v7.0.43
+	github.com/minio/minio-go/v7 v7.0.45
 	github.com/stretchr/testify v1.8.0
 	github.com/urfave/cli/v2 v2.19.2
 	github.com/vektra/mockery/v2 v2.14.1
@@ -18,7 +18,7 @@ require (
 	k8s.io/api v0.25.2
 	k8s.io/apimachinery v0.25.2
 	k8s.io/client-go v0.25.2
-	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2
+	k8s.io/utils v0.0.0-20221128185143-99ec85e7a448
 	sigs.k8s.io/controller-runtime v0.13.0
 	sigs.k8s.io/controller-tools v0.10.0
 )
