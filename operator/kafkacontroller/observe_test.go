@@ -16,6 +16,7 @@ import (
 	"github.com/vshn/provider-exoscale/operator/mapper"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
 )
 
@@ -265,6 +266,7 @@ func sampleKafka(name string) exoscalev1.Kafka {
 	instance.Spec.ForProvider.Maintenance.DayOfWeek = "monday"
 	instance.Spec.ForProvider.Maintenance.TimeOfDay = "10:10:10"
 	instance.Spec.ForProvider.Zone = "ch-dk-2"
+	instance.Spec.ForProvider.KafkaSettings = runtime.RawExtension{Raw: []byte(`{"connections_max_idle_ms":60000}`)}
 	return instance
 }
 
@@ -277,6 +279,9 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 	res.Maintenance = &oapi.DbaasServiceMaintenance{
 		Dow:  "monday",
 		Time: "10:10:10",
+	}
+	res.KafkaSettings = &map[string]interface{}{
+		"connections_max_idle_ms": 60000,
 	}
 
 	nodes := []string{"194.182.160.164:21701",

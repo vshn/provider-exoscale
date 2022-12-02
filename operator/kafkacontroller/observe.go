@@ -163,7 +163,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 	if external.IpFilter != nil {
 		actualIPFilter = *external.IpFilter
 	}
-	actualKafkaSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
+	actualKafkaSettings, err := mapper.ToRawExtension(external.KafkaSettings)
 	if err != nil {
 		return false, err.Error()
 	}
