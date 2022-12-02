@@ -29,6 +29,10 @@ func (c connection) Update(ctx context.Context, mg resource.Managed) (managed.Ex
 	if err != nil {
 		return managed.ExternalUpdate{}, fmt.Errorf("invalid kafka settings: %w", err)
 	}
+	restSettings, err := mapper.ToMap(spec.KafkaRestSettings)
+	if err != nil {
+		return managed.ExternalUpdate{}, fmt.Errorf("invalid kafka rest settings: %w", err)
+	}
 
 	body := oapi.UpdateDbaasServiceKafkaJSONRequestBody{
 		IpFilter:      &ipFilter,
@@ -42,6 +46,8 @@ func (c connection) Update(ctx context.Context, mg resource.Managed) (managed.Ex
 		},
 		Plan:                  &spec.Size.Plan,
 		TerminationProtection: &spec.TerminationProtection,
+		KafkaRestEnabled:      &spec.KafkaRestEnabled,
+		KafkaRestSettings:     &restSettings,
 	}
 
 	resp, err := c.exo.UpdateDbaasServiceKafkaWithResponse(ctx, oapi.DbaasServiceName(instance.GetInstanceName()), body)

@@ -12,6 +12,7 @@ import (
 	exoscaleapi "github.com/exoscale/egoscale/v2/api"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/google/go-cmp/cmp"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
@@ -90,11 +91,18 @@ func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservati
 		nodeStates = mapper.ToNodeStates(external.NodeStates)
 	}
 
+	restSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
+	if err != nil {
+		return exoscalev1.KafkaObservation{}, err
+	}
+
 	return exoscalev1.KafkaObservation{
-		Version:       pointer.StringDeref(external.Version, ""),
-		KafkaSettings: settings,
-		NodeStates:    nodeStates,
-		Notifications: notifications,
+		Version:           pointer.StringDeref(external.Version, ""),
+		KafkaSettings:     settings,
+		KafkaRestEnabled:  pointer.BoolDeref(external.KafkaRestEnabled, false),
+		KafkaRestSettings: restSettings,
+		NodeStates:        nodeStates,
+		Notifications:     notifications,
 	}, nil
 }
 func getCondition(external *oapi.DbaasServiceKafka) (xpv1.Condition, error) {
@@ -146,7 +154,7 @@ func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[stri
 		port, _ = uriParams["port"].(string)
 	}
 
-	return map[string][]byte{
+	details := map[string][]byte{
 		"KAFKA_URI":    []byte(uri),
 		"KAFKA_HOST":   []byte(host),
 		"KAFKA_PORT":   []byte(port),
@@ -154,7 +162,13 @@ func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[stri
 		"service.cert": []byte(cert),
 		"service.key":  []byte(key),
 		"ca.crt":       []byte(ca),
-	}, nil
+	}
+
+	if external.KafkaRestEnabled != nil && *external.KafkaRestEnabled && external.ConnectionInfo.RestUri != nil {
+		details["KAFKA_REST_URI"] = []byte(*external.ConnectionInfo.RestUri)
+	}
+
+	return details, nil
 }
 
 func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaParameters) (bool, string) {
@@ -162,7 +176,13 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 	if external.IpFilter != nil {
 		actualIPFilter = *external.IpFilter
 	}
+
 	actualKafkaSettings, err := mapper.ToRawExtension(external.KafkaSettings)
+	if err != nil {
+		return false, err.Error()
+	}
+
+	actualKafkaRestSettings, err := getActualKafkaRestSettings(external.KafkaRestSettings, expected.KafkaRestSettings)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -180,9 +200,47 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 			},
 			IPFilter: actualIPFilter,
 		},
-		Version:       expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
-		KafkaSettings: actualKafkaSettings,
+		Version:           expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
+		KafkaSettings:     actualKafkaSettings,
+		KafkaRestEnabled:  pointer.BoolDeref(external.KafkaRestEnabled, false),
+		KafkaRestSettings: actualKafkaRestSettings,
 	}
+	settingComparer := cmp.Comparer(mapper.CompareSettings)
+	return cmp.Equal(expected, actual, settingComparer), cmp.Diff(expected, actual, settingComparer)
+}
 
-	return cmp.Equal(expected, actual), cmp.Diff(expected, actual)
+// getActualKafkaRestSettings reads the Kafa REST settings and strips out all non relevant default settings
+// Exoscale always returns all defaults, not just the fields we set, so we need to strip them so that we can compare the actual and expected setting.
+func getActualKafkaRestSettings(actual *map[string]interface{}, expected runtime.RawExtension) (runtime.RawExtension, error) {
+	if actual == nil {
+		return runtime.RawExtension{}, nil
+	}
+	expectedMap, err := mapper.ToMap(expected)
+	if err != nil {
+		return runtime.RawExtension{}, err
+	}
+	s := stripRestSettingsDefaults(*actual, expectedMap)
+	return mapper.ToRawExtension(&s)
+}
+
+// defaultRestSettings are the default settings for Kafka REST.
+var defaultRestSettings = map[string]interface{}{
+	"consumer_enable_auto_commit":  true,
+	"producer_acks":                "1", // Yes, that's a "1" as a string. I don't know why, that's just how it is..
+	"consumer_request_max_bytes":   67108864,
+	"simpleconsumer_pool_size_max": 25,
+	"producer_linger_ms":           0,
+	"consumer_request_timeout_ms":  1000,
+}
+
+func stripRestSettingsDefaults(actual map[string]interface{}, expected map[string]interface{}) map[string]interface{} {
+	res := map[string]interface{}{}
+	for k, v := range actual {
+		d, isDefault := defaultRestSettings[k]
+		_, isExpected := expected[k]
+		if !isDefault || d != v || isExpected {
+			res[k] = v
+		}
+	}
+	return res
 }

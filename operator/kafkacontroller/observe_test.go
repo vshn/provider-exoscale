@@ -69,7 +69,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
 		require.NotNil(t, res.ConnectionDetails)
 		expectedConnDetails := managed.ConnectionDetails{
 			"KAFKA_URI":    []byte("foobar.com:21701"),
@@ -79,6 +79,55 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 			"service.cert": []byte("CERT"),
 			"service.key":  []byte("KEY"),
 			"ca.crt":       []byte("CA"),
+		}
+		assert.Equal(t, expectedConnDetails, res.ConnectionDetails)
+	})
+}
+
+func TestObserve_UpToDate_ConnectionDetails_with_REST(t *testing.T) {
+	exoMock := &operatortest.ClientWithResponsesInterface{}
+	c := connection{
+		exo: exoMock,
+	}
+
+	instance := sampleKafka("foo")
+	instance.Spec.ForProvider.KafkaRestEnabled = true
+	found := sampleAPIKafka("foo")
+	found.Uri = pointer.String("foobar.com:21701")
+	found.UriParams = &map[string]interface{}{
+		"host": "foobar.com",
+		"port": "21701",
+	}
+	found.ConnectionInfo.Nodes = &[]string{
+		"10.10.1.1:21701",
+		"10.10.1.2:21701",
+		"10.10.1.3:21701",
+	}
+	found.ConnectionInfo.AccessCert = pointer.String("CERT")
+	found.ConnectionInfo.AccessKey = pointer.String("KEY")
+	found.KafkaRestEnabled = pointer.Bool(true)
+	found.ConnectionInfo.RestUri = pointer.String("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701")
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
+
+	assert.NotPanics(t, func() {
+		ctx := context.Background()
+		res, err := c.Observe(ctx, &instance)
+
+		assert.NoError(t, err)
+		require.NotNil(t, res)
+		assert.True(t, res.ResourceExists, "report resource exits")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
+		require.NotNil(t, res.ConnectionDetails)
+		expectedConnDetails := managed.ConnectionDetails{
+			"KAFKA_URI":      []byte("foobar.com:21701"),
+			"KAFKA_REST_URI": []byte("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701"),
+			"KAFKA_HOST":     []byte("foobar.com"),
+			"KAFKA_PORT":     []byte("21701"),
+			"KAFKA_NODES":    []byte("10.10.1.1:21701 10.10.1.2:21701 10.10.1.3:21701"),
+			"service.cert":   []byte("CERT"),
+			"service.key":    []byte("KEY"),
+			"ca.crt":         []byte("CA"),
 		}
 		assert.Equal(t, expectedConnDetails, res.ConnectionDetails)
 	})
@@ -113,7 +162,7 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
 
 		assert.Equal(t, "3.2.1", instance.Status.AtProvider.Version)
 		require.Len(t, instance.Status.AtProvider.NodeStates, 2, "expect 2 node states")
@@ -142,7 +191,7 @@ func TestObserve_UpToDate_Condition_NotReady(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
 
 		readyState := instance.Status.ConditionedStatus.GetCondition(xpv1.TypeReady)
 
@@ -170,7 +219,7 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
 
 		readyState := instance.Status.ConditionedStatus.GetCondition(xpv1.TypeReady)
 
@@ -197,7 +246,35 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.True(t, res.ResourceUpToDate, "report resource uptodate")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
+	})
+}
+
+func TestObserve_UpToDate_RestSettings(t *testing.T) {
+	exoMock := &operatortest.ClientWithResponsesInterface{}
+	c := connection{
+		exo: exoMock,
+	}
+	instance := sampleKafka("foo")
+	restsetting, _ := mapper.ToRawExtension(&map[string]interface{}{
+		"producer_acks":                "1",
+		"simpleconsumer_pool_size_max": 25,
+	})
+	instance.Spec.ForProvider.KafkaRestEnabled = true
+	instance.Spec.ForProvider.KafkaRestSettings = restsetting
+	found := sampleAPIKafka("foo")
+	found.KafkaRestEnabled = pointer.Bool(true)
+
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
+
+	assert.NotPanics(t, func() {
+		ctx := context.Background()
+		res, err := c.Observe(ctx, &instance)
+		assert.NoError(t, err)
+		require.NotNil(t, res)
+		assert.True(t, res.ResourceExists, "report resource exits")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
 	})
 }
 
@@ -253,6 +330,34 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 	})
 }
 
+func TestObserve_Outdated_RestSettings(t *testing.T) {
+	exoMock := &operatortest.ClientWithResponsesInterface{}
+	c := connection{
+		exo: exoMock,
+	}
+	instance := sampleKafka("foo")
+	restsetting, _ := mapper.ToRawExtension(&map[string]interface{}{
+		"foo":           "bar",
+		"producer_acks": "2",
+	})
+	instance.Spec.ForProvider.KafkaRestEnabled = true
+	instance.Spec.ForProvider.KafkaRestSettings = restsetting
+	found := sampleAPIKafka("foo")
+	found.KafkaRestEnabled = pointer.Bool(true)
+
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
+
+	assert.NotPanics(t, func() {
+		ctx := context.Background()
+		res, err := c.Observe(ctx, &instance)
+		assert.NoError(t, err)
+		require.NotNil(t, res)
+		assert.True(t, res.ResourceExists, "report resource exits")
+		assert.False(t, res.ResourceUpToDate, "report resource not uptodate")
+	})
+}
+
 func sampleKafka(name string) exoscalev1.Kafka {
 	instance := exoscalev1.Kafka{
 		ObjectMeta: metav1.ObjectMeta{
@@ -283,6 +388,7 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 	res.KafkaSettings = &map[string]interface{}{
 		"connections_max_idle_ms": 60000,
 	}
+	res.KafkaRestSettings = &defaultRestSettings
 
 	nodes := []string{"194.182.160.164:21701",
 		"159.100.244.100:21701",

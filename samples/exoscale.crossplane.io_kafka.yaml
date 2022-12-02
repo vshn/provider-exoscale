@@ -7,6 +7,7 @@ spec:
   forProvider:
     ipFilter:
     - 0.0.0.0/0
+    kafkaRestSettings: null
     kafkaSettings:
       connections_max_idle_ms: 60000
     maintenance:
@@ -22,4 +23,5 @@ spec:
     namespace: default
 status:
   atProvider:
+    kafkaRestSettings: null
     kafkaSettings: null
