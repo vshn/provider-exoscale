@@ -7,7 +7,6 @@ import (
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/webhook"
-	"go.uber.org/multierr"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	"github.com/go-logr/logr"
@@ -66,11 +65,15 @@ func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error 
 }
 
 func validateSpec(params exoscalev1.KafkaParameters) error {
-	return multierr.Combine(
-		validateIpFilter(params),
-		validateMaintenanceSchedule(params),
-		validateKafkaSettings(params),
-	)
+	err := validateIpFilter(params)
+	if err != nil {
+		return err
+	}
+	err = validateMaintenanceSchedule(params)
+	if err != nil {
+		return err
+	}
+	return validateKafkaSettings(params)
 }
 
 func validateIpFilter(params exoscalev1.KafkaParameters) error {
@@ -90,10 +93,11 @@ func validateKafkaSettings(obj exoscalev1.KafkaParameters) error {
 }
 
 func validateImmutable(oldInst, newInst exoscalev1.Kafka) error {
-	return multierr.Combine(
-		compareZone(oldInst.Spec.ForProvider, newInst.Spec.ForProvider),
-		compareVersion(oldInst, newInst),
-	)
+	err := compareZone(oldInst.Spec.ForProvider, newInst.Spec.ForProvider)
+	if err != nil {
+		return err
+	}
+	return compareVersion(oldInst, newInst)
 }
 
 func compareZone(oldParams, newParams exoscalev1.KafkaParameters) error {
