@@ -237,19 +237,19 @@
 <pre class="highlightjs highlight"><code class="language-yaml hljs" data-lang="yaml">apiVersion: exoscale.crossplane.io/v1
 kind: IAMKey
 metadata:
-  name: my-exoscale-iam-key
+  name: iam-key-local-dev
 spec:
   forProvider:
-    keyName: iam-key
+    keyName: iam-key-local-dev
     services:
       sos:
         buckets:
-          - bucket-test-1
+          - bucket-local-dev
     zone: CH-DK-2
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:
-    name: my-exoscale-iam-key
+    name: my-exoscale-user-credentials
     namespace: default</code></pre>
 </div>
 </div>
