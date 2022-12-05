@@ -1,0 +1,19 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: Kafka
+metadata:
+  name: e2e-test-kafka
+spec:
+  forProvider:
+    ipFilter:
+      - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    size:
+      plan: startup-2
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-kafka-details
+    namespace: default

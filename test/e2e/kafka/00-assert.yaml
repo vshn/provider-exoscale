@@ -1,0 +1,48 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: Kafka
+metadata:
+  annotations:
+    crossplane.io/external-name: e2e-test-kafka
+  finalizers:
+    - finalizer.managedresource.crossplane.io
+  name: e2e-test-kafka
+spec:
+  deletionPolicy: Delete
+  forProvider:
+    ipFilter:
+      - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    size:
+      plan: startup-2
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: e2e-test-kafka-details
+    namespace: default
+status:
+  atProvider:
+    nodeStates:
+      - state: running
+      - state: running
+      - state: running
+  conditions:
+    - status: "True"
+    - status: "True"
+---
+apiVersion: v1
+kind: Secret
+type: connection.crossplane.io/v1alpha1
+metadata:
+  name: e2e-test-kafka-details
+  namespace: default
+  ownerReferences:
+    - apiVersion: exoscale.crossplane.io/v1
+      kind: Kafka
+      name: e2e-test-kafka

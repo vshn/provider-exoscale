@@ -51,6 +51,26 @@ webhooks:
     service:
       name: webhook-service
       namespace: system
+      path: /validate-exoscale-crossplane-io-v1-kafka
+  failurePolicy: Fail
+  name: kafkas.exoscale.crossplane.io
+  rules:
+  - apiGroups:
+    - exoscale.crossplane.io
+    apiVersions:
+    - v1
+    operations:
+    - CREATE
+    - UPDATE
+    resources:
+    - kafkas
+  sideEffects: None
+- admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: webhook-service
+      namespace: system
       path: /validate-exoscale-crossplane-io-v1-mysql
   failurePolicy: Fail
   name: mysqls.exoscale.crossplane.io
