@@ -27,7 +27,7 @@ func (c connection) Delete(ctx context.Context, mg resource.Managed) error {
 		if errors.Is(err, exoscaleapi.ErrNotFound) {
 			return nil
 		}
-		return fmt.Errorf("cannot delete kafak instance: %w", err)
+		return fmt.Errorf("cannot delete kafka instance: %w", err)
 	}
 	log.V(2).Info("response", "body", string(resp.Body))
 	return nil

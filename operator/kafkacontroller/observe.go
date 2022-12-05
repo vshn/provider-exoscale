@@ -68,11 +68,10 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 	upToDate, diff := diffParameters(external, instance.Spec.ForProvider)
 
 	return managed.ExternalObservation{
-		ResourceExists:          true,
-		ResourceUpToDate:        upToDate,
-		ResourceLateInitialized: false,
-		ConnectionDetails:       connDetails,
-		Diff:                    diff,
+		ResourceExists:    true,
+		ResourceUpToDate:  upToDate,
+		ConnectionDetails: connDetails,
+		Diff:              diff,
 	}, nil
 }
 
