@@ -80,11 +80,11 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservation, error) {
 	notifications, err := mapper.ToNotifications(external.Notifications)
 	if err != nil {
-		return exoscalev1.KafkaObservation{}, err
+		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing notifications: %w", err)
 	}
 	settings, err := mapper.ToRawExtension(external.KafkaSettings)
 	if err != nil {
-		return exoscalev1.KafkaObservation{}, err
+		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing kafka settings: %w", err)
 	}
 
 	nodeStates := []exoscalev1.NodeState{}
@@ -94,7 +94,7 @@ func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservati
 
 	restSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
 	if err != nil {
-		return exoscalev1.KafkaObservation{}, err
+		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing kafka REST settings: %w", err)
 	}
 
 	return exoscalev1.KafkaObservation{
@@ -218,7 +218,7 @@ func getActualKafkaRestSettings(actual *map[string]interface{}, expected runtime
 	}
 	expectedMap, err := mapper.ToMap(expected)
 	if err != nil {
-		return runtime.RawExtension{}, err
+		return runtime.RawExtension{}, fmt.Errorf("error parsing kafka REST settings: %w", err)
 	}
 	s := stripRestSettingsDefaults(*actual, expectedMap)
 	return mapper.ToRawExtension(&s)
