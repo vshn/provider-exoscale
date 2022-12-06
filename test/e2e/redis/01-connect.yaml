@@ -19,17 +19,7 @@ spec:
             - bash
           args:
             - -c
-            - echo "Testing Select...\n" && redis-cli -u $REDIS_URL KEYS *
+            - echo "Testing Select...\n" && redis-cli -u $REDIS_URL --insecure KEYS *
           envFrom:
             - secretRef:
                 name: e2e-test-redis-details
-          volumeMounts:
-            - name: ca
-              mountPath: /root/.redis
-      volumes:
-        - name: ca
-          secret:
-            secretName: e2e-test-redis-details
-            items:
-              - key: ca.crt
-                path: root.crt

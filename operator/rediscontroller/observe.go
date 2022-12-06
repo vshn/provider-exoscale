@@ -58,17 +58,11 @@ func (p pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ext
 		log.V(2).Info("ignoring unknown instance state", "state", state)
 	}
 
-	res, err := p.exo.GetDbaasCaCertificateWithResponse(ctx)
-	if err != nil {
-		return managed.ExternalObservation{}, fmt.Errorf("unable to retrieve CA certificate: %w", err)
-	}
-	ca := *res.JSON200.Certificate
-
 	rp, err := mapParameters(redis, redisInstance.Spec.ForProvider.Zone)
 	if err != nil {
 		return managed.ExternalObservation{}, err
 	}
-	cd, err := connectionDetails(redis, ca)
+	cd, err := connectionDetails(redis)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("unable to parse connection details: %w", err)
 	}
@@ -105,7 +99,7 @@ func isUpToDate(current, external *exoscalev1.RedisParameters, log logr.Logger) 
 	return ok
 }
 
-func connectionDetails(in oapi.DbaasServiceRedis, ca string) (map[string][]byte, error) {
+func connectionDetails(in oapi.DbaasServiceRedis) (map[string][]byte, error) {
 	if in.ConnectionInfo == nil || len(*in.ConnectionInfo.Uri) == 0 {
 		return map[string][]byte{}, nil
 	}
@@ -121,7 +115,6 @@ func connectionDetails(in oapi.DbaasServiceRedis, ca string) (map[string][]byte,
 		"REDIS_USERNAME": []byte(parsed.User.Username()),
 		"REDIS_PASSWORD": []byte(password),
 		"REDIS_URL":      []byte(uri),
-		"ca.crt":         []byte(ca),
 	}, nil
 }
 

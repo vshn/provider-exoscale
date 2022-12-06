@@ -4,9 +4,6 @@ package rediscontroller
 
 import (
 	"fmt"
-	"io"
-	"net/http"
-	"strings"
 	"testing"
 	"time"
 
@@ -53,7 +50,6 @@ func (ts *RedisControllerTestSuite) SetupTest() {
 
 func (ts *RedisControllerTestSuite) TestCreate() {
 	name := "test-create"
-	ts.mockCaCertificateResponse()
 
 	settings := map[string]any{
 		"maxmemory_policy": "noeviction",
@@ -90,7 +86,6 @@ func (ts *RedisControllerTestSuite) TestCreate() {
 	ts.Assert().Equal("bar", string(secret.Data["REDIS_PASSWORD"]))
 	ts.Assert().Equal("baz", string(secret.Data["REDIS_HOST"]))
 	ts.Assert().Equal("5321", string(secret.Data["REDIS_PORT"]))
-	ts.Assert().Equal("certifyingliketheresnotomorrow", string(secret.Data["ca.crt"]))
 
 	instance := &exoscalev1.Redis{}
 	ts.FetchResource(types.NamespacedName{Name: mg.Name, Namespace: mg.Namespace}, instance)
@@ -114,8 +109,6 @@ func (ts *RedisControllerTestSuite) TestCreate() {
 }
 
 func (ts *RedisControllerTestSuite) TestUpdate() {
-	ts.mockCaCertificateResponse()
-
 	name := "test-update"
 	settings := map[string]any{
 		"maxmemory_policy": "noeviction",
@@ -182,8 +175,6 @@ func (ts *RedisControllerTestSuite) TestUpdate() {
 }
 
 func (ts *RedisControllerTestSuite) TestDelete() {
-	ts.mockCaCertificateResponse()
-
 	name := "test-delete"
 	settings := map[string]any{
 		"maxmemory_policy": "noeviction",
@@ -246,16 +237,6 @@ func (ts *RedisControllerTestSuite) reconcile(req reconcile.Request) (reconcile.
 // which are always necessary to have.
 func (ts *RedisControllerTestSuite) resetExoClientMock() {
 	ts.ExoClientMock.ExpectedCalls = nil
-	ts.mockCaCertificateResponse()
-}
-
-func (ts *RedisControllerTestSuite) mockCaCertificateResponse() *mock.Call {
-	return ts.ExoClientMock.On("GetDbaasCaCertificateWithResponse", mock.Anything).
-		Return(oapi.ParseGetDbaasCaCertificateResponse(&http.Response{
-			StatusCode: http.StatusOK,
-			Header:     http.Header{"Content-Type": []string{"application/json"}},
-			Body:       io.NopCloser(strings.NewReader(`{"certificate": "certifyingliketheresnotomorrow"}`)),
-		}))
 }
 
 func (ts *RedisControllerTestSuite) getRedisResponse(mg *exoscalev1.Redis, settings map[string]any) *oapi.GetDbaasServiceRedisResponse {
