@@ -39,6 +39,7 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 		}
 		return managed.ExternalObservation{}, err
 	}
+
 	external := res.JSON200
 
 	instance.Status.AtProvider, err = getObservation(external)
@@ -226,11 +227,11 @@ func getActualKafkaRestSettings(actual *map[string]interface{}, expected runtime
 // defaultRestSettings are the default settings for Kafka REST.
 var defaultRestSettings = map[string]interface{}{
 	"consumer_enable_auto_commit":  true,
-	"producer_acks":                "1", // Yes, that's a "1" as a string. I don't know why, that's just how it is..
-	"consumer_request_max_bytes":   67108864,
-	"simpleconsumer_pool_size_max": 25,
-	"producer_linger_ms":           0,
-	"consumer_request_timeout_ms":  1000,
+	"producer_acks":                "1",               // Yes, that's a "1" as a string. I don't know why, that's just how it is..
+	"consumer_request_max_bytes":   float64(67108864), // When parsing json into map[string]interface{} we get floats.
+	"simpleconsumer_pool_size_max": float64(25),
+	"producer_linger_ms":           float64(0),
+	"consumer_request_timeout_ms":  float64(1000),
 }
 
 func stripRestSettingsDefaults(actual map[string]interface{}, expected map[string]interface{}) map[string]interface{} {

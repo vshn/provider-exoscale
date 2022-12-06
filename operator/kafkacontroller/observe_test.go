@@ -250,6 +250,31 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 	})
 }
 
+func TestObserve_UpToDate_EmptyRestSettings(t *testing.T) {
+	exoMock := &operatortest.ClientWithResponsesInterface{}
+	c := connection{
+		exo: exoMock,
+	}
+	instance := sampleKafka("foo")
+	instance.Spec.ForProvider.KafkaRestEnabled = true
+	instance.Spec.ForProvider.KafkaRestSettings = runtime.RawExtension{}
+	found := sampleAPIKafka("foo")
+	found.KafkaRestEnabled = pointer.Bool(true)
+
+	mockGetKafkaCall(exoMock, "foo", found, nil)
+	mockCACall(exoMock)
+
+	assert.NotPanics(t, func() {
+		ctx := context.Background()
+		res, err := c.Observe(ctx, &instance)
+		assert.NoError(t, err)
+		require.NotNil(t, res)
+		assert.True(t, res.ResourceExists, "report resource exits")
+		assert.Truef(t, res.ResourceUpToDate, "report resource uptodate: Diff: %s", res.Diff)
+		assert.Empty(t, res.Diff)
+	})
+}
+
 func TestObserve_UpToDate_RestSettings(t *testing.T) {
 	exoMock := &operatortest.ClientWithResponsesInterface{}
 	c := connection{
@@ -258,7 +283,7 @@ func TestObserve_UpToDate_RestSettings(t *testing.T) {
 	instance := sampleKafka("foo")
 	restsetting, _ := mapper.ToRawExtension(&map[string]interface{}{
 		"producer_acks":                "1",
-		"simpleconsumer_pool_size_max": 25,
+		"simpleconsumer_pool_size_max": float64(25),
 	})
 	instance.Spec.ForProvider.KafkaRestEnabled = true
 	instance.Spec.ForProvider.KafkaRestSettings = restsetting
@@ -388,7 +413,11 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 	res.KafkaSettings = &map[string]interface{}{
 		"connections_max_idle_ms": 60000,
 	}
-	res.KafkaRestSettings = &defaultRestSettings
+	restSet := map[string]interface{}{}
+	for k, v := range defaultRestSettings {
+		restSet[k] = v
+	}
+	res.KafkaRestSettings = &restSet
 
 	nodes := []string{"194.182.160.164:21701",
 		"159.100.244.100:21701",
