@@ -110,6 +110,10 @@ func isUpToDate(current, external *exoscalev1.MySQLParameters, log logr.Logger) 
 		return false
 	}
 	extIPFilter := []string(external.IPFilter)
+
+	if current.Version == "" {
+		current.Version = external.Version
+	}
 	hasSameMajorVersion, err := mapper.CompareMajorVersion(current.Version, external.Version)
 	if err != nil {
 		log.Error(err, "parse mySQLInstance version", "current", current.Version, "external", external.Version)

@@ -142,6 +142,9 @@ func isUpToDate(current, external *exoscalev1.PostgreSQLParameters, log logr.Log
 	if external == nil {
 		return false
 	}
+	if current.Version == "" {
+		current.Version = external.Version
+	}
 	sameMajorVersion, err := mapper.CompareMajorVersion(current.Version, external.Version)
 	if err != nil {
 		log.Error(err, "parse PostgreSQL version", "current", current.Version, "external", external.Version)

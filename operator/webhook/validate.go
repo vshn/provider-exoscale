@@ -29,6 +29,9 @@ func ValidateRawExtension(raw runtime.RawExtension) error {
 }
 
 func ValidateVersion(oldObs, oldDes, newDes string) error {
+	if oldObs == "" {
+		return nil
+	}
 	oldObserved, err := version.NewVersion(oldObs)
 	if err != nil {
 		return fmt.Errorf("set old status version failed: %w", err)

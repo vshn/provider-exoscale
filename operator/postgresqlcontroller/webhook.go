@@ -32,6 +32,11 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 	oldInstance := oldObj.(*exoscalev1.PostgreSQL)
 	v.log.V(1).Info("Validate update")
 
+	if newInstance.DeletionTimestamp != nil {
+		v.log.V(2).Info("instance deleted, not validating updates")
+		return nil
+	}
+
 	err := v.validateSpec(newInstance)
 	if err != nil {
 		return err
