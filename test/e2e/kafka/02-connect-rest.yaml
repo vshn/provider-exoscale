@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: connect-kafka-rest
+  namespace: default
+spec:
+  backoffLimit: 5
+  template:
+    metadata:
+      labels:
+        e2e-test: kafka
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: connect
+          image: curlimages/curl
+          imagePullPolicy: IfNotPresent
+          command:
+            - sh
+          args:
+            - -c
+            - |
+              curl --fail -X POST -H "Content-Type: application/vnd.kafka.json.v2+json" --data '{"records":[{"value":{"foo":"bar"}}]}' ${KAFKA_REST_URI}/topics/test
+          envFrom:
+            - secretRef:
+                name: e2e-test-kafka-details
