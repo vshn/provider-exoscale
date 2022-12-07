@@ -78,6 +78,14 @@ spec:
                     items:
                       type: string
                     type: array
+                  kafkaRestEnabled:
+                    description: KafkaRestEnabled
+                    type: boolean
+                  kafkaRestSettings:
+                    description: KafkaRestSettings contains additional Kafka-REST
+                      settings.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   kafkaSettings:
                     description: KafkaSettings contains additional Kafka settings.
                     type: object
@@ -311,6 +319,14 @@ spec:
               atProvider:
                 description: KafkaObservation are the observable fields of a Kafka.
                 properties:
+                  KafkaRestEnabled:
+                    description: KafkaRestEnabled
+                    type: boolean
+                  kafkaRestSettings:
+                    description: KafkaRestSettings contains additional Kafka-REST
+                      settings.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
                   kafkaSettings:
                     description: KafkaSettings contains additional Kafka settings
                       as set by the provider.

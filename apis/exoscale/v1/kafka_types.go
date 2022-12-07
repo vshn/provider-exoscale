@@ -26,6 +26,12 @@ type KafkaParameters struct {
 
 	// KafkaSettings contains additional Kafka settings.
 	KafkaSettings runtime.RawExtension `json:"kafkaSettings,omitempty"`
+
+	// KafkaRestEnabled
+	KafkaRestEnabled bool `json:"kafkaRestEnabled,omitempty"`
+
+	// KafkaRestSettings contains additional Kafka-REST settings.
+	KafkaRestSettings runtime.RawExtension `json:"kafkaRestSettings,omitempty"`
 }
 
 // KafkaSpec defines the desired state of a Kafka.
@@ -39,6 +45,12 @@ type KafkaObservation struct {
 	Version string `json:"version,omitempty"`
 	// KafkaSettings contains additional Kafka settings as set by the provider.
 	KafkaSettings runtime.RawExtension `json:"kafkaSettings,omitempty"`
+
+	// KafkaRestEnabled
+	KafkaRestEnabled bool `json:"KafkaRestEnabled,omitempty"`
+
+	// KafkaRestSettings contains additional Kafka-REST settings.
+	KafkaRestSettings runtime.RawExtension `json:"kafkaRestSettings,omitempty"`
 
 	// State of individual service nodes
 	NodeStates []NodeState `json:"nodeStates,omitempty"`

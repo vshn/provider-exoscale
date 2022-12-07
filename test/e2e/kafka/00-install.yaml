@@ -4,6 +4,7 @@ metadata:
   name: e2e-test-kafka
 spec:
   forProvider:
+    kafkaRestEnabled: true
     ipFilter:
       - 0.0.0.0/0
     maintenance:

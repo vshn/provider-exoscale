@@ -33,6 +33,11 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 	if err != nil {
 		return managed.ExternalCreation{}, fmt.Errorf("invalid kafka settings: %w", err)
 	}
+
+	restSettings, err := mapper.ToMap(spec.KafkaRestSettings)
+	if err != nil {
+		return managed.ExternalCreation{}, fmt.Errorf("invalid kafka rest settings: %w", err)
+	}
 	var version *string
 	if spec.Version != "" {
 		version = &spec.Version
@@ -51,6 +56,8 @@ func (c connection) Create(ctx context.Context, mg resource.Managed) (managed.Ex
 		Plan:                  spec.Size.Plan,
 		Version:               version,
 		TerminationProtection: &spec.TerminationProtection,
+		KafkaRestEnabled:      &spec.KafkaRestEnabled,
+		KafkaRestSettings:     &restSettings,
 	}
 
 	resp, err := c.exo.CreateDbaasServiceKafkaWithResponse(ctx, oapi.DbaasServiceName(instance.GetInstanceName()), body)
