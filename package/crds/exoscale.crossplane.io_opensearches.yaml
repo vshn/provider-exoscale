@@ -1,0 +1,452 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.10.0
+  creationTimestamp: null
+  name: opensearches.exoscale.crossplane.io
+spec:
+  group: exoscale.crossplane.io
+  names:
+    categories:
+    - crossplane
+    - exoscale
+    kind: OpenSearch
+    listKind: OpenSearchList
+    plural: opensearches
+    singular: opensearch
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.conditions[?(@.type=='Ready')].reason
+      name: State
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Ready')].status
+      name: Ready
+      type: string
+    - jsonPath: .status.conditions[?(@.type=='Synced')].status
+      name: Synced
+      type: string
+    - jsonPath: .metadata.annotations.crossplane\.io/external-name
+      name: External Name
+      type: string
+    - jsonPath: .spec.forProvider.size.plan
+      name: Plan
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    name: v1
+    schema:
+      openAPIV3Schema:
+        description: OpenSearch is the API for creating OpenSearch.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: OpenSearchSpec defines the desired state of a OpenSearch.
+            properties:
+              deletionPolicy:
+                default: Delete
+                description: DeletionPolicy specifies what will happen to the underlying
+                  external when this managed resource is deleted - either "Delete"
+                  or "Orphan" the external resource.
+                enum:
+                - Orphan
+                - Delete
+                type: string
+              forProvider:
+                description: OpenSearchParameters are the configurable fields of a
+                  OpenSearch instance.
+                properties:
+                  backup:
+                    description: BackupSpec contains settings to control the backups
+                      of an instance.
+                    properties:
+                      timeOfDay:
+                        description: 'TimeOfDay for doing daily backups, in UTC. Format:
+                          "hh:mm:ss".'
+                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
+                        type: string
+                    type: object
+                  ipFilter:
+                    description: IPFilter is a list of allowed IPv4 CIDR ranges that
+                      can access the service. If no IP Filter is set, you may not
+                      be able to reach the service. A value of `0.0.0.0/0` will open
+                      the service to all addresses on the public internet.
+                    items:
+                      type: string
+                    type: array
+                  maintenance:
+                    description: MaintenanceSpec contains settings to control the
+                      maintenance of an instance.
+                    properties:
+                      dayOfWeek:
+                        description: DayOfWeek specifies at which weekday the maintenance
+                          is held place. Allowed values are [monday, tuesday, wednesday,
+                          thursday, friday, saturday, sunday, never]
+                        enum:
+                        - monday
+                        - tuesday
+                        - wednesday
+                        - thursday
+                        - friday
+                        - saturday
+                        - sunday
+                        - never
+                        type: string
+                      timeOfDay:
+                        description: 'TimeOfDay for installing updates in UTC. Format:
+                          "hh:mm:ss".'
+                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
+                        type: string
+                    type: object
+                  openSearchSettings:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  size:
+                    description: Size contains the service capacity settings.
+                    properties:
+                      plan:
+                        type: string
+                    type: object
+                  terminationProtection:
+                    description: TerminationProtection protects against termination
+                      and powering off.
+                    type: boolean
+                  version:
+                    description: Version - supported versions are "1" and "2" (string)
+                    type: string
+                  zone:
+                    description: Zone is the datacenter identifier in which the instance
+                      runs in.
+                    enum:
+                    - ch-gva-2
+                    - ch-dk-2
+                    - de-fra-1
+                    - de-muc-1
+                    - at-vie-1
+                    - bg-sof-1
+                    type: string
+                required:
+                - zone
+                type: object
+              providerConfigRef:
+                default:
+                  name: default
+                description: ProviderConfigReference specifies how the provider that
+                  will be used to create, observe, update, and delete this managed
+                  resource should be configured.
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              providerRef:
+                description: 'ProviderReference specifies the provider that will be
+                  used to create, observe, update, and delete this managed resource.
+                  Deprecated: Please use ProviderConfigReference, i.e. `providerConfigRef`'
+                properties:
+                  name:
+                    description: Name of the referenced object.
+                    type: string
+                  policy:
+                    description: Policies for referencing.
+                    properties:
+                      resolution:
+                        default: Required
+                        description: Resolution specifies whether resolution of this
+                          reference is required. The default is 'Required', which
+                          means the reconcile will fail if the reference cannot be
+                          resolved. 'Optional' means this reference will be a no-op
+                          if it cannot be resolved.
+                        enum:
+                        - Required
+                        - Optional
+                        type: string
+                      resolve:
+                        description: Resolve specifies when this reference should
+                          be resolved. The default is 'IfNotPresent', which will attempt
+                          to resolve the reference only when the corresponding field
+                          is not present. Use 'Always' to resolve the reference on
+                          every reconcile.
+                        enum:
+                        - Always
+                        - IfNotPresent
+                        type: string
+                    type: object
+                required:
+                - name
+                type: object
+              publishConnectionDetailsTo:
+                description: PublishConnectionDetailsTo specifies the connection secret
+                  config which contains a name, metadata and a reference to secret
+                  store config to which any connection details for this managed resource
+                  should be written. Connection details frequently include the endpoint,
+                  username, and password required to connect to the managed resource.
+                properties:
+                  configRef:
+                    default:
+                      name: default
+                    description: SecretStoreConfigRef specifies which secret store
+                      config should be used for this ConnectionSecret.
+                    properties:
+                      name:
+                        description: Name of the referenced object.
+                        type: string
+                      policy:
+                        description: Policies for referencing.
+                        properties:
+                          resolution:
+                            default: Required
+                            description: Resolution specifies whether resolution of
+                              this reference is required. The default is 'Required',
+                              which means the reconcile will fail if the reference
+                              cannot be resolved. 'Optional' means this reference
+                              will be a no-op if it cannot be resolved.
+                            enum:
+                            - Required
+                            - Optional
+                            type: string
+                          resolve:
+                            description: Resolve specifies when this reference should
+                              be resolved. The default is 'IfNotPresent', which will
+                              attempt to resolve the reference only when the corresponding
+                              field is not present. Use 'Always' to resolve the reference
+                              on every reconcile.
+                            enum:
+                            - Always
+                            - IfNotPresent
+                            type: string
+                        type: object
+                    required:
+                    - name
+                    type: object
+                  metadata:
+                    description: Metadata is the metadata for connection secret.
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        description: Annotations are the annotations to be added to
+                          connection secret. - For Kubernetes secrets, this will be
+                          used as "metadata.annotations". - It is up to Secret Store
+                          implementation for others store types.
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        description: Labels are the labels/tags to be added to connection
+                          secret. - For Kubernetes secrets, this will be used as "metadata.labels".
+                          - It is up to Secret Store implementation for others store
+                          types.
+                        type: object
+                      type:
+                        description: Type is the SecretType for the connection secret.
+                          - Only valid for Kubernetes Secret Stores.
+                        type: string
+                    type: object
+                  name:
+                    description: Name is the name of the connection secret.
+                    type: string
+                required:
+                - name
+                type: object
+              writeConnectionSecretToRef:
+                description: WriteConnectionSecretToReference specifies the namespace
+                  and name of a Secret to which any connection details for this managed
+                  resource should be written. Connection details frequently include
+                  the endpoint, username, and password required to connect to the
+                  managed resource. This field is planned to be replaced in a future
+                  release in favor of PublishConnectionDetailsTo. Currently, both
+                  could be set independently and connection details would be published
+                  to both without affecting each other.
+                properties:
+                  name:
+                    description: Name of the secret.
+                    type: string
+                  namespace:
+                    description: Namespace of the secret.
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - forProvider
+            type: object
+          status:
+            description: OpenSearchStatus represents the observed state of a OpenSearch
+              instance.
+            properties:
+              atProvider:
+                description: OpenSearchObservation are the observable fields of a
+                  OpenSearch.
+                properties:
+                  ipFilter:
+                    description: IPFilter is a list of allowed IPv4 CIDR ranges that
+                      can access the service. If no IP Filter is set, you may not
+                      be able to reach the service. A value of `0.0.0.0/0` will open
+                      the service to all addresses on the public internet.
+                    items:
+                      type: string
+                    type: array
+                  maintenance:
+                    description: MaintenanceSpec contains settings to control the
+                      maintenance of an instance.
+                    properties:
+                      dayOfWeek:
+                        description: DayOfWeek specifies at which weekday the maintenance
+                          is held place. Allowed values are [monday, tuesday, wednesday,
+                          thursday, friday, saturday, sunday, never]
+                        enum:
+                        - monday
+                        - tuesday
+                        - wednesday
+                        - thursday
+                        - friday
+                        - saturday
+                        - sunday
+                        - never
+                        type: string
+                      timeOfDay:
+                        description: 'TimeOfDay for installing updates in UTC. Format:
+                          "hh:mm:ss".'
+                        pattern: ^([0-1]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$
+                        type: string
+                    type: object
+                  nodeStates:
+                    description: State of individual service nodes
+                    items:
+                      description: NodeState describes the state of a service node.
+                      properties:
+                        name:
+                          description: Name of the service node
+                          type: string
+                        role:
+                          description: Role of this node.
+                          type: string
+                        state:
+                          description: State of the service node.
+                          type: string
+                      type: object
+                    type: array
+                  notifications:
+                    description: Service notifications
+                    items:
+                      description: Notification contains a service message.
+                      properties:
+                        level:
+                          description: Level of the notification.
+                          type: string
+                        message:
+                          description: Message contains the notification.
+                          type: string
+                        metadata:
+                          description: Metadata contains additional data.
+                          type: object
+                          x-kubernetes-preserve-unknown-fields: true
+                        type:
+                          description: Type of the notification.
+                          type: string
+                      type: object
+                    type: array
+                  openSearchSettings:
+                    description: OpenSearchSettings contains additional OpenSearch
+                      settings as set by the provider.
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  size:
+                    description: Size contains the service capacity settings.
+                    properties:
+                      plan:
+                        type: string
+                    type: object
+                  terminationProtection:
+                    description: TerminationProtection protects against termination
+                      and powering off.
+                    type: boolean
+                  version:
+                    type: string
+                required:
+                - maintenance
+                type: object
+              conditions:
+                description: Conditions of the resource.
+                items:
+                  description: A Condition that may apply to a resource.
+                  properties:
+                    lastTransitionTime:
+                      description: LastTransitionTime is the last time this condition
+                        transitioned from one status to another.
+                      format: date-time
+                      type: string
+                    message:
+                      description: A Message containing details about this condition's
+                        last transition from one status to another, if any.
+                      type: string
+                    reason:
+                      description: A Reason for this condition's last transition from
+                        one status to another.
+                      type: string
+                    status:
+                      description: Status of this condition; is it currently True,
+                        False, or Unknown?
+                      type: string
+                    type:
+                      description: Type of this condition. At most one of each condition
+                        type may apply to a resource at any point in time.
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

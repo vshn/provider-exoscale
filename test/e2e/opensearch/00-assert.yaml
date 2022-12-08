@@ -1,0 +1,33 @@
+apiVersion: kuttl.dev/v1beta1
+kind: TestAssert
+timeout: 600
+---
+apiVersion: exoscale.crossplane.io/v1
+kind: OpenSearch
+metadata:
+  name: e2e-test-opensearch
+status:
+  atProvider:
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:00:00"
+    nodeStates:
+      - name: e2e-test-opensearch-1
+        state: running
+    ipFilter:
+      - "0.0.0.0/0"
+      - "195.11.65.98/32"
+  conditions:
+    - status: 'True'
+    - status: 'True'
+---
+apiVersion: v1
+kind: Secret
+type: connection.crossplane.io/v1alpha1
+metadata:
+  name: e2e-test-opensearch-secret
+  namespace: default
+  ownerReferences:
+    - apiVersion: exoscale.crossplane.io/v1
+      kind: OpenSearch
+      name: e2e-test-opensearch

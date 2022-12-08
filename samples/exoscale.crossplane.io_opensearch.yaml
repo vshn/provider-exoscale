@@ -1,0 +1,28 @@
+apiVersion: exoscale.crossplane.io/v1
+kind: OpenSearch
+metadata:
+  creationTimestamp: null
+  name: opensearch-local-dev
+spec:
+  forProvider:
+    backup: {}
+    ipFilter:
+    - 0.0.0.0/0
+    maintenance:
+      dayOfWeek: monday
+      timeOfDay: "12:01:55"
+    openSearchSettings: null
+    size:
+      plan: hobbyist-2
+    version: "2"
+    zone: ch-dk-2
+  providerConfigRef:
+    name: provider-config
+  writeConnectionSecretToRef:
+    name: opensearch-local-dev-details
+    namespace: default
+status:
+  atProvider:
+    maintenance: {}
+    openSearchSettings: null
+    size: {}
