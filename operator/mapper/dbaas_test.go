@@ -134,7 +134,7 @@ func TestCompareSettings(t *testing.T) {
 		"BothEmpty":       {givenSpec: "", observedSpec: nil, expected: true},
 		"Null":            {givenSpec: "null", observedSpec: nil, expected: true},
 		"EmptyObserved":   {givenSpec: `{"key":"value"}`, observedSpec: map[string]interface{}{}, expected: false},
-		"EmptySpec":       {givenSpec: ``, observedSpec: map[string]interface{}{"key": "value"}, expected: false},
+		"EmptySpec":       {givenSpec: ``, observedSpec: map[string]interface{}{"key": "value"}, expected: true},
 		"EmptySpecObject": {givenSpec: `{}`, observedSpec: nil, expected: true},
 		"SameString":      {givenSpec: `{"string":"value"}`, observedSpec: map[string]interface{}{"string": "value"}, expected: true},
 		"SameNumber":      {givenSpec: `{"number":0.5}`, observedSpec: map[string]interface{}{"number": 0.5}, expected: true},
