@@ -389,6 +389,7 @@ func sampleKafka(name string) exoscalev1.Kafka {
 			Name: "foo",
 		},
 	}
+	instance.Spec.ForProvider.Version = "3.2"
 	instance.Spec.ForProvider.Size.Plan = "businesss-8"
 	instance.Spec.ForProvider.IPFilter = []string{
 		"0.0.0.0/0",

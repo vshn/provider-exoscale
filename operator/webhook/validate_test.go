@@ -43,7 +43,7 @@ func TestValidateRawExtension(t *testing.T) {
 	}
 }
 
-func TestValidateVersion(t *testing.T) {
+func TestValidateUpdateVersion(t *testing.T) {
 	tests := map[string]struct {
 		oldObservedVersion string
 		oldSpecVersion     string
@@ -77,7 +77,46 @@ func TestValidateVersion(t *testing.T) {
 	}
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			err := ValidateVersion(tc.oldObservedVersion, tc.oldSpecVersion, tc.newDesiredVersion)
+			err := ValidateUpdateVersion(tc.oldObservedVersion, tc.oldSpecVersion, tc.newDesiredVersion)
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}
+
+func TestValidateVersions(t *testing.T) {
+	tests := map[string]struct {
+		wanted           string
+		admittedVersions []string
+		expectedError    string
+	}{
+		"valid version": {
+			wanted:           "8",
+			admittedVersions: []string{"8", "9"},
+			expectedError:    "",
+		},
+		"version nor provided": {
+			wanted:           "",
+			admittedVersions: []string{"8"},
+			expectedError:    "version must be provided",
+		},
+		"invalid version": {
+			wanted:           "8.0.2",
+			admittedVersions: []string{"8"},
+			expectedError:    "version not valid",
+		},
+		"invalid version, too old": {
+			wanted:           "7",
+			admittedVersions: []string{"8"},
+			expectedError:    "version not valid",
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := ValidateVersions(tc.wanted, tc.admittedVersions)
 			if tc.expectedError != "" {
 				assert.EqualError(t, err, tc.expectedError)
 			} else {

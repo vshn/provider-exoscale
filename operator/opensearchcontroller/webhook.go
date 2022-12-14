@@ -12,6 +12,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+var admittedVersions = []string{"1", "2"}
+
 // Validator validates admission requests.
 type Validator struct {
 	log logr.Logger
@@ -27,8 +29,14 @@ func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error 
 
 // ValidateUpdate implements admission.CustomValidator.
 func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
-	newInstance := newObj.(*exoscalev1.OpenSearch)
-	oldInstance := oldObj.(*exoscalev1.OpenSearch)
+	newInstance, ok := newObj.(*exoscalev1.OpenSearch)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", newObj)
+	}
+	oldInstance, ok := oldObj.(*exoscalev1.OpenSearch)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", oldObj)
+	}
 	v.log.V(1).Info("validate update")
 
 	err := v.validateSpec(newInstance)
@@ -40,17 +48,16 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 
 // ValidateDelete implements admission.CustomValidator.
 func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
-	//	mySQLInstance := obj.(*exoscalev1.OpenSearch)
 	v.log.V(1).Info("validate delete (noop)")
 	return nil
 }
 
 func (v *Validator) validateSpec(obj *exoscalev1.OpenSearch) error {
 	for _, validatorFn := range []func(exoscalev1.OpenSearchParameters) error{
-		v.validateIpFilter,
-		v.validateMaintenanceSchedule,
-		v.validateSettings,
-		v.validateVersion,
+		validateIpFilter,
+		validateMaintenanceSchedule,
+		validateSettings,
+		validateVersion,
 	} {
 		if err := validatorFn(obj.Spec.ForProvider); err != nil {
 			return err
@@ -59,35 +66,26 @@ func (v *Validator) validateSpec(obj *exoscalev1.OpenSearch) error {
 	return nil
 }
 
-func (v *Validator) validateIpFilter(obj exoscalev1.OpenSearchParameters) error {
+func validateIpFilter(obj exoscalev1.OpenSearchParameters) error {
 	if len(obj.IPFilter) == 0 {
 		return fmt.Errorf("IP filter cannot be empty")
 	}
 	return nil
 }
 
-func (v *Validator) validateMaintenanceSchedule(obj exoscalev1.OpenSearchParameters) error {
+func validateMaintenanceSchedule(obj exoscalev1.OpenSearchParameters) error {
 	if _, _, _, err := obj.Maintenance.TimeOfDay.Parse(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Validator) validateSettings(obj exoscalev1.OpenSearchParameters) error {
+func validateSettings(obj exoscalev1.OpenSearchParameters) error {
 	return webhook.ValidateRawExtension(obj.OpenSearchSettings)
 }
 
-func (v *Validator) validateVersion(obj exoscalev1.OpenSearchParameters) error {
-	// opensearch accepts only major version as a string
-	switch obj.MajorVersion {
-	case "1":
-		break
-	case "2":
-		break
-	default:
-		return fmt.Errorf("Opensearch version must be \"1\" or \"2\"")
-	}
-	return webhook.ValidateRawExtension(obj.OpenSearchSettings)
+func validateVersion(obj exoscalev1.OpenSearchParameters) error {
+	return webhook.ValidateVersions(obj.MajorVersion, admittedVersions)
 }
 
 func (v *Validator) compare(old, new *exoscalev1.OpenSearch) error {
@@ -114,7 +112,18 @@ func (v *Validator) compareZone(old, new *exoscalev1.OpenSearch) error {
 }
 
 func (v *Validator) compareVersion(old, new *exoscalev1.OpenSearch) error {
-	return webhook.ValidateVersion(old.Status.AtProvider.MajorVersion, old.Spec.ForProvider.MajorVersion, new.Spec.ForProvider.MajorVersion)
+	if old.Spec.ForProvider.MajorVersion == new.Spec.ForProvider.MajorVersion {
+		return nil
+	}
+	if new.Spec.ForProvider.MajorVersion == "" {
+		// Setting version to empty string should always be fine
+		return nil
+	}
+	if old.Spec.ForProvider.MajorVersion == "" {
+		// Fall back to reported version if no version was set before
+		old.Spec.ForProvider.MajorVersion = old.Status.AtProvider.MajorVersion
+	}
+	return webhook.ValidateUpdateVersion(old.Status.AtProvider.MajorVersion, old.Spec.ForProvider.MajorVersion, new.Spec.ForProvider.MajorVersion)
 }
 
 func (v *Validator) isCreated(obj *exoscalev1.OpenSearch) bool {

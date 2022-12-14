@@ -13,6 +13,8 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+var admittedVersions = []string{"3.2"}
+
 // SetupWebhook adds a webhook for kafka resources.
 func SetupWebhook(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
@@ -47,7 +49,7 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 	}
 	oldInstance, ok := oldObj.(*exoscalev1.Kafka)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for kafka webhook", newObj)
+		return fmt.Errorf("invalid managed resource type %T for kafka webhook", oldObj)
 	}
 	v.log.V(2).WithValues("old", oldInstance, "new", newInstance).Info("VALIDATE update")
 
@@ -65,7 +67,11 @@ func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error 
 }
 
 func validateSpec(params exoscalev1.KafkaParameters) error {
-	err := validateIpFilter(params)
+	err := validateVersion(params)
+	if err != nil {
+		return err
+	}
+	err = validateIpFilter(params)
 	if err != nil {
 		return err
 	}
@@ -74,6 +80,10 @@ func validateSpec(params exoscalev1.KafkaParameters) error {
 		return err
 	}
 	return validateKafkaSettings(params)
+}
+
+func validateVersion(obj exoscalev1.KafkaParameters) error {
+	return webhook.ValidateVersions(obj.Version, admittedVersions)
 }
 
 func validateIpFilter(params exoscalev1.KafkaParameters) error {
@@ -112,12 +122,12 @@ func compareVersion(oldInst, newInst exoscalev1.Kafka) error {
 		return nil
 	}
 	if newInst.Spec.ForProvider.Version == "" {
-		// Setting version to empyt string should always be fine
+		// Setting version to empty string should always be fine
 		return nil
 	}
 	if oldInst.Spec.ForProvider.Version == "" {
 		// Fall back to reported version if no version was set before
 		oldInst.Spec.ForProvider.Version = oldInst.Status.AtProvider.Version
 	}
-	return webhook.ValidateVersion(oldInst.Status.AtProvider.Version, oldInst.Spec.ForProvider.Version, newInst.Spec.ForProvider.Version)
+	return webhook.ValidateUpdateVersion(oldInst.Status.AtProvider.Version, oldInst.Spec.ForProvider.Version, newInst.Spec.ForProvider.Version)
 }
