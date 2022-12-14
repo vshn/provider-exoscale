@@ -136,6 +136,9 @@ test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
 		kubectl delete iamkeys --all; \
 		kubectl delete postgresql --all; \
 		kubectl delete mysql --all; \
+		kubectl delete redis --all; \
+		kubectl delete kafka --all; \
+		kubectl delete opensearch --all; \
 	else \
 		echo "no kubeconfig found"; \
 	fi
