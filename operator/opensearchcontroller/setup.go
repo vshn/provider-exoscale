@@ -40,7 +40,8 @@ func SetupWebhook(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(&exoscalev1.OpenSearch{}).
 		WithValidator(&Validator{
-			log: mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.OpenSearchKind)),
+			log:  mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.OpenSearchKind)),
+			kube: mgr.GetClient(),
 		}).
 		Complete()
 }

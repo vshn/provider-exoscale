@@ -299,6 +299,7 @@ func newKafkaSample() *exoscalev1.Kafka {
 					},
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
+				Version:       "3.2",
 				KafkaSettings: runtime.RawExtension{Raw: []byte(`{"connections_max_idle_ms": 60000}`)},
 			},
 		},

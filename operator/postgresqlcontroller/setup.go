@@ -41,7 +41,8 @@ func SetupWebhook(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(&exoscalev1.PostgreSQL{}).
 		WithValidator(&Validator{
-			log: mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.PostgreSQLKind)),
+			log:  mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.PostgreSQLKind)),
+			kube: mgr.GetClient(),
 		}).
 		Complete()
 }

@@ -41,7 +41,8 @@ func SetupWebhook(mgr ctrl.Manager) error {
 	return ctrl.NewWebhookManagedBy(mgr).
 		For(&exoscalev1.MySQL{}).
 		WithValidator(&Validator{
-			log: mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.MySQLKind)),
+			log:  mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.MySQLKind)),
+			kube: mgr.GetClient(),
 		}).
 		Complete()
 }
