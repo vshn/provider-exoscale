@@ -79,7 +79,7 @@ func (v *Validator) validateSettings(obj exoscalev1.OpenSearchParameters) error 
 
 func (v *Validator) validateVersion(obj exoscalev1.OpenSearchParameters) error {
 	// opensearch accepts only major version as a string
-	switch obj.Version {
+	switch obj.MajorVersion {
 	case "1":
 		break
 	case "2":
@@ -114,7 +114,7 @@ func (v *Validator) compareZone(old, new *exoscalev1.OpenSearch) error {
 }
 
 func (v *Validator) compareVersion(old, new *exoscalev1.OpenSearch) error {
-	return webhook.ValidateVersion(old.Status.AtProvider.Version, old.Spec.ForProvider.Version, new.Spec.ForProvider.Version)
+	return webhook.ValidateVersion(old.Status.AtProvider.MajorVersion, old.Spec.ForProvider.MajorVersion, new.Spec.ForProvider.MajorVersion)
 }
 
 func (v *Validator) isCreated(obj *exoscalev1.OpenSearch) bool {

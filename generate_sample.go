@@ -337,7 +337,7 @@ func newOpensearchSample() *exoscalev1.OpenSearch {
 					IPFilter: exoscalev1.IPFilter{"0.0.0.0/0"},
 				},
 				Zone:               "ch-dk-2",
-				Version:            "2",
+				MajorVersion:       "2",
 				OpenSearchSettings: runtime.RawExtension{},
 			},
 		},

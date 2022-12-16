@@ -11,10 +11,10 @@ spec:
     maintenance:
       dayOfWeek: monday
       timeOfDay: "12:01:55"
+    majorVersion: "2"
     openSearchSettings: null
     size:
       plan: hobbyist-2
-    version: "2"
     zone: ch-dk-2
   providerConfigRef:
     name: provider-config

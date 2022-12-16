@@ -107,8 +107,8 @@ func isUpToDate(current, external *exoscalev1.OpenSearchParameters, log logr.Log
 
 func mapObservation(instance oapi.DbaasServiceOpensearch) (exoscalev1.OpenSearchObservation, error) {
 	observation := exoscalev1.OpenSearchObservation{
-		Version:    pointer.StringDeref(instance.Version, ""),
-		NodeStates: mapper.ToNodeStates(instance.NodeStates),
+		MajorVersion: pointer.StringDeref(instance.Version, ""),
+		NodeStates:   mapper.ToNodeStates(instance.NodeStates),
 	}
 
 	settings, err := mapper.ToRawExtension(instance.OpensearchSettings)
