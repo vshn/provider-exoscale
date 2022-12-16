@@ -18,8 +18,8 @@ type OpenSearchParameters struct {
 	// +kubebuilder:validation:Required
 	// Zone is the datacenter identifier in which the instance runs in.
 	Zone Zone `json:"zone"`
-	// Version - supported versions are "1" and "2" (string)
-	Version            string               `json:"version,omitempty"`
+	// majorVersion - supported versions are "1" and "2" (string)
+	MajorVersion       string               `json:"majorVersion,omitempty"`
 	OpenSearchSettings runtime.RawExtension `json:"openSearchSettings,omitempty"`
 }
 
@@ -31,7 +31,7 @@ type OpenSearchSpec struct {
 
 // OpenSearchObservation are the observable fields of a OpenSearch.
 type OpenSearchObservation struct {
-	Version string `json:"version,omitempty"`
+	MajorVersion string `json:"majorVersion,omitempty"`
 	// OpenSearchSettings contains additional OpenSearch settings as set by the provider.
 	OpenSearchSettings runtime.RawExtension `json:"openSearchSettings,omitempty"`
 

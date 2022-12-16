@@ -36,8 +36,8 @@ func (p *pipeline) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 		},
 		OpensearchSettings:    &settings,
 		TerminationProtection: &forProvider.TerminationProtection,
-		// Version can be only major: ['1','2']
-		Version: &forProvider.Version,
+		// majorVersion can be only major: ['1','2']
+		Version: &forProvider.MajorVersion,
 	}
 	resp, err := p.exo.CreateDbaasServiceOpensearchWithResponse(ctx, oapi.DbaasServiceName(openSearch.GetInstanceName()), body)
 	if err != nil {
