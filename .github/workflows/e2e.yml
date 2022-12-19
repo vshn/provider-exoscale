@@ -6,8 +6,8 @@ on:
       - master
     paths-ignore:
       - docs/**
-  schedule:
-    - cron: 37 10 * * 1-5 # At 10:37 on every day-of-week from Monday through Friday
+  # schedule:
+  #   - cron: 37 10 * * 1-5 # At 10:37 on every day-of-week from Monday through Friday
 
 jobs:
   test-e2e:
