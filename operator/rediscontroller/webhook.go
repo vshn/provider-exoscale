@@ -41,7 +41,6 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 
 // ValidateDelete implements admission.CustomValidator.
 func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
-	//	instance := obj.(*exoscalev1.Redis)
 	v.log.V(1).Info("validate delete (noop)")
 	return nil
 }

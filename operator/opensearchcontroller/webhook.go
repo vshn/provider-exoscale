@@ -5,30 +5,86 @@ import (
 	"fmt"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
+	exoscalesdk "github.com/exoscale/egoscale/v2"
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"github.com/vshn/provider-exoscale/operator/webhook"
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+const serviceType = "opensearch"
 
 // Validator validates admission requests.
 type Validator struct {
-	log logr.Logger
+	log  logr.Logger
+	kube client.Client
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error {
-	openSearchInstance := obj.(*exoscalev1.OpenSearch)
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+	openSearchInstance, ok := obj.(*exoscalev1.OpenSearch)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", obj)
+	}
 	v.log.V(1).Info("validate create")
+
+	availableVersions, err := v.getAvailableVersions(ctx, obj)
+	if err != nil {
+		return err
+	}
+
+	err = v.validateVersion(ctx, obj, *availableVersions)
+	if err != nil {
+		return err
+	}
 
 	return v.validateSpec(openSearchInstance)
 }
 
+func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
+	openSearchInstance := obj.(*exoscalev1.OpenSearch)
+
+	v.log.V(1).Info("get opensearch available versions")
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, openSearchInstance.GetProviderConfigReference().Name, exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", openSearchInstance.Spec.ForProvider.Zone)))
+	if err != nil {
+		return nil, fmt.Errorf("open exoscale client failed: %w", err)
+	}
+
+	// get opensearch available versions
+	resp, err := exo.Exoscale.GetDbaasServiceTypeWithResponse(ctx, serviceType)
+	if err != nil {
+		return nil, fmt.Errorf("get DBaaS service type failed: %w", err)
+	}
+
+	v.log.V(1).Info("DBaaS service type", "body", string(resp.Body))
+
+	serviceType := *resp.JSON200
+	if serviceType.AvailableVersions == nil {
+		return nil, fmt.Errorf("opensearch available versions not found")
+	}
+	return serviceType.AvailableVersions, nil
+}
+
+func (v *Validator) validateVersion(_ context.Context, obj runtime.Object, availableVersions []string) error {
+	openSearchInstance := obj.(*exoscalev1.OpenSearch)
+
+	v.log.V(1).Info("validate version")
+	return webhook.ValidateVersions(openSearchInstance.Spec.ForProvider.MajorVersion, availableVersions)
+}
+
 // ValidateUpdate implements admission.CustomValidator.
 func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
-	newInstance := newObj.(*exoscalev1.OpenSearch)
-	oldInstance := oldObj.(*exoscalev1.OpenSearch)
+	newInstance, ok := newObj.(*exoscalev1.OpenSearch)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", newObj)
+	}
+	oldInstance, ok := oldObj.(*exoscalev1.OpenSearch)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", oldObj)
+	}
 	v.log.V(1).Info("validate update")
 
 	err := v.validateSpec(newInstance)
@@ -40,17 +96,15 @@ func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Obj
 
 // ValidateDelete implements admission.CustomValidator.
 func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
-	//	mySQLInstance := obj.(*exoscalev1.OpenSearch)
 	v.log.V(1).Info("validate delete (noop)")
 	return nil
 }
 
 func (v *Validator) validateSpec(obj *exoscalev1.OpenSearch) error {
 	for _, validatorFn := range []func(exoscalev1.OpenSearchParameters) error{
-		v.validateIpFilter,
-		v.validateMaintenanceSchedule,
-		v.validateSettings,
-		v.validateVersion,
+		validateIpFilter,
+		validateMaintenanceSchedule,
+		validateSettings,
 	} {
 		if err := validatorFn(obj.Spec.ForProvider); err != nil {
 			return err
@@ -59,34 +113,21 @@ func (v *Validator) validateSpec(obj *exoscalev1.OpenSearch) error {
 	return nil
 }
 
-func (v *Validator) validateIpFilter(obj exoscalev1.OpenSearchParameters) error {
+func validateIpFilter(obj exoscalev1.OpenSearchParameters) error {
 	if len(obj.IPFilter) == 0 {
 		return fmt.Errorf("IP filter cannot be empty")
 	}
 	return nil
 }
 
-func (v *Validator) validateMaintenanceSchedule(obj exoscalev1.OpenSearchParameters) error {
+func validateMaintenanceSchedule(obj exoscalev1.OpenSearchParameters) error {
 	if _, _, _, err := obj.Maintenance.TimeOfDay.Parse(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Validator) validateSettings(obj exoscalev1.OpenSearchParameters) error {
-	return webhook.ValidateRawExtension(obj.OpenSearchSettings)
-}
-
-func (v *Validator) validateVersion(obj exoscalev1.OpenSearchParameters) error {
-	// opensearch accepts only major version as a string
-	switch obj.MajorVersion {
-	case "1":
-		break
-	case "2":
-		break
-	default:
-		return fmt.Errorf("Opensearch version must be \"1\" or \"2\"")
-	}
+func validateSettings(obj exoscalev1.OpenSearchParameters) error {
 	return webhook.ValidateRawExtension(obj.OpenSearchSettings)
 }
 
@@ -114,7 +155,14 @@ func (v *Validator) compareZone(old, new *exoscalev1.OpenSearch) error {
 }
 
 func (v *Validator) compareVersion(old, new *exoscalev1.OpenSearch) error {
-	return webhook.ValidateVersion(old.Status.AtProvider.MajorVersion, old.Spec.ForProvider.MajorVersion, new.Spec.ForProvider.MajorVersion)
+	if old.Spec.ForProvider.MajorVersion == new.Spec.ForProvider.MajorVersion {
+		return nil
+	}
+	if old.Spec.ForProvider.MajorVersion == "" {
+		// Fall back to reported version if no version was set before
+		old.Spec.ForProvider.MajorVersion = old.Status.AtProvider.MajorVersion
+	}
+	return webhook.ValidateUpdateVersion(old.Status.AtProvider.MajorVersion, old.Spec.ForProvider.MajorVersion, new.Spec.ForProvider.MajorVersion)
 }
 
 func (v *Validator) isCreated(obj *exoscalev1.OpenSearch) bool {

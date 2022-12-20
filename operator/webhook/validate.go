@@ -28,18 +28,18 @@ func ValidateRawExtension(raw runtime.RawExtension) error {
 	return nil
 }
 
-func ValidateVersion(oldObs, oldDes, newDes string) error {
+func ValidateUpdateVersion(oldObs, oldDes, newDes string) error {
 	oldObserved, err := version.NewVersion(oldObs)
 	if err != nil {
-		return fmt.Errorf("set old status version failed: %w", err)
+		return fmt.Errorf("set old status version '%s' failed: %w", oldObs, err)
 	}
 	oldDesired, err := version.NewVersion(oldDes)
 	if err != nil {
-		return fmt.Errorf("set old desired version failed: %w", err)
+		return fmt.Errorf("set old desired version '%s' failed: %w", oldDes, err)
 	}
 	newDesired, err := version.NewVersion(newDes)
 	if err != nil {
-		return fmt.Errorf("set new desired version: %w", err)
+		return fmt.Errorf("set new desired version '%s' failed: %w", newDes, err)
 	}
 
 	c, err := version.NewConstraint(fmt.Sprintf("<= %s", oldObserved.String()))
@@ -53,4 +53,23 @@ func ValidateVersion(oldObs, oldDes, newDes string) error {
 	}
 	// we only allow version change if it matches the observed version
 	return nil
+}
+
+func ValidateVersions(wanted string, admittedVersions []string) error {
+	if wanted == "" {
+		return fmt.Errorf("version must be provided")
+	}
+	if !contains(admittedVersions, wanted) {
+		return fmt.Errorf("version not valid")
+	}
+	return nil
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }

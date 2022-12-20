@@ -12,6 +12,7 @@ spec:
       timeOfDay: "12:00:00"
     size:
       plan: startup-2
+    version: '3.2'
     zone: ch-dk-2
   providerConfigRef:
     name: provider-config

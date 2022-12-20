@@ -4,53 +4,105 @@ import (
 	"context"
 	"fmt"
 
+	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/mapper"
+	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"github.com/vshn/provider-exoscale/operator/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/go-logr/logr"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
+const serviceType = "pg"
+
 // Validator validates admission requests.
 type Validator struct {
-	log logr.Logger
+	log  logr.Logger
+	kube client.Client
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error {
-	instance := obj.(*exoscalev1.PostgreSQL)
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+	instance, ok := obj.(*exoscalev1.PostgreSQL)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for postgres webhook", obj)
+	}
 	v.log.V(1).Info("Validate create")
+
+	availableVersions, err := v.getAvailableVersions(ctx, obj)
+	if err != nil {
+		return err
+	}
+
+	err = v.validateVersion(ctx, obj, *availableVersions)
+	if err != nil {
+		return err
+	}
 
 	return v.validateSpec(instance)
 }
 
+func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
+	instance := obj.(*exoscalev1.PostgreSQL)
+
+	v.log.V(1).Info("get postgres available versions")
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", instance.Spec.ForProvider.Zone)))
+	if err != nil {
+		return nil, fmt.Errorf("open exoscale client failed: %w", err)
+	}
+
+	resp, err := exo.Exoscale.GetDbaasServiceTypeWithResponse(ctx, serviceType)
+	if err != nil {
+		return nil, fmt.Errorf("get DBaaS service type failed: %w", err)
+	}
+
+	v.log.V(1).Info("DBaaS service type", "body", string(resp.Body))
+
+	serviceType := *resp.JSON200
+	if serviceType.AvailableVersions == nil {
+		return nil, fmt.Errorf("postgres available versions not found")
+	}
+	return serviceType.AvailableVersions, nil
+}
+
+func (v *Validator) validateVersion(ctx context.Context, obj runtime.Object, availableVersions []string) error {
+	instance := obj.(*exoscalev1.PostgreSQL)
+
+	v.log.V(1).Info("validate version")
+	return webhook.ValidateVersions(instance.Spec.ForProvider.Version, availableVersions)
+}
+
 // ValidateUpdate implements admission.CustomValidator.
 func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
-	newInstance := newObj.(*exoscalev1.PostgreSQL)
-	oldInstance := oldObj.(*exoscalev1.PostgreSQL)
+	newInstance, ok := newObj.(*exoscalev1.PostgreSQL)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for postgres webhook", newObj)
+	}
+	oldInstance, ok := oldObj.(*exoscalev1.PostgreSQL)
+	if !ok {
+		return fmt.Errorf("invalid managed resource type %T for postgres webhook", oldObj)
+	}
 	v.log.V(1).Info("Validate update")
 
 	err := v.validateSpec(newInstance)
 	if err != nil {
 		return err
 	}
-	return v.compare(oldInstance, newInstance)
+	return validateImmutable(*oldInstance, *newInstance)
 }
 
 // ValidateDelete implements admission.CustomValidator.
 func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
-	//	instance := obj.(*exoscalev1.PostgreSQL)
 	v.log.V(1).Info("Validate delete (noop)")
 	return nil
 }
 
 func (v *Validator) validateSpec(obj *exoscalev1.PostgreSQL) error {
 	for _, validatorFn := range []func(exoscalev1.PostgreSQLParameters) error{
-		v.validateIpFilter,
-		v.validateMaintenanceSchedule,
-		v.validatePGSettings,
+		validateIpFilter,
+		validateMaintenanceSchedule,
+		validatePGSettings,
 	} {
 		if err := validatorFn(obj.Spec.ForProvider); err != nil {
 			return err
@@ -59,52 +111,46 @@ func (v *Validator) validateSpec(obj *exoscalev1.PostgreSQL) error {
 	return nil
 }
 
-func (v *Validator) validateIpFilter(obj exoscalev1.PostgreSQLParameters) error {
+func validateIpFilter(obj exoscalev1.PostgreSQLParameters) error {
 	if len(obj.IPFilter) == 0 {
 		return fmt.Errorf("IP filter cannot be empty")
 	}
 	return nil
 }
 
-func (v *Validator) validateMaintenanceSchedule(obj exoscalev1.PostgreSQLParameters) error {
+func validateMaintenanceSchedule(obj exoscalev1.PostgreSQLParameters) error {
 	if _, _, _, err := obj.Maintenance.TimeOfDay.Parse(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (v *Validator) validatePGSettings(obj exoscalev1.PostgreSQLParameters) error {
+func validatePGSettings(obj exoscalev1.PostgreSQLParameters) error {
 	return webhook.ValidateRawExtension(obj.PGSettings)
 }
 
-func (v *Validator) compare(old, new *exoscalev1.PostgreSQL) error {
-	if !v.isCreated(old) {
-		// comparing immutable fields is only necessary after creation.
+func validateImmutable(oldInst, newInst exoscalev1.PostgreSQL) error {
+	err := compareZone(oldInst.Spec.ForProvider, newInst.Spec.ForProvider)
+	if err != nil {
+		return err
+	}
+	return compareVersion(oldInst, newInst)
+}
+
+func compareZone(oldParams, newParams exoscalev1.PostgreSQLParameters) error {
+	if oldParams.Zone != newParams.Zone {
+		return fmt.Errorf("field is immutable: %s (old), %s (changed)", oldParams.Zone, newParams.Zone)
+	}
+	return nil
+}
+
+func compareVersion(oldInst, newInst exoscalev1.PostgreSQL) error {
+	if oldInst.Spec.ForProvider.Version == newInst.Spec.ForProvider.Version {
 		return nil
 	}
-	for _, compareFn := range []func(_, _ *exoscalev1.PostgreSQL) error{
-		v.compareZone,
-		v.compareVersion,
-	} {
-		if err := compareFn(old, new); err != nil {
-			return err
-		}
+	if oldInst.Spec.ForProvider.Version == "" {
+		// Fall back to reported version if no version was set before
+		oldInst.Spec.ForProvider.Version = oldInst.Status.AtProvider.Version
 	}
-	return nil
-}
-
-func (v *Validator) compareZone(old, new *exoscalev1.PostgreSQL) error {
-	if old.Spec.ForProvider.Zone != new.Spec.ForProvider.Zone {
-		return fmt.Errorf("field is immutable after creation: %s (old), %s (changed)", old.Spec.ForProvider.Zone, new.Spec.ForProvider.Zone)
-	}
-	return nil
-}
-
-func (v *Validator) compareVersion(old, new *exoscalev1.PostgreSQL) error {
-	return webhook.ValidateVersion(old.Status.AtProvider.Version, old.Spec.ForProvider.Version, new.Spec.ForProvider.Version)
-}
-
-func (v *Validator) isCreated(obj *exoscalev1.PostgreSQL) bool {
-	cond := mapper.FindStatusCondition(obj.Status.Conditions, xpv1.Available().Type)
-	return cond != nil
+	return webhook.ValidateUpdateVersion(oldInst.Status.AtProvider.Version, oldInst.Spec.ForProvider.Version, newInst.Spec.ForProvider.Version)
 }
