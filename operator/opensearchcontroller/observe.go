@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscaleapi "github.com/exoscale/egoscale/v2/api"
@@ -73,9 +74,13 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func connectionDetails(in oapi.DbaasServiceOpensearch) (managed.ConnectionDetails, error) {
+	uriParams := *in.UriParams
+
 	return map[string][]byte{
 		"OPENSEARCH_USER":          []byte(*in.ConnectionInfo.Username),
 		"OPENSEARCH_PASSWORD":      []byte(*in.ConnectionInfo.Password),
+		"OPENSEARCH_HOST":          []byte(uriParams["host"].(string)),
+		"OPENSEARCH_PORT":          []byte(uriParams["port"].(string)),
 		"OPENSEARCH_URI":           []byte(*in.Uri),
 		"OPENSEARCH_DASHBOARD_URI": []byte(*in.ConnectionInfo.DashboardUri),
 	}, nil
