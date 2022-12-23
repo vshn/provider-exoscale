@@ -13,7 +13,7 @@ spec:
     ipFilter:
       - "0.0.0.0/0"
       - "195.11.65.98/32"
-    version: "2"
+    majorVersion: "2"
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:
