@@ -1,6 +1,6 @@
 name: provider-exoscale
 title: Exoscale Provider for Crossplane
-version: master
+version: "0.8"
 start_page: ROOT:index.adoc
 nav:
   - modules/ROOT/nav.adoc
