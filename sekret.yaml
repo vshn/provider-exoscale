@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: objectbucket-creds
+data:
+  AWS_ACCESS_KEY_ID: OFk4Qzc0TzFHME9PNjkyWkFGRjU=
+  AWS_REGION: cm1h
+  AWS_SECRET_ACCESS_KEY: dFg5S0F4dzBQdXc0c0EwbWZUQXpiamxLNFRvZUpZNXozMVJxS1lhcg==
+  BUCKET_NAME: bXktcmV2aWV3LWJ1Y2tldA==
+  ENDPOINT: b2JqZWN0cy5ybWEuY2xvdWRzY2FsZS5jaA==
