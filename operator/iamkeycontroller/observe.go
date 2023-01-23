@@ -3,6 +3,8 @@ package iamkeycontroller
 import (
 	"context"
 	"fmt"
+	"net/url"
+
 	pipeline "github.com/ccremer/go-command-pipeline"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
@@ -13,7 +15,6 @@ import (
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
-	"net/url"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -48,14 +49,22 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		).RunWithContext(pctx)
 
 	if result != nil {
-		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
+		connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
+		if err != nil {
+			return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
+		}
+		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: connDetails}, nil
 	}
 
 	iamKey.Status.AtProvider.KeyName = *pctx.iamExoscaleKey.Name
 	iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(*pctx.iamExoscaleKey.Resources)
 
 	iamKey.SetConditions(xpv1.Available())
-	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
+	connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
+	if err != nil {
+		return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
+	}
+	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: connDetails}, nil
 }
 
 // getIAMKey fetches an existing IAM key from the project associated with the API Key and Secret.

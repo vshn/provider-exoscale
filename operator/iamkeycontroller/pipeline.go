@@ -2,6 +2,8 @@ package iamkeycontroller
 
 import (
 	"context"
+	"errors"
+
 	exoscalesdk "github.com/exoscale/egoscale/v2"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 
@@ -61,11 +63,17 @@ func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *
 	}
 }
 
-func toConnectionDetails(iamKey *exoscalesdk.IAMAccessKey) managed.ConnectionDetails {
+func toConnectionDetails(iamKey *exoscalesdk.IAMAccessKey) (managed.ConnectionDetails, error) {
+	if iamKey.Key == nil {
+		return nil, errors.New("iamKey key not found in connection details")
+	}
+	if iamKey.Secret == nil {
+		return nil, errors.New("iamKey secret not found in connection details")
+	}
 	return map[string][]byte{
 		exoscalev1.AccessKeyIDName:     []byte(*iamKey.Key),
 		exoscalev1.SecretAccessKeyName: []byte(*iamKey.Secret),
-	}
+	}, nil
 }
 
 func fromManaged(mg resource.Managed) *exoscalev1.IAMKey {
