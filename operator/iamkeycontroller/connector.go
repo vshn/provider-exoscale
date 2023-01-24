@@ -12,13 +12,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type IAMKeyConnector struct {
+type connector struct {
 	Kube     client.Client
 	Recorder event.Recorder
 }
 
 // Connect implements managed.ExternalConnecter.
-func (c *IAMKeyConnector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
+func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	ctx = pipeline.MutableContext(ctx)
 	log := ctrl.LoggerFrom(ctx)
 	log.V(1).Info("Connecting resource")

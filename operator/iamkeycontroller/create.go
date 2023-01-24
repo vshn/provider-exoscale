@@ -44,8 +44,12 @@ func (p *IAMKeyPipeline) Create(ctx context.Context, mg resource.Managed) (manag
 	if err != nil {
 		return managed.ExternalCreation{}, errors.Wrap(err, "cannot create IAM Key")
 	}
+	connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
+	if err != nil {
+		return managed.ExternalCreation{}, fmt.Errorf("cannot parse connection details: %w", err)
+	}
 
-	return managed.ExternalCreation{ConnectionDetails: toConnectionDetails(pctx.iamExoscaleKey)}, nil
+	return managed.ExternalCreation{ConnectionDetails: connDetails}, nil
 }
 
 // createIAMKey creates a new IAMKey in the project associated with the API Key and Secret.
@@ -114,7 +118,11 @@ func (p *IAMKeyPipeline) createCredentialsSecret(ctx *pipelineContext) error {
 		if secret.Data == nil {
 			secret.Data = map[string][]byte{}
 		}
-		for k, v := range toConnectionDetails(ctx.iamExoscaleKey) {
+		connDetails, err := toConnectionDetails(ctx.iamExoscaleKey)
+		if err != nil {
+			return fmt.Errorf("cannot parse connection details: %w", err)
+		}
+		for k, v := range connDetails {
 			secret.Data[k] = v
 		}
 		secret.Immutable = pointer.Bool(true)

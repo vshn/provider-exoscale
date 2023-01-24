@@ -21,7 +21,7 @@ func SetupController(mgr ctrl.Manager) error {
 
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.IAMKeyGroupVersionKind),
-		managed.WithExternalConnecter(&IAMKeyConnector{
+		managed.WithExternalConnecter(&connector{
 			Kube:     mgr.GetClient(),
 			Recorder: recorder,
 		}),
