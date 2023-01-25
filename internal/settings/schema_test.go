@@ -90,7 +90,7 @@ func TestSetDefaultNested(t *testing.T) {
 	input := runtime.RawExtension{
 		Raw: []byte(`{"bar": "blub"}`),
 	}
-	out, err := schemas.SetDefaults("simple", input)
+	out, err := schemas.SetDefaults("nested", input)
 	require.NoError(t, err, "failed to set defaults")
 
 	outMap, err := mapper.ToMap(out)
@@ -105,7 +105,7 @@ func TestSetDefaultNested(t *testing.T) {
 	require.Truef(t, ok, "should set sub object as map")
 	assert.EqualValues(t, "buzz", sub1Map["bar"])
 
-	sub2, ok := outMap["obj"]
+	sub2, ok := sub1Map["obj"]
 	require.Truef(t, ok, "should set sub-sub object")
 	sub2Map, ok := sub2.(map[string]interface{})
 	require.Truef(t, ok, "should set sub-sub object as map")

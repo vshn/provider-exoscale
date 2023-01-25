@@ -45,10 +45,7 @@ func (s schemas) SetDefaults(name string, input runtime.RawExtension) (runtime.R
 		return runtime.RawExtension{}, fmt.Errorf("failed to parse input: %w", err)
 	}
 
-	err = setDefaults(sc, inMap)
-	if err != nil {
-		return runtime.RawExtension{}, fmt.Errorf("failed to set defaults: %w", err)
-	}
+	setDefaults(sc, inMap)
 
 	out, err := mapper.ToRawExtension(&inMap)
 	if err != nil {
@@ -57,17 +54,37 @@ func (s schemas) SetDefaults(name string, input runtime.RawExtension) (runtime.R
 	return out, nil
 }
 
-func setDefaults(sc schema, input map[string]interface{}) error {
+func setDefaults(sc schema, input map[string]interface{}) bool {
+	hasSetDefaults := false
 
 	for key, val := range sc.Properties {
-		_, ok := input[key]
-		if ok {
-			continue
-		}
+		switch val.Type {
+		case "object":
+			submap := map[string]interface{}{}
 
-		if val.Default != nil {
-			input[key] = val.Default
+			if _, ok := input[key]; ok {
+				submap, ok = input[key].(map[string]interface{})
+				if !ok {
+					continue
+				}
+			}
+
+			if setDefaults(val, submap) {
+				input[key] = submap
+				hasSetDefaults = true
+			}
+
+		default:
+			_, ok := input[key]
+			if ok {
+				continue
+			}
+
+			if val.Default != nil {
+				input[key] = val.Default
+				hasSetDefaults = true
+			}
 		}
 	}
-	return nil
+	return hasSetDefaults
 }
