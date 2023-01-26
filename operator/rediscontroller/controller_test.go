@@ -41,6 +41,11 @@ func (ts *RedisControllerTestSuite) SetupTest() {
 	nopRecorder := event.NewNopRecorder()
 	ts.p = newPipeline(ts.Client, nopRecorder, ts.ExoClientMock)
 
+	ts.ExoClientMock.On("GetDbaasSettingsRedisWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasSettingsRedisResponse{
+			Body: rawResponse,
+		}, nil)
+
 	ts.reconciler = createReconciler(ts.Manager, "testredis", nopRecorder, &connector{
 		kube:     ts.Client,
 		recorder: nopRecorder,
@@ -64,7 +69,9 @@ func (ts *RedisControllerTestSuite) TestCreate() {
 		Return(&oapi.CreateDbaasServiceRedisResponse{Body: []byte{}}, nil).
 		Once()
 
-	redisResponse := ts.getRedisResponse(mg, settings)
+	respSet := emptyRedisSettings
+	respSet["maxmemory_policy"] = "noeviction"
+	redisResponse := ts.getRedisResponse(mg, respSet)
 	ts.ExoClientMock.On("GetDbaasServiceRedisWithResponse", mock.Anything, oapi.DbaasServiceName(name)).
 		Return(redisResponse, nil)
 
@@ -108,6 +115,43 @@ func (ts *RedisControllerTestSuite) TestCreate() {
 	ts.ExoClientMock.AssertExpectations(ts.T())
 }
 
+func (ts *RedisControllerTestSuite) TestNoChange() {
+	name := "test-nochange"
+	settings := map[string]any{
+		"maxmemory_policy": "noeviction",
+	}
+
+	mg := newRedisInstance(name, settings)
+	mg.Status = exoscalev1.RedisStatus{
+		ResourceStatus: xpv1.ResourceStatus{},
+		AtProvider:     exoscalev1.RedisObservation{},
+	}
+	respSet := emptyRedisSettings
+	respSet["maxmemory_policy"] = "noeviction"
+	redisResponse := ts.getRedisResponse(mg, respSet)
+
+	ts.ExoClientMock.On("GetDbaasServiceRedisWithResponse", mock.Anything, oapi.DbaasServiceName(name)).
+		Return(redisResponse, nil).Once()
+
+	ts.EnsureResources(mg)
+
+	_, err := ts.reconcile(reconcile.Request{NamespacedName: types.NamespacedName{Name: mg.Name, Namespace: mg.Namespace}})
+	ts.Assert().NoError(err)
+
+	instance := &exoscalev1.Redis{}
+	ts.FetchResource(types.NamespacedName{Name: mg.Name, Namespace: mg.Namespace}, instance)
+
+	synced := false
+	for _, condition := range instance.Status.Conditions {
+		ts.Assert().Equal(corev1.ConditionTrue, condition.Status)
+		ts.Assert().Equal(xpv1.ReasonReconcileSuccess, condition.Reason)
+		synced = true
+	}
+	ts.Assert().True(synced, "not synced")
+
+	ts.ExoClientMock.AssertExpectations(ts.T())
+}
+
 func (ts *RedisControllerTestSuite) TestUpdate() {
 	name := "test-update"
 	settings := map[string]any{
@@ -119,7 +163,9 @@ func (ts *RedisControllerTestSuite) TestUpdate() {
 		ResourceStatus: xpv1.ResourceStatus{},
 		AtProvider:     exoscalev1.RedisObservation{},
 	}
-	redisResponse := ts.getRedisResponse(mg, settings)
+	respSet := emptyRedisSettings
+	respSet["maxmemory_policy"] = "noeviction"
+	redisResponse := ts.getRedisResponse(mg, respSet)
 
 	ts.ExoClientMock.On("UpdateDbaasServiceRedisWithResponse", mock.Anything, oapi.DbaasServiceName(name), mock.Anything).
 		Return(&oapi.UpdateDbaasServiceRedisResponse{Body: []byte{}}, nil).
@@ -131,7 +177,7 @@ func (ts *RedisControllerTestSuite) TestUpdate() {
 
 	ts.EnsureResources(mg)
 
-	updatedResponse := ts.getRedisResponse(mg, settings)
+	updatedResponse := ts.getRedisResponse(mg, respSet)
 	updatedResponse.JSON200.Maintenance.Dow = oapi.DbaasServiceMaintenanceDowFriday
 	ts.ExoClientMock.On("GetDbaasServiceRedisWithResponse", mock.Anything, oapi.DbaasServiceName(name)).
 		Return(updatedResponse, nil)
@@ -185,7 +231,9 @@ func (ts *RedisControllerTestSuite) TestDelete() {
 		ResourceStatus: xpv1.ResourceStatus{},
 		AtProvider:     exoscalev1.RedisObservation{},
 	}
-	redisResponse := ts.getRedisResponse(mg, settings)
+	respSet := emptyRedisSettings
+	respSet["maxmemory_policy"] = "noeviction"
+	redisResponse := ts.getRedisResponse(mg, respSet)
 
 	ts.EnsureResources(mg)
 

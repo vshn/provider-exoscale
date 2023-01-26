@@ -28,7 +28,6 @@ func ParseSchemas(raw []byte) (Schemas, error) {
 type schemas map[string]schema
 
 type schema struct {
-	Type       string
 	Default    interface{}
 	Properties schemas
 }
@@ -58,8 +57,7 @@ func setDefaults(sc schema, input map[string]interface{}) bool {
 	hasSetDefaults := false
 
 	for key, val := range sc.Properties {
-		switch val.Type {
-		case "object":
+		if len(val.Properties) > 0 {
 			submap := map[string]interface{}{}
 
 			if _, ok := input[key]; ok {
@@ -73,8 +71,7 @@ func setDefaults(sc schema, input map[string]interface{}) bool {
 				input[key] = submap
 				hasSetDefaults = true
 			}
-
-		default:
+		} else {
 			_, ok := input[key]
 			if ok {
 				continue
