@@ -60,7 +60,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 	found.ConnectionInfo.AccessKey = pointer.String("KEY")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -109,7 +109,7 @@ func TestObserve_UpToDate_ConnectionDetails_with_REST(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 	found.ConnectionInfo.RestUri = pointer.String("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701")
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -155,7 +155,7 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 	}
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -186,7 +186,7 @@ func TestObserve_UpToDate_Condition_NotReady(t *testing.T) {
 	found.State = &state
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -215,7 +215,7 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 	found.State = &state
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -243,7 +243,7 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 	found.Version = pointer.String("3.2.1")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -268,7 +268,7 @@ func TestObserve_UpToDate_EmptyRestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -298,7 +298,7 @@ func TestObserve_UpToDate_RestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -321,7 +321,7 @@ func TestObserve_Outdated(t *testing.T) {
 	found.Maintenance.Dow = "tuesday"
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -352,7 +352,7 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 	}
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -381,7 +381,7 @@ func TestObserve_Outdated_RestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
-  mockGetKafkaSettingsCall(exoMock, nil)
+	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
