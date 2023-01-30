@@ -60,6 +60,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 	found.ConnectionInfo.AccessKey = pointer.String("KEY")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -108,6 +109,7 @@ func TestObserve_UpToDate_ConnectionDetails_with_REST(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 	found.ConnectionInfo.RestUri = pointer.String("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701")
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -153,6 +155,7 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 	}
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -183,6 +186,7 @@ func TestObserve_UpToDate_Condition_NotReady(t *testing.T) {
 	found.State = &state
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -211,6 +215,7 @@ func TestObserve_UpToDate_Condition_Ready(t *testing.T) {
 	found.State = &state
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -238,6 +243,7 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 	found.Version = pointer.String("3.2.1")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -262,6 +268,7 @@ func TestObserve_UpToDate_EmptyRestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -291,6 +298,7 @@ func TestObserve_UpToDate_RestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -313,6 +321,7 @@ func TestObserve_Outdated(t *testing.T) {
 	found.Maintenance.Dow = "tuesday"
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -343,6 +352,7 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 	}
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -371,6 +381,7 @@ func TestObserve_Outdated_RestSettings(t *testing.T) {
 	found.KafkaRestEnabled = pointer.Bool(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
+  mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
 
 	assert.NotPanics(t, func() {
@@ -444,6 +455,15 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 	return &res
 }
 
+var defaultRestSettings = map[string]interface{}{
+	"consumer_enable_auto_commit":  true,
+	"producer_acks":                "1",               // Yes, that's a "1" as a string. I don't know why, that's just how it is..
+	"consumer_request_max_bytes":   float64(67108864), // When parsing json into map[string]interface{} we get floats.
+	"simpleconsumer_pool_size_max": float64(25),
+	"producer_linger_ms":           float64(0),
+	"consumer_request_timeout_ms":  float64(1000),
+}
+
 func mockGetKafkaCall(m *operatortest.ClientWithResponsesInterface, name string, found *oapi.DbaasServiceKafka, err error) {
 	m.On("GetDbaasServiceKafkaWithResponse", mock.Anything, oapi.DbaasServiceName(name)).
 		Return(&oapi.GetDbaasServiceKafkaResponse{
@@ -452,6 +472,13 @@ func mockGetKafkaCall(m *operatortest.ClientWithResponsesInterface, name string,
 		}, err).
 		Once()
 
+}
+func mockGetKafkaSettingsCall(m *operatortest.ClientWithResponsesInterface, err error) {
+	m.On("GetDbaasSettingsKafkaWithResponse", mock.Anything).
+		Return(&oapi.GetDbaasSettingsKafkaResponse{
+			Body: rawSettingsResponse,
+		}, err).
+		Once()
 }
 func mockCACall(m *operatortest.ClientWithResponsesInterface) {
 	m.On("GetDbaasCaCertificateWithResponse", mock.Anything).

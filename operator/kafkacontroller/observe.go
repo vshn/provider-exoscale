@@ -12,7 +12,6 @@ import (
 	exoscaleapi "github.com/exoscale/egoscale/v2/api"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/google/go-cmp/cmp"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
@@ -67,7 +66,13 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 		return managed.ExternalObservation{}, fmt.Errorf("failed to get kafka connection details: %w", err)
 	}
 
-	upToDate, diff := diffParameters(external, instance.Spec.ForProvider)
+	currentParams, err := setSettingsDefaults(ctx, c.exo, &instance.Spec.ForProvider)
+	if err != nil {
+		log.Error(err, "unable to set kafka settings schema")
+		currentParams = &instance.Spec.ForProvider
+	}
+
+	upToDate, diff := diffParameters(external, *currentParams)
 
 	return managed.ExternalObservation{
 		ResourceExists:    true,
@@ -183,7 +188,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 		return false, err.Error()
 	}
 
-	actualKafkaRestSettings, err := getActualKafkaRestSettings(external.KafkaRestSettings, expected.KafkaRestSettings)
+	actualKafkaRestSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
 	if err != nil {
 		return false, err.Error()
 	}
@@ -208,40 +213,4 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 	}
 	settingComparer := cmp.Comparer(mapper.CompareSettings)
 	return cmp.Equal(expected, actual, settingComparer), cmp.Diff(expected, actual, settingComparer)
-}
-
-// getActualKafkaRestSettings reads the Kafa REST settings and strips out all non relevant default settings
-// Exoscale always returns all defaults, not just the fields we set, so we need to strip them so that we can compare the actual and expected setting.
-func getActualKafkaRestSettings(actual *map[string]interface{}, expected runtime.RawExtension) (runtime.RawExtension, error) {
-	if actual == nil {
-		return runtime.RawExtension{}, nil
-	}
-	expectedMap, err := mapper.ToMap(expected)
-	if err != nil {
-		return runtime.RawExtension{}, fmt.Errorf("error parsing kafka REST settings: %w", err)
-	}
-	s := stripRestSettingsDefaults(*actual, expectedMap)
-	return mapper.ToRawExtension(&s)
-}
-
-// defaultRestSettings are the default settings for Kafka REST.
-var defaultRestSettings = map[string]interface{}{
-	"consumer_enable_auto_commit":  true,
-	"producer_acks":                "1",               // Yes, that's a "1" as a string. I don't know why, that's just how it is..
-	"consumer_request_max_bytes":   float64(67108864), // When parsing json into map[string]interface{} we get floats.
-	"simpleconsumer_pool_size_max": float64(25),
-	"producer_linger_ms":           float64(0),
-	"consumer_request_timeout_ms":  float64(1000),
-}
-
-func stripRestSettingsDefaults(actual map[string]interface{}, expected map[string]interface{}) map[string]interface{} {
-	res := map[string]interface{}{}
-	for k, v := range actual {
-		d, isDefault := defaultRestSettings[k]
-		_, isExpected := expected[k]
-		if !isDefault || d != v || isExpected {
-			res[k] = v
-		}
-	}
-	return res
 }
