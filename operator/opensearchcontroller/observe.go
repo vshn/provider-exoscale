@@ -66,9 +66,15 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse parameters: %w", err)
 	}
 
+	currentParams, err := setSettingsDefaults(ctx, p.exo, &openSearchInstance.Spec.ForProvider)
+	if err != nil {
+		log.Error(err, "unable to set opensearch settings schema")
+		currentParams = &openSearchInstance.Spec.ForProvider
+	}
+
 	return managed.ExternalObservation{
 		ResourceExists:    true,
-		ResourceUpToDate:  isUpToDate(&openSearchInstance.Spec.ForProvider, params, log),
+		ResourceUpToDate:  isUpToDate(currentParams, params, log),
 		ConnectionDetails: connDetails,
 	}, nil
 }
