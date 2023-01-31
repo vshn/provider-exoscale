@@ -3,6 +3,7 @@ package bucketcontroller
 import (
 	"context"
 	"fmt"
+
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -55,7 +56,9 @@ func (p *ProvisioningPipeline) deleteAllObjects(ctx *pipelineContext) error {
 		}
 	}()
 
-	for obj := range p.minioClient.RemoveObjects(ctx, bucketName, objectsCh, minio.RemoveObjectsOptions{GovernanceBypass: true}) {
+	// s3 seems to use the default retention governance mode, which causes bucket deletion to fail, unless bypassing governance retention
+	// https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lock-overview.html
+	for obj := range p.minioClient.RemoveObjects(ctx, bucketName, objectsCh, minio.RemoveObjectsOptions{GovernanceBypass: false}) {
 		return fmt.Errorf("object %q cannot be removed: %w", obj.ObjectName, obj.Err)
 	}
 	return nil
