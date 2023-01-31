@@ -42,18 +42,15 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 	}
 
 	pipe := pipeline.NewPipeline[*pipelineContext]()
-	result := pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
+	err = pipe.WithBeforeHooks(pipelineutil.DebugLogger(pctx)).
 		WithSteps(
 			pipe.NewStep("fetch credentials secret", p.fetchCredentialsSecret),
 			pipe.NewStep("check credentials", p.checkSecret),
 		).RunWithContext(pctx)
 
-	if result != nil {
-		connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
-		if err != nil {
-			return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
-		}
-		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false, ConnectionDetails: connDetails}, nil
+	if err != nil {
+		log.V(2).Info("pipeline that fetches and checks credentials secret returned", "error", err)
+		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false}, nil
 	}
 
 	iamKey.Status.AtProvider.KeyName = *pctx.iamExoscaleKey.Name
