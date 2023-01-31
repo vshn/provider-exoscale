@@ -8,6 +8,7 @@
       The PR has a meaningful description that sums up the change. It will be
       linked in the changelog.
 - [ ] PR contains a single logical change (to build a better changelog).
+- [ ] I have run successfully `make test-e2e` locally.
 - [ ] Update the documentation.
 - [ ] Categorize the PR by adding one of the labels:
       `bug`, `enhancement`, `documentation`, `change`, `breaking`, `dependency`
