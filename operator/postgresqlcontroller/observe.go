@@ -53,9 +53,15 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot read connection details")
 	}
+
+	currentParams, err := setSettingsDefaults(ctx, p.exo, &pgInstance.Spec.ForProvider)
+	if err != nil {
+		log.Error(err, "unable to set postgres settings schema")
+		currentParams = &pgInstance.Spec.ForProvider
+	}
 	return managed.ExternalObservation{
 		ResourceExists:    true,
-		ResourceUpToDate:  isUpToDate(&pgInstance.Spec.ForProvider, pp, log),
+		ResourceUpToDate:  isUpToDate(currentParams, pp, log),
 		ConnectionDetails: connDetails,
 	}, nil
 }

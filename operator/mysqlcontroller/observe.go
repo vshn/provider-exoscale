@@ -72,10 +72,15 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse parameters: %w", err)
 	}
+	currentParams, err := setSettingsDefaults(ctx, p.exo, &mySQLInstance.Spec.ForProvider)
+	if err != nil {
+		log.Error(err, "unable to set mysql settings schema")
+		currentParams = &mySQLInstance.Spec.ForProvider
+	}
 
 	return managed.ExternalObservation{
 		ResourceExists:    true,
-		ResourceUpToDate:  isUpToDate(&mySQLInstance.Spec.ForProvider, params, log),
+		ResourceUpToDate:  isUpToDate(currentParams, params, log),
 		ConnectionDetails: connDetails,
 	}, nil
 }

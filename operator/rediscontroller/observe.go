@@ -67,9 +67,15 @@ func (p pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ext
 		return managed.ExternalObservation{}, fmt.Errorf("unable to parse connection details: %w", err)
 	}
 
+	currentParams, err := setSettingsDefaults(ctx, p.exo, &redisInstance.Spec.ForProvider)
+	if err != nil {
+		log.Error(err, "unable to set redis settings schema")
+		currentParams = &redisInstance.Spec.ForProvider
+	}
+
 	observation := managed.ExternalObservation{
 		ResourceExists:          true,
-		ResourceUpToDate:        isUpToDate(&redisInstance.Spec.ForProvider, rp, log),
+		ResourceUpToDate:        isUpToDate(currentParams, rp, log),
 		ResourceLateInitialized: false,
 		ConnectionDetails:       cd,
 	}
