@@ -3,6 +3,7 @@ package bucketcontroller
 import (
 	"context"
 	"fmt"
+
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -55,10 +56,26 @@ func (p *ProvisioningPipeline) deleteAllObjects(ctx *pipelineContext) error {
 		}
 	}()
 
-	for obj := range p.minioClient.RemoveObjects(ctx, bucketName, objectsCh, minio.RemoveObjectsOptions{GovernanceBypass: true}) {
+	bypassGovernance, err := p.isBucketLockEnabled(ctx, bucketName)
+	if err != nil {
+		log.Error(err, "not able to determine ObjectLock status for bucket", "bucket", bucketName)
+	}
+
+	for obj := range p.minioClient.RemoveObjects(ctx, bucketName, objectsCh, minio.RemoveObjectsOptions{GovernanceBypass: bypassGovernance}) {
 		return fmt.Errorf("object %q cannot be removed: %w", obj.ObjectName, obj.Err)
 	}
 	return nil
+}
+
+func (p *ProvisioningPipeline) isBucketLockEnabled(ctx context.Context, bucketName string) (bool, error) {
+	_, mode, _, _, err := p.minioClient.GetObjectLockConfig(ctx, bucketName)
+	if err != nil && err.Error() == "Object Lock configuration does not exist for this bucket" {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+	// If there's an objectLockConfig it could still be disabled...
+	return mode != nil, nil
 }
 
 // deleteS3Bucket deletes the bucket.
