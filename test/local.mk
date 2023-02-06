@@ -128,6 +128,11 @@ test-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## E2E tests
 	@rm -f kubeconfig
 # kuttl leaves kubeconfig garbage: https://github.com/kudobuilder/kuttl/issues/297
 
+run-single-e2e: export KUBECONFIG = $(KIND_KUBECONFIG)
+run-single-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## Run specific e2e test with `run-single-e2e test=$name`
+	GOBIN=$(go_bin) $(kuttl_bin) test ./test/e2e --config ./test/e2e/kuttl-test.yaml --suppress-log=Events --test $(test)
+	@rm -f kubeconfig
+
 .PHONY: .e2e-test-clean
 .e2e-test-clean: export KUBECONFIG = $(KIND_KUBECONFIG)
 .e2e-test-clean:
