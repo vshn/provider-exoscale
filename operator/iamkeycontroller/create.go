@@ -73,8 +73,7 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 		// Allowed object storage operations on the new IAM key
 		// Some permissions are excluded such as create and list all sos buckets.
 		exoscalesdk.CreateIAMAccessKeyWithOperations(IAMKeyAllowedOperations),
-		// The tag and resource are used to limit the permissions to object storage
-		exoscalesdk.CreateIAMAccessKeyWithTags([]string{SOSResourceDomain}),
+		// Limit the permissions to the provided object storage resources
 		exoscalesdk.CreateIAMAccessKeyWithResources(keyResources),
 	}
 
