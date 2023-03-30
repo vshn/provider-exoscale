@@ -13,9 +13,11 @@ $(crossplane_bin): | $(go_bin)
 
 # Install up plugin
 $(up_bin):export GOBIN = $(go_bin)
+$(up_bin):export VERSION=v0.15.0
 $(up_bin): | $(go_bin)
 	curl -sL "https://cli.upbound.io" | sh
 	@mv up $@
+	$(up_bin) --version
 
 .PHONY: package
 package: ## All-in-one packaging and releasing
