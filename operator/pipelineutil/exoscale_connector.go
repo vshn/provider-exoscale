@@ -76,7 +76,9 @@ func fetchProviderConfig(ctx *connectContext) error {
 func fetchSecret(ctx *connectContext) error {
 	secretRef := ctx.providerConfig.Spec.Credentials.APISecretRef
 	ctx.credentialSecret = &corev1.Secret{}
+
 	err := ctx.kube.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, ctx.credentialSecret)
+
 	return errors.Wrap(err, "cannot get secret with API token")
 }
 
@@ -96,4 +98,26 @@ func createExoscaleClient(ctx *connectContext) error {
 	ec, err := exoscalesdk.NewClient(ctx.apiKey, ctx.apiSecret, ctx.opts...)
 	ctx.exoscaleClient = ec
 	return err
+}
+
+// FetchProviderConfig returns the apiKey and apiSecret of the given providerConfigRef
+func FetchProviderConfig(ctx context.Context, kube client.Client, providerConfigRef string) (string, string, error) {
+	pctx := &connectContext{
+		Context:            ctx,
+		kube:               kube,
+		ProviderConfigName: providerConfigRef,
+	}
+
+	pipe := pipeline.NewPipeline[*connectContext]()
+	pipe.WithBeforeHooks(DebugLogger(pctx)).
+		WithSteps(
+			pipe.NewStep("fetch provider config", fetchProviderConfig),
+			pipe.NewStep("fetch secret", fetchSecret),
+			pipe.NewStep("validate secret", validateSecret),
+		)
+	err := pipe.RunWithContext(pctx)
+	if err != nil {
+		return "", "", err
+	}
+	return pctx.apiKey, pctx.apiSecret, nil
 }

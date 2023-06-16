@@ -14,6 +14,7 @@ node_modules/
 # work
 .kind/
 .work/
+.vscode/
 
 # Crossplane package
 /package/crossplane.yaml

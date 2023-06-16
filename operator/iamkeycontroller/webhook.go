@@ -3,6 +3,7 @@ package iamkeycontroller
 import (
 	"context"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/api/equality"
 
 	"github.com/go-logr/logr"

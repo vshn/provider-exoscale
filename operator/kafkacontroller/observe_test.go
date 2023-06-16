@@ -435,9 +435,11 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 		"159.100.244.100:21701",
 		"159.100.241.65:21701",
 	}
+
 	res.ConnectionInfo = &struct {
 		AccessCert  *string   "json:\"access-cert,omitempty\""
 		AccessKey   *string   "json:\"access-key,omitempty\""
+		ConnectUri  *string   "json:\"connect-uri,omitempty\""
 		Nodes       *[]string "json:\"nodes,omitempty\""
 		RegistryUri *string   "json:\"registry-uri,omitempty\""
 		RestUri     *string   "json:\"rest-uri,omitempty\""

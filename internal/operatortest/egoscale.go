@@ -586,6 +586,66 @@ func (_m *ClientWithResponsesInterface) CreateAntiAffinityGroupWithResponse(ctx 
 	return r0, r1
 }
 
+// CreateApiKeyWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateApiKeyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateApiKeyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateApiKeyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateApiKeyResponse); ok {
+		r0 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateApiKeyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateApiKeyWithResponse provides a mock function with given fields: ctx, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateApiKeyWithResponse(ctx context.Context, body oapi.CreateApiKeyJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateApiKeyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateApiKeyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.CreateApiKeyJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateApiKeyResponse); ok {
+		r0 = rf(ctx, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateApiKeyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.CreateApiKeyJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateDbaasIntegrationWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
 func (_m *ClientWithResponsesInterface) CreateDbaasIntegrationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasIntegrationResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -639,6 +699,486 @@ func (_m *ClientWithResponsesInterface) CreateDbaasIntegrationWithResponse(ctx c
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, oapi.CreateDbaasIntegrationJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaSchemaRegistryAclConfigWithBodyWithResponse provides a mock function with given fields: ctx, name, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaSchemaRegistryAclConfigWithBodyWithResponse(ctx context.Context, name oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse); ok {
+		r0 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaSchemaRegistryAclConfigWithResponse provides a mock function with given fields: ctx, name, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaSchemaRegistryAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, body oapi.CreateDbaasKafkaSchemaRegistryAclConfigJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaSchemaRegistryAclConfigJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse); ok {
+		r0 = rf(ctx, name, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaSchemaRegistryAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaSchemaRegistryAclConfigJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaTopicAclConfigWithBodyWithResponse provides a mock function with given fields: ctx, name, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaTopicAclConfigWithBodyWithResponse(ctx context.Context, name oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaTopicAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaTopicAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaTopicAclConfigResponse); ok {
+		r0 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaTopicAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaTopicAclConfigWithResponse provides a mock function with given fields: ctx, name, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaTopicAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, body oapi.CreateDbaasKafkaTopicAclConfigJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaTopicAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaTopicAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaTopicAclConfigJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaTopicAclConfigResponse); ok {
+		r0 = rf(ctx, name, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaTopicAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaTopicAclConfigJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaUserWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaUserWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaUserResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasKafkaUserWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasKafkaUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasKafkaUserJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasKafkaUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasKafkaUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaUserJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasKafkaUserResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasKafkaUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasKafkaUserJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasMysqlUserWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasMysqlUserWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasMysqlUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasMysqlUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasMysqlUserResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasMysqlUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasMysqlUserWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasMysqlUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasMysqlUserJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasMysqlUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasMysqlUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasMysqlUserJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasMysqlUserResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasMysqlUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasMysqlUserJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasOpensearchUserWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasOpensearchUserWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasOpensearchUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasOpensearchUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasOpensearchUserResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasOpensearchUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasOpensearchUserWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasOpensearchUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasOpensearchUserJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasOpensearchUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasOpensearchUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasOpensearchUserJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasOpensearchUserResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasOpensearchUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasOpensearchUserJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgConnectionPoolWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgConnectionPoolWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgConnectionPoolResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgConnectionPoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgConnectionPoolResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgConnectionPoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgConnectionPoolWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgConnectionPoolWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasPgConnectionPoolJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgConnectionPoolResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgConnectionPoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgConnectionPoolJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgConnectionPoolResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgConnectionPoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgConnectionPoolJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPostgresUserWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPostgresUserWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPostgresUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPostgresUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasPostgresUserResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPostgresUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPostgresUserWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPostgresUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasPostgresUserJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPostgresUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPostgresUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPostgresUserJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasPostgresUserResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPostgresUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPostgresUserJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasServiceGrafanaWithBodyWithResponse provides a mock function with given fields: ctx, name, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasServiceGrafanaWithBodyWithResponse(ctx context.Context, name oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasServiceGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasServiceGrafanaWithResponse provides a mock function with given fields: ctx, name, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasServiceGrafanaWithResponse(ctx context.Context, name oapi.DbaasServiceName, body oapi.CreateDbaasServiceGrafanaJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasServiceGrafanaJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasServiceGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasServiceGrafanaJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, body, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1186,6 +1726,66 @@ func (_m *ClientWithResponsesInterface) CreateElasticIpWithResponse(ctx context.
 	return r0, r1
 }
 
+// CreateIamRoleWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateIamRoleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateIamRoleResponse); ok {
+		r0 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateIamRoleResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateIamRoleWithResponse provides a mock function with given fields: ctx, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateIamRoleWithResponse(ctx context.Context, body oapi.CreateIamRoleJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.CreateIamRoleJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateIamRoleResponse); ok {
+		r0 = rf(ctx, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateIamRoleResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.CreateIamRoleJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateInstancePoolWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
 func (_m *ClientWithResponsesInterface) CreateInstancePoolWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateInstancePoolResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -1666,6 +2266,36 @@ func (_m *ClientWithResponsesInterface) DeleteAntiAffinityGroupWithResponse(ctx 
 	return r0, r1
 }
 
+// DeleteApiKeyWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteApiKeyWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteApiKeyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteApiKeyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteApiKeyResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteApiKeyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteDbaasIntegrationWithResponse provides a mock function with given fields: ctx, id, reqEditors
 func (_m *ClientWithResponsesInterface) DeleteDbaasIntegrationWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasIntegrationResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -1689,6 +2319,396 @@ func (_m *ClientWithResponsesInterface) DeleteDbaasIntegrationWithResponse(ctx c
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasKafkaSchemaRegistryAclConfigWithResponse provides a mock function with given fields: ctx, name, aclId, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasKafkaSchemaRegistryAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, aclId oapi.DbaasKafkaAclId, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasKafkaSchemaRegistryAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, aclId)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasKafkaSchemaRegistryAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasKafkaAclId, ...oapi.RequestEditorFn) *oapi.DeleteDbaasKafkaSchemaRegistryAclConfigResponse); ok {
+		r0 = rf(ctx, name, aclId, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasKafkaSchemaRegistryAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasKafkaAclId, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, aclId, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasKafkaTopicAclConfigWithResponse provides a mock function with given fields: ctx, name, aclId, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasKafkaTopicAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, aclId oapi.DbaasKafkaAclId, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasKafkaTopicAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, aclId)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasKafkaTopicAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasKafkaAclId, ...oapi.RequestEditorFn) *oapi.DeleteDbaasKafkaTopicAclConfigResponse); ok {
+		r0 = rf(ctx, name, aclId, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasKafkaTopicAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasKafkaAclId, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, aclId, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasKafkaUserWithResponse provides a mock function with given fields: ctx, serviceName, username, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasKafkaUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasKafkaUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasKafkaUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) *oapi.DeleteDbaasKafkaUserResponse); ok {
+		r0 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasKafkaUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasMysqlUserWithResponse provides a mock function with given fields: ctx, serviceName, username, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasMysqlUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasMysqlUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasMysqlUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) *oapi.DeleteDbaasMysqlUserResponse); ok {
+		r0 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasMysqlUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasOpensearchUserWithResponse provides a mock function with given fields: ctx, serviceName, username, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasOpensearchUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasOpensearchUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasOpensearchUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) *oapi.DeleteDbaasOpensearchUserResponse); ok {
+		r0 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasOpensearchUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasPgConnectionPoolWithResponse provides a mock function with given fields: ctx, serviceName, connectionPoolName, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasPgConnectionPoolWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, connectionPoolName oapi.DbaasPgPoolName, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasPgConnectionPoolResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, connectionPoolName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasPgConnectionPoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, ...oapi.RequestEditorFn) *oapi.DeleteDbaasPgConnectionPoolResponse); ok {
+		r0 = rf(ctx, serviceName, connectionPoolName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasPgConnectionPoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, connectionPoolName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasPostgresUserWithResponse provides a mock function with given fields: ctx, serviceName, username, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasPostgresUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasPostgresUserResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasPostgresUserResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) *oapi.DeleteDbaasPostgresUserResponse); ok {
+		r0 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasPostgresUserResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServiceGrafanaWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServiceGrafanaWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServiceGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServiceKafkaWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServiceKafkaWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServiceKafkaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServiceKafkaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServiceKafkaResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServiceKafkaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServiceMysqlWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServiceMysqlWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServiceMysqlResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServiceMysqlResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServiceMysqlResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServiceMysqlResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServiceOpensearchWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServiceOpensearchWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServiceOpensearchResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServiceOpensearchResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServiceOpensearchResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServiceOpensearchResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServicePgWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServicePgWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServicePgResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServicePgResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServicePgResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServicePgResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasServiceRedisWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasServiceRedisWithResponse(ctx context.Context, name string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasServiceRedisResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasServiceRedisResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteDbaasServiceRedisResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasServiceRedisResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -1803,6 +2823,36 @@ func (_m *ClientWithResponsesInterface) DeleteElasticIpWithResponse(ctx context.
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*oapi.DeleteElasticIpResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteIamRoleWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteIamRoleWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.DeleteIamRoleResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteIamRoleResponse)
 		}
 	}
 
@@ -2686,6 +3736,36 @@ func (_m *ClientWithResponsesInterface) GetAntiAffinityGroupWithResponse(ctx con
 	return r0, r1
 }
 
+// GetApiKeyWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) GetApiKeyWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.GetApiKeyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetApiKeyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.GetApiKeyResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetApiKeyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDbaasCaCertificateWithResponse provides a mock function with given fields: ctx, reqEditors
 func (_m *ClientWithResponsesInterface) GetDbaasCaCertificateWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasCaCertificateResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -2746,6 +3826,36 @@ func (_m *ClientWithResponsesInterface) GetDbaasIntegrationWithResponse(ctx cont
 	return r0, r1
 }
 
+// GetDbaasKafkaAclConfigWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) GetDbaasKafkaAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasKafkaAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetDbaasKafkaAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.GetDbaasKafkaAclConfigResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetDbaasKafkaAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetDbaasMigrationStatusWithResponse provides a mock function with given fields: ctx, name, reqEditors
 func (_m *ClientWithResponsesInterface) GetDbaasMigrationStatusWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasMigrationStatusResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -2763,6 +3873,66 @@ func (_m *ClientWithResponsesInterface) GetDbaasMigrationStatusWithResponse(ctx 
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*oapi.GetDbaasMigrationStatusResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDbaasOpensearchAclConfigWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) GetDbaasOpensearchAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasOpensearchAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetDbaasOpensearchAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.GetDbaasOpensearchAclConfigResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetDbaasOpensearchAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDbaasServiceGrafanaWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) GetDbaasServiceGrafanaWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.GetDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetDbaasServiceGrafanaResponse)
 		}
 	}
 
@@ -3069,6 +4239,36 @@ func (_m *ClientWithResponsesInterface) GetDbaasServiceTypeWithResponse(ctx cont
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, serviceTypeName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetDbaasSettingsGrafanaWithResponse provides a mock function with given fields: ctx, reqEditors
+func (_m *ClientWithResponsesInterface) GetDbaasSettingsGrafanaWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.GetDbaasSettingsGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetDbaasSettingsGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, ...oapi.RequestEditorFn) *oapi.GetDbaasSettingsGrafanaResponse); ok {
+		r0 = rf(ctx, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetDbaasSettingsGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -3393,6 +4593,66 @@ func (_m *ClientWithResponsesInterface) GetElasticIpWithResponse(ctx context.Con
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*oapi.GetElasticIpResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetIamOrganizationPolicyWithResponse provides a mock function with given fields: ctx, reqEditors
+func (_m *ClientWithResponsesInterface) GetIamOrganizationPolicyWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.GetIamOrganizationPolicyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetIamOrganizationPolicyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, ...oapi.RequestEditorFn) *oapi.GetIamOrganizationPolicyResponse); ok {
+		r0 = rf(ctx, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetIamOrganizationPolicyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetIamRoleWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) GetIamRoleWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.GetIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.GetIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.GetIamRoleResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.GetIamRoleResponse)
 		}
 	}
 
@@ -4066,6 +5326,36 @@ func (_m *ClientWithResponsesInterface) ListAntiAffinityGroupsWithResponse(ctx c
 	return r0, r1
 }
 
+// ListApiKeysWithResponse provides a mock function with given fields: ctx, reqEditors
+func (_m *ClientWithResponsesInterface) ListApiKeysWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.ListApiKeysResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ListApiKeysResponse
+	if rf, ok := ret.Get(0).(func(context.Context, ...oapi.RequestEditorFn) *oapi.ListApiKeysResponse); ok {
+		r0 = rf(ctx, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ListApiKeysResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListDbaasIntegrationSettingsWithResponse provides a mock function with given fields: ctx, integrationType, sourceType, destType, reqEditors
 func (_m *ClientWithResponsesInterface) ListDbaasIntegrationSettingsWithResponse(ctx context.Context, integrationType string, sourceType string, destType string, reqEditors ...oapi.RequestEditorFn) (*oapi.ListDbaasIntegrationSettingsResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -4336,6 +5626,36 @@ func (_m *ClientWithResponsesInterface) ListEventsWithResponse(ctx context.Conte
 	return r0, r1
 }
 
+// ListIamRolesWithResponse provides a mock function with given fields: ctx, reqEditors
+func (_m *ClientWithResponsesInterface) ListIamRolesWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.ListIamRolesResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ListIamRolesResponse
+	if rf, ok := ret.Get(0).(func(context.Context, ...oapi.RequestEditorFn) *oapi.ListIamRolesResponse); ok {
+		r0 = rf(ctx, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ListIamRolesResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListInstancePoolsWithResponse provides a mock function with given fields: ctx, reqEditors
 func (_m *ClientWithResponsesInterface) ListInstancePoolsWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.ListInstancePoolsResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -4516,20 +5836,20 @@ func (_m *ClientWithResponsesInterface) ListQuotasWithResponse(ctx context.Conte
 	return r0, r1
 }
 
-// ListSecurityGroupsWithResponse provides a mock function with given fields: ctx, reqEditors
-func (_m *ClientWithResponsesInterface) ListSecurityGroupsWithResponse(ctx context.Context, reqEditors ...oapi.RequestEditorFn) (*oapi.ListSecurityGroupsResponse, error) {
+// ListSecurityGroupsWithResponse provides a mock function with given fields: ctx, params, reqEditors
+func (_m *ClientWithResponsesInterface) ListSecurityGroupsWithResponse(ctx context.Context, params *oapi.ListSecurityGroupsParams, reqEditors ...oapi.RequestEditorFn) (*oapi.ListSecurityGroupsResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
 	for _i := range reqEditors {
 		_va[_i] = reqEditors[_i]
 	}
 	var _ca []interface{}
-	_ca = append(_ca, ctx)
+	_ca = append(_ca, ctx, params)
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
 	var r0 *oapi.ListSecurityGroupsResponse
-	if rf, ok := ret.Get(0).(func(context.Context, ...oapi.RequestEditorFn) *oapi.ListSecurityGroupsResponse); ok {
-		r0 = rf(ctx, reqEditors...)
+	if rf, ok := ret.Get(0).(func(context.Context, *oapi.ListSecurityGroupsParams, ...oapi.RequestEditorFn) *oapi.ListSecurityGroupsResponse); ok {
+		r0 = rf(ctx, params, reqEditors...)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*oapi.ListSecurityGroupsResponse)
@@ -4537,8 +5857,8 @@ func (_m *ClientWithResponsesInterface) ListSecurityGroupsWithResponse(ctx conte
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, ...oapi.RequestEditorFn) error); ok {
-		r1 = rf(ctx, reqEditors...)
+	if rf, ok := ret.Get(1).(func(context.Context, *oapi.ListSecurityGroupsParams, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, params, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -5086,6 +6406,246 @@ func (_m *ClientWithResponsesInterface) RemoveInstanceProtectionWithResponse(ctx
 	return r0, r1
 }
 
+// ResetDbaasKafkaUserPasswordWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, username, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasKafkaUserPasswordWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasKafkaUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasKafkaUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) *oapi.ResetDbaasKafkaUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasKafkaUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasKafkaUserPasswordWithResponse provides a mock function with given fields: ctx, serviceName, username, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasKafkaUserPasswordWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, body oapi.ResetDbaasKafkaUserPasswordJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasKafkaUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasKafkaUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasKafkaUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) *oapi.ResetDbaasKafkaUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasKafkaUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasKafkaUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasMysqlUserPasswordWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, username, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasMysqlUserPasswordWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasMysqlUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasMysqlUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) *oapi.ResetDbaasMysqlUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasMysqlUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasMysqlUserPasswordWithResponse provides a mock function with given fields: ctx, serviceName, username, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasMysqlUserPasswordWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, body oapi.ResetDbaasMysqlUserPasswordJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasMysqlUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasMysqlUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasMysqlUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) *oapi.ResetDbaasMysqlUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasMysqlUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasMysqlUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasOpensearchUserPasswordWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, username, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasOpensearchUserPasswordWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasOpensearchUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasOpensearchUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) *oapi.ResetDbaasOpensearchUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasOpensearchUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasOpensearchUserPasswordWithResponse provides a mock function with given fields: ctx, serviceName, username, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasOpensearchUserPasswordWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, body oapi.ResetDbaasOpensearchUserPasswordJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasOpensearchUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasOpensearchUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasOpensearchUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) *oapi.ResetDbaasOpensearchUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasOpensearchUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasOpensearchUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasPostgresUserPasswordWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, username, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasPostgresUserPasswordWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasPostgresUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasPostgresUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) *oapi.ResetDbaasPostgresUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasPostgresUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetDbaasPostgresUserPasswordWithResponse provides a mock function with given fields: ctx, serviceName, username, body, reqEditors
+func (_m *ClientWithResponsesInterface) ResetDbaasPostgresUserPasswordWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, body oapi.ResetDbaasPostgresUserPasswordJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetDbaasPostgresUserPasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetDbaasPostgresUserPasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasPostgresUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) *oapi.ResetDbaasPostgresUserPasswordResponse); ok {
+		r0 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetDbaasPostgresUserPasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.ResetDbaasPostgresUserPasswordJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ResetElasticIpFieldWithResponse provides a mock function with given fields: ctx, id, field, reqEditors
 func (_m *ClientWithResponsesInterface) ResetElasticIpFieldWithResponse(ctx context.Context, id string, field oapi.ResetElasticIpFieldParamsField, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetElasticIpFieldResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -5446,6 +7006,36 @@ func (_m *ClientWithResponsesInterface) ResizeInstanceDiskWithResponse(ctx conte
 	return r0, r1
 }
 
+// RevealInstancePasswordWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) RevealInstancePasswordWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.RevealInstancePasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.RevealInstancePasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.RevealInstancePasswordResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.RevealInstancePasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // RevertInstanceToSnapshotWithBodyWithResponse provides a mock function with given fields: ctx, instanceId, contentType, body, reqEditors
 func (_m *ClientWithResponsesInterface) RevertInstanceToSnapshotWithBodyWithResponse(ctx context.Context, instanceId string, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.RevertInstanceToSnapshotResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -5776,6 +7366,186 @@ func (_m *ClientWithResponsesInterface) ScaleSksNodepoolWithResponse(ctx context
 	return r0, r1
 }
 
+// StartDbaasGrafanaMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasGrafanaMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasGrafanaMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasGrafanaMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasGrafanaMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasGrafanaMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartDbaasKafkaMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasKafkaMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasKafkaMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasKafkaMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasKafkaMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasKafkaMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartDbaasMysqlMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasMysqlMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasMysqlMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasMysqlMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasMysqlMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasMysqlMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartDbaasOpensearchMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasOpensearchMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasOpensearchMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasOpensearchMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasOpensearchMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasOpensearchMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartDbaasPgMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasPgMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasPgMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasPgMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasPgMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasPgMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// StartDbaasRedisMaintenanceWithResponse provides a mock function with given fields: ctx, name, reqEditors
+func (_m *ClientWithResponsesInterface) StartDbaasRedisMaintenanceWithResponse(ctx context.Context, name oapi.DbaasServiceName, reqEditors ...oapi.RequestEditorFn) (*oapi.StartDbaasRedisMaintenanceResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.StartDbaasRedisMaintenanceResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) *oapi.StartDbaasRedisMaintenanceResponse); ok {
+		r0 = rf(ctx, name, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.StartDbaasRedisMaintenanceResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // StartInstanceWithBodyWithResponse provides a mock function with given fields: ctx, id, contentType, body, reqEditors
 func (_m *ClientWithResponsesInterface) StartInstanceWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.StartInstanceResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -6009,6 +7779,246 @@ func (_m *ClientWithResponsesInterface) UpdateDbaasIntegrationWithResponse(ctx c
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, oapi.UpdateDbaasIntegrationJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, id, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasOpensearchAclConfigWithBodyWithResponse provides a mock function with given fields: ctx, name, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasOpensearchAclConfigWithBodyWithResponse(ctx context.Context, name oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasOpensearchAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasOpensearchAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateDbaasOpensearchAclConfigResponse); ok {
+		r0 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasOpensearchAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasOpensearchAclConfigWithResponse provides a mock function with given fields: ctx, name, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasOpensearchAclConfigWithResponse(ctx context.Context, name oapi.DbaasServiceName, body oapi.UpdateDbaasOpensearchAclConfigJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasOpensearchAclConfigResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasOpensearchAclConfigResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.UpdateDbaasOpensearchAclConfigJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateDbaasOpensearchAclConfigResponse); ok {
+		r0 = rf(ctx, name, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasOpensearchAclConfigResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.UpdateDbaasOpensearchAclConfigJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasPgConnectionPoolWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, connectionPoolName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasPgConnectionPoolWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, connectionPoolName oapi.DbaasPgPoolName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasPgConnectionPoolResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, connectionPoolName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasPgConnectionPoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateDbaasPgConnectionPoolResponse); ok {
+		r0 = rf(ctx, serviceName, connectionPoolName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasPgConnectionPoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, connectionPoolName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasPgConnectionPoolWithResponse provides a mock function with given fields: ctx, serviceName, connectionPoolName, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasPgConnectionPoolWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, connectionPoolName oapi.DbaasPgPoolName, body oapi.UpdateDbaasPgConnectionPoolJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasPgConnectionPoolResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, connectionPoolName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasPgConnectionPoolResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, oapi.UpdateDbaasPgConnectionPoolJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateDbaasPgConnectionPoolResponse); ok {
+		r0 = rf(ctx, serviceName, connectionPoolName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasPgConnectionPoolResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, oapi.UpdateDbaasPgConnectionPoolJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, connectionPoolName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasPostgresAllowReplicationWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, username, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasPostgresAllowReplicationWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasPostgresAllowReplicationResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasPostgresAllowReplicationResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateDbaasPostgresAllowReplicationResponse); ok {
+		r0 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasPostgresAllowReplicationResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasPostgresAllowReplicationWithResponse provides a mock function with given fields: ctx, serviceName, username, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasPostgresAllowReplicationWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, body oapi.UpdateDbaasPostgresAllowReplicationJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasPostgresAllowReplicationResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, username, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasPostgresAllowReplicationResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.UpdateDbaasPostgresAllowReplicationJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateDbaasPostgresAllowReplicationResponse); ok {
+		r0 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasPostgresAllowReplicationResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasUserUsername, oapi.UpdateDbaasPostgresAllowReplicationJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, username, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasServiceGrafanaWithBodyWithResponse provides a mock function with given fields: ctx, name, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasServiceGrafanaWithBodyWithResponse(ctx context.Context, name oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasServiceGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateDbaasServiceGrafanaWithResponse provides a mock function with given fields: ctx, name, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateDbaasServiceGrafanaWithResponse(ctx context.Context, name oapi.DbaasServiceName, body oapi.UpdateDbaasServiceGrafanaJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateDbaasServiceGrafanaResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, name, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateDbaasServiceGrafanaResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.UpdateDbaasServiceGrafanaJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateDbaasServiceGrafanaResponse); ok {
+		r0 = rf(ctx, name, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateDbaasServiceGrafanaResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.UpdateDbaasServiceGrafanaJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, name, body, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -6428,6 +8438,186 @@ func (_m *ClientWithResponsesInterface) UpdateElasticIpWithResponse(ctx context.
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, oapi.UpdateElasticIpJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamOrganizationPolicyWithBodyWithResponse provides a mock function with given fields: ctx, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamOrganizationPolicyWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamOrganizationPolicyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamOrganizationPolicyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateIamOrganizationPolicyResponse); ok {
+		r0 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamOrganizationPolicyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamOrganizationPolicyWithResponse provides a mock function with given fields: ctx, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamOrganizationPolicyWithResponse(ctx context.Context, body oapi.UpdateIamOrganizationPolicyJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamOrganizationPolicyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamOrganizationPolicyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.UpdateIamOrganizationPolicyJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateIamOrganizationPolicyResponse); ok {
+		r0 = rf(ctx, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamOrganizationPolicyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.UpdateIamOrganizationPolicyJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamRolePolicyWithBodyWithResponse provides a mock function with given fields: ctx, id, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamRolePolicyWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamRolePolicyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamRolePolicyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateIamRolePolicyResponse); ok {
+		r0 = rf(ctx, id, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamRolePolicyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamRolePolicyWithResponse provides a mock function with given fields: ctx, id, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamRolePolicyWithResponse(ctx context.Context, id string, body oapi.UpdateIamRolePolicyJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamRolePolicyResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamRolePolicyResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, oapi.UpdateIamRolePolicyJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateIamRolePolicyResponse); ok {
+		r0 = rf(ctx, id, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamRolePolicyResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, oapi.UpdateIamRolePolicyJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamRoleWithBodyWithResponse provides a mock function with given fields: ctx, id, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamRoleWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, io.Reader, ...oapi.RequestEditorFn) *oapi.UpdateIamRoleResponse); ok {
+		r0 = rf(ctx, id, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamRoleResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// UpdateIamRoleWithResponse provides a mock function with given fields: ctx, id, body, reqEditors
+func (_m *ClientWithResponsesInterface) UpdateIamRoleWithResponse(ctx context.Context, id string, body oapi.UpdateIamRoleJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.UpdateIamRoleResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.UpdateIamRoleResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, oapi.UpdateIamRoleJSONRequestBody, ...oapi.RequestEditorFn) *oapi.UpdateIamRoleResponse); ok {
+		r0 = rf(ctx, id, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.UpdateIamRoleResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, oapi.UpdateIamRoleJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, id, body, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
