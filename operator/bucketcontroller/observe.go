@@ -14,6 +14,7 @@ import (
 )
 
 var bucketExistsFn = func(ctx context.Context, mc *minio.Client, bucketName string) (bool, error) {
+	//time.Sleep(time.Second * 5)
 	return mc.BucketExists(ctx, bucketName)
 }
 
@@ -26,6 +27,7 @@ func (p *ProvisioningPipeline) Observe(ctx context.Context, mg resource.Managed)
 
 	bucketName := bucket.GetBucketName()
 	exists, err := bucketExistsFn(ctx, p.minioClient, bucketName)
+	fmt.Println("bucket: ", bucketName, " exists: ", exists, " err: ", err)
 	if err != nil {
 		errResp := minio.ToErrorResponse(err)
 		if errResp.StatusCode == http.StatusForbidden {

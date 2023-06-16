@@ -2,6 +2,7 @@ package iamkeycontroller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/url"
 
@@ -29,8 +30,10 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		if KeyId, exists := iamKey.Annotations[KeyIDAnnotationKey]; exists {
 			iamKey.Status.AtProvider.KeyID = KeyId
 			delete(iamKey.Annotations, KeyIDAnnotationKey)
+			log.V(1).Info("Deleting annotation", "key", KeyIDAnnotationKey)
 		} else {
 			// New resource, create user first
+			log.V(1).Info("IAM key not found, returning")
 			return managed.ExternalObservation{}, nil
 		}
 	}
@@ -53,48 +56,92 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: false}, nil
 	}
 
+	log.V(1).Info("Observing resource line 58")
+	fmt.Println(*pctx.iamExoscaleKey.Name)
 	iamKey.Status.AtProvider.KeyName = *pctx.iamExoscaleKey.Name
-	iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(*pctx.iamExoscaleKey.Resources)
 
 	iamKey.SetConditions(xpv1.Available())
 	connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
 	}
+	log.Info("Observation successfull", "keyName", iamKey.Status.AtProvider.KeyName)
 	return managed.ExternalObservation{ResourceExists: true, ResourceUpToDate: true, ConnectionDetails: connDetails}, nil
 }
 
 // getIAMKey fetches an existing IAM key from the project associated with the API Key and Secret.
 func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
 	log := controllerruntime.LoggerFrom(ctx)
+	found := false
+	keyList := IamKeysList{}
 
-	exoscaleIAMKey, err := p.exoscaleClient.GetIAMAccessKey(ctx, ctx.iamKey.Spec.ForProvider.Zone, ctx.iamKey.Status.AtProvider.KeyID)
+	// send request
+	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key", nil)
 	if err != nil {
+		log.Error(err, "Cannot list apiKeys")
 		return err
 	}
-	ctx.iamExoscaleKey = exoscaleIAMKey
-	log.V(1).Info("Fetched IAM key in exoscale", "iamID", exoscaleIAMKey.Key, "keyName", exoscaleIAMKey.Name)
+
+	err = json.NewDecoder(resp.Body).Decode(&keyList)
+	if err != nil {
+		log.Error(err, "Cannot unmarshall response to keyList")
+		return err
+	}
+
+	if len(keyList.IamKeys) == 0 {
+		log.Info("No IAM Keys found")
+		panic("No IAM Keys found")
+	} else {
+		fmt.Println("IAM Keys found: ", len(keyList.IamKeys))
+	}
+
+	for i, val := range keyList.IamKeys {
+		fmt.Println(i, *val.Name, *val.Key)
+		if *val.Name == ctx.iamKey.Spec.ForProvider.KeyName {
+			ctx.iamExoscaleKey = &exoscalesdk.IAMAccessKey{
+				Key:  val.Key,
+				Name: val.Name,
+			}
+			found = true
+			log.Info("IAM Key exists, observation successfull", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
+		}
+	}
+
+	if !found {
+		log.Info("IAM Key not found, observation failed", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
+		return fmt.Errorf("IAM Key not found, observation failed")
+	}
+	log.Info("breakpoint")
 	return nil
 
 }
 
 func (p *IAMKeyPipeline) fetchCredentialsSecret(ctx *pipelineContext) error {
+	log := controllerruntime.LoggerFrom(ctx)
 	secretRef := ctx.iamKey.Spec.WriteConnectionSecretToReference
 	ctx.credentialsSecret = &corev1.Secret{}
-	return p.kube.Get(ctx, types.NamespacedName{Namespace: secretRef.Namespace, Name: secretRef.Name}, ctx.credentialsSecret)
+	log.Info("Fetching credentials secret during iamkey observation", secretRef.Namespace, secretRef.Name)
+	err := p.kube.Get(ctx, types.NamespacedName{Namespace: secretRef.Namespace, Name: secretRef.Name}, ctx.credentialsSecret)
+	if err != nil {
+		log.Error(err, "Cannot fetch credentials secret")
+		return err
+	}
+	return nil
 
 }
 
 func (p *IAMKeyPipeline) checkSecret(ctx *pipelineContext) error {
 	data := ctx.credentialsSecret.Data
-
+	fmt.Println("data: ", data)
 	if len(data) == 0 {
 		return fmt.Errorf("secret %q does not have any data", fmt.Sprintf("%s/%s", ctx.credentialsSecret.Namespace, ctx.credentialsSecret.Name))
 	}
-
+	fmt.Println("after len in checkSecret")
 	// Populate secret key from the secret credentials as exoscale IAM get operation does not return the secret key
 	secret := string(data[exoscalev1.SecretAccessKeyName])
+	fmt.Println("after secret assignement in checkSecret")
 	ctx.iamExoscaleKey.Secret = &secret
+	fmt.Println("before exit checkSecret")
 	return nil
 }
 

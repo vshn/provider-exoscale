@@ -12,7 +12,7 @@ import (
 func DebugLogger[T context.Context](ctx T) pipeline.Listener[T] {
 	log := controllerruntime.LoggerFrom(ctx)
 	hook := func(step pipeline.Step[T]) {
-		log.V(2).Info(`Entering step "` + step.Name + `"`)
+		log.Info(`Entering step "` + step.Name + `"`)
 	}
 	return hook
 }

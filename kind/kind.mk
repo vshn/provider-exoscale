@@ -26,7 +26,7 @@ kind-setup-ingress: kind-setup ## Install NGINX as ingress controller onto kind 
 # We fix the arch to linux/amd64 since kind runs in amd64 even on Mac/arm.
 kind-load-image: export GOOS = linux
 kind-load-image: export GOARCH = amd64
-kind-load-image: kind-setup build-docker ## Load the container image onto kind cluster
+kind-load-image: build-docker ## Load the container image onto kind cluster
 	@$(kind_bin) load docker-image --name $(KIND_CLUSTER) $(CONTAINER_IMG)
 
 .PHONY: kind-clean

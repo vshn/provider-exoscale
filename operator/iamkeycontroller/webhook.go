@@ -3,6 +3,7 @@ package iamkeycontroller
 import (
 	"context"
 	"fmt"
+
 	"k8s.io/apimachinery/pkg/api/equality"
 
 	"github.com/go-logr/logr"
@@ -19,10 +20,7 @@ type IAMKeyValidator struct {
 func (v *IAMKeyValidator) ValidateCreate(_ context.Context, obj runtime.Object) error {
 	iamKey := obj.(*exoscalev1.IAMKey)
 	v.log.V(1).Info("Validate create", "name", iamKey.Name)
-	if len(iamKey.Spec.ForProvider.Services.SOS.Buckets) == 0 {
-		return fmt.Errorf("an IAMKey named %q should have at least 1 allowed bucket",
-			iamKey.Name)
-	}
+
 	secretRef := iamKey.Spec.WriteConnectionSecretToReference
 	if secretRef == nil || secretRef.Name == "" || secretRef.Namespace == "" {
 		return fmt.Errorf(".spec.writeConnectionSecretToRef.name and .spec.writeConnectionSecretToRef.namespace are required")

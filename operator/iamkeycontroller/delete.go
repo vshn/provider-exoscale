@@ -2,11 +2,11 @@ package iamkeycontroller
 
 import (
 	"context"
+
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscalesdk "github.com/exoscale/egoscale/v2"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
@@ -33,15 +33,16 @@ func (p *IAMKeyPipeline) deleteIAMKey(ctx *pipelineContext) error {
 	log := controllerruntime.LoggerFrom(ctx)
 	iamKey := ctx.iamKey
 
-	err := p.exoscaleClient.RevokeIAMAccessKey(ctx, iamKey.Spec.ForProvider.Zone, &exoscalesdk.IAMAccessKey{
-		Key: &iamKey.Status.AtProvider.KeyID,
-	})
+	log.Info("Starting IAM key deletion", "keyName", iamKey.Spec.ForProvider.KeyName)
+
+	_, err := ExecuteRequest(ctx, "DELETE", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+iamKey.Status.AtProvider.KeyID, nil)
 	if err != nil {
+		log.Error(err, "Cannot delete apiKey", "keyName", iamKey.Status.AtProvider.KeyID)
 		return err
 	}
-	log.V(1).Info("Deleted IAM key in exoscale", "keyID", iamKey.Status.AtProvider.KeyID)
-	return nil
+	log.Info("Iam key deleted successfully", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
 
+	return nil
 }
 
 func (p *IAMKeyPipeline) emitDeletionEvent(ctx *pipelineContext) error {

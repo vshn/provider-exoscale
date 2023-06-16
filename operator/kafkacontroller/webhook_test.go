@@ -2,10 +2,11 @@ package kafkacontroller
 
 import (
 	"context"
+	"testing"
+
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/stretchr/testify/mock"
 	"github.com/vshn/provider-exoscale/internal/operatortest"
-	"testing"
 
 	"github.com/go-logr/logr"
 	"github.com/stretchr/testify/assert"

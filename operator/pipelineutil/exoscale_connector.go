@@ -76,7 +76,9 @@ func fetchProviderConfig(ctx *connectContext) error {
 func fetchSecret(ctx *connectContext) error {
 	secretRef := ctx.providerConfig.Spec.Credentials.APISecretRef
 	ctx.credentialSecret = &corev1.Secret{}
+
 	err := ctx.kube.Get(ctx, types.NamespacedName{Name: secretRef.Name, Namespace: secretRef.Namespace}, ctx.credentialSecret)
+
 	return errors.Wrap(err, "cannot get secret with API token")
 }
 
