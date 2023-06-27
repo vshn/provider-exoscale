@@ -25,24 +25,19 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	corev1 "k8s.io/api/core/v1"
 
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
 	// KeyIDAnnotationKey is the annotation key where the IAMKey ID is stored.
-	KeyIDAnnotationKey = "exoscale.crossplane.io/key-id"
+	KeyIDAnnotationKey  = "exoscale.crossplane.io/key-id"
+	RoleIDAnnotationKey = "exoscale.crossplane.io/role-id"
 	// BucketResourceType is the resource type bucket to which the IAMKey has access to.
 	BucketResourceType = "bucket"
 	//SOSResourceDomain is the resource domain to which the IAMKey has access to.
 	SOSResourceDomain = "sos"
 )
-
-// IamKeyName as global variable
-var IamRoleName = "appcat-iam-sos-role"
 
 // IAMKeyPipeline provisions IAMKeys on exoscale.com
 type IAMKeyPipeline struct {
@@ -152,7 +147,6 @@ func signRequest(req *http.Request, expiration time.Time, apiKey, apiSecret stri
 
 func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalledBody interface{}) (*http.Response, error) {
 	log := controllerruntime.LoggerFrom(ctx)
-	jsoned := ""
 	req := &http.Request{
 		Method: method,
 		URL: &url.URL{
@@ -173,38 +167,40 @@ func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalled
 		}
 
 		req.Body = io.NopCloser(bytes.NewReader(jsonbt))
-		jsoned = string(jsonbt)
 	}
 
-	config, err := rest.InClusterConfig()
-	if err != nil {
-		log.Error(err, "Cannot get in cluster config", "path: ", path, "host: ", host, "method: ", method, "body: ", jsoned)
-		return nil, err
-	}
-	// Create a Kubernetes clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Error(err, "Cannot create kubernetes clientset")
-		return nil, err
-	}
+	// config, err := rest.InClusterConfig()
+	// if err != nil {
+	// 	log.Error(err, "Cannot get in cluster config", "path: ", path, "host: ", host, "method: ", method, "body: ", jsoned)
+	// 	return nil, err
+	// }
+	// // Create a Kubernetes clientset
+	// clientset, err := kubernetes.NewForConfig(config)
+	// if err != nil {
+	// 	log.Error(err, "Cannot create kubernetes clientset")
+	// 	return nil, err
+	// }
 
-	// Specify the namespace and secret name
-	namespace := "syn-crossplane"
-	secretName := "exoscale-api-access"
+	// // Specify the namespace and secret name
+	// namespace := "syn-crossplane"
+	// secretName := "exoscale-api-access"
 
-	// Retrieve the secret
-	secret, err := clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
-	if err != nil {
-		log.Error(err, "Cannot get secret", "namespace: ", namespace, "secretName: ", secretName)
-		return nil, err
-	}
+	// // Retrieve the secret
+	// secret, err := clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
+	// if err != nil {
+	// 	log.Error(err, "Cannot get secret", "namespace: ", namespace, "secretName: ", secretName)
+	// 	return nil, err
+	// }
+
+	//fmt.Println(string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]), req.URL.String())
 
 	if req.Method == "POST" {
 		req.Header.Set("Content-Type", "application/json")
 	}
 
 	// sign request
-	err = signRequest(req, time.Now().Add(5*time.Minute), string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]))
+	//err := signRequest(req, time.Now().Add(5*time.Minute), string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]))
+	err := signRequest(req, time.Now().Add(5*time.Minute), "replace-me-key", "replace-me-secret")
 	if err != nil {
 		log.Error(err, "Cannot sign request")
 		return nil, err
@@ -213,8 +209,19 @@ func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalled
 	// send request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Error(err, "Cannot send request", "path: ", path, "host: ", host, "method: ", method, "body: ", jsoned)
+		log.Error(err, "Cannot send request", "path: ", path, "host: ", host, "method: ", method)
 		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		log.Error(err, "Request returned non 200 status code", "path: ", path, "host: ", host, "method: ", method, "status code: ", resp.StatusCode)
+		resp1, err := io.ReadAll(resp.Body)
+		if err != nil {
+			log.Error(err, "Cannot read response body")
+			return nil, err
+		}
+		log.Error(err, "Response body", "body: ", string(resp1))
+		return nil, errors.New("request returned non 200 status code")
+
 	}
 
 	return resp, nil

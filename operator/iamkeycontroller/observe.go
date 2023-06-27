@@ -12,6 +12,7 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exooapi "github.com/exoscale/egoscale/v2/oapi"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	corev1 "k8s.io/api/core/v1"
@@ -41,7 +42,7 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 	pctx := &pipelineContext{Context: ctx, iamKey: iamKey}
 	err := p.getIAMKey(pctx)
 	if err != nil {
-		return managed.ExternalObservation{}, resource.Ignore(isNotFound, err)
+		return managed.ExternalObservation{ResourceExists: false}, resource.Ignore(isNotFound, err)
 	}
 
 	pipe := pipeline.NewPipeline[*pipelineContext]()
@@ -72,46 +73,28 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 // getIAMKey fetches an existing IAM key from the project associated with the API Key and Secret.
 func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
 	log := controllerruntime.LoggerFrom(ctx)
-	found := false
-	keyList := IamKeysList{}
+	keyDetails := exooapi.IamApiKey{}
 
 	// send request
-	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key", nil)
+	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.ObjectMeta.Annotations[KeyIDAnnotationKey], nil)
 	if err != nil {
 		log.Error(err, "Cannot list apiKeys")
 		return err
 	}
 
-	err = json.NewDecoder(resp.Body).Decode(&keyList)
+	err = json.NewDecoder(resp.Body).Decode(&keyDetails)
 	if err != nil {
-		log.Error(err, "Cannot unmarshall response to keyList")
+		log.Error(err, "Cannot decode response body (IamKeyGet)")
 		return err
 	}
 
-	if len(keyList.IamKeys) == 0 {
-		log.Info("No IAM Keys found")
-		panic("No IAM Keys found")
-	} else {
-		fmt.Println("IAM Keys found: ", len(keyList.IamKeys))
+	ctx.iamExoscaleKey = &exoscalesdk.IAMAccessKey{
+		Key:  keyDetails.Key,
+		Name: keyDetails.Name,
 	}
 
-	for i, val := range keyList.IamKeys {
-		fmt.Println(i, *val.Name, *val.Key)
-		if *val.Name == ctx.iamKey.Spec.ForProvider.KeyName {
-			ctx.iamExoscaleKey = &exoscalesdk.IAMAccessKey{
-				Key:  val.Key,
-				Name: val.Name,
-			}
-			found = true
-			log.Info("IAM Key exists, observation successfull", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
-		}
-	}
+	log.Info("IAM key fetched successfully", "keyName", ctx.iamKey.Spec.ForProvider.KeyName, "response", resp.Status)
 
-	if !found {
-		log.Info("IAM Key not found, observation failed", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
-		return fmt.Errorf("IAM Key not found, observation failed")
-	}
-	log.Info("breakpoint")
 	return nil
 
 }
@@ -143,19 +126,6 @@ func (p *IAMKeyPipeline) checkSecret(ctx *pipelineContext) error {
 	ctx.iamExoscaleKey.Secret = &secret
 	fmt.Println("before exit checkSecret")
 	return nil
-}
-
-func getBuckets(iamResources []exoscalesdk.IAMAccessKeyResource) []string {
-	buckets := make([]string, 0, len(iamResources))
-	if len(iamResources) == 0 {
-		return buckets
-	}
-	for _, iamResource := range iamResources {
-		if iamResource.Domain == SOSResourceDomain {
-			buckets = append(buckets, iamResource.ResourceName)
-		}
-	}
-	return buckets
 }
 
 func isNotFound(err error) bool {
