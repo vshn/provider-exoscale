@@ -29,5 +29,11 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	if err != nil {
 		return nil, err
 	}
-	return NewPipeline(c.Kube, c.Recorder, exo.Exoscale), nil
+
+	apiKey, apiSecret, err := pipelineutil.FetchProviderConfig(ctx, c.Kube, iamKey.GetProviderConfigName())
+	if err != nil {
+		return nil, err
+	}
+
+	return NewPipeline(c.Kube, c.Recorder, exo.Exoscale, apiKey, apiSecret), nil
 }

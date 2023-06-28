@@ -76,7 +76,7 @@ func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
 	keyDetails := exooapi.IamApiKey{}
 
 	// send request
-	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.Status.AtProvider.KeyID, nil)
+	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.Status.AtProvider.KeyID, p.apiKey, p.apiSecret, nil)
 	if err != nil {
 		log.Error(err, "Cannot list apiKeys")
 		return err

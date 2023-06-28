@@ -44,6 +44,8 @@ type IAMKeyPipeline struct {
 	kube           client.Client
 	recorder       event.Recorder
 	exoscaleClient *exoscalesdk.Client
+	apiKey         string
+	apiSecret      string
 }
 
 type pipelineContext struct {
@@ -62,11 +64,13 @@ type IamKeysList struct {
 }
 
 // NewPipeline returns a new instance of IAMKeyPipeline.
-func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *exoscalesdk.Client) *IAMKeyPipeline {
+func NewPipeline(client client.Client, recorder event.Recorder, exoscaleClient *exoscalesdk.Client, apiKey, apiSecret string) *IAMKeyPipeline {
 	return &IAMKeyPipeline{
 		kube:           client,
 		recorder:       recorder,
 		exoscaleClient: exoscaleClient,
+		apiKey:         apiKey,
+		apiSecret:      apiSecret,
 	}
 }
 
@@ -145,7 +149,7 @@ func signRequest(req *http.Request, expiration time.Time, apiKey, apiSecret stri
 	return nil
 }
 
-func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalledBody interface{}) (*http.Response, error) {
+func ExecuteRequest(ctx context.Context, method, host, path, access_key, access_secret string, unMarshalledBody interface{}) (*http.Response, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	req := &http.Request{
 		Method: method,
@@ -169,38 +173,12 @@ func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalled
 		req.Body = io.NopCloser(bytes.NewReader(jsonbt))
 	}
 
-	// config, err := rest.InClusterConfig()
-	// if err != nil {
-	// 	log.Error(err, "Cannot get in cluster config", "path: ", path, "host: ", host, "method: ", method, "body: ", jsoned)
-	// 	return nil, err
-	// }
-	// // Create a Kubernetes clientset
-	// clientset, err := kubernetes.NewForConfig(config)
-	// if err != nil {
-	// 	log.Error(err, "Cannot create kubernetes clientset")
-	// 	return nil, err
-	// }
-
-	// // Specify the namespace and secret name
-	// namespace := "syn-crossplane"
-	// secretName := "exoscale-api-access"
-
-	// // Retrieve the secret
-	// secret, err := clientset.CoreV1().Secrets(namespace).Get(ctx, secretName, metav1.GetOptions{})
-	// if err != nil {
-	// 	log.Error(err, "Cannot get secret", "namespace: ", namespace, "secretName: ", secretName)
-	// 	return nil, err
-	// }
-
-	//fmt.Println(string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]), req.URL.String())
-
 	if req.Method == "POST" {
 		req.Header.Set("Content-Type", "application/json")
 	}
 
 	// sign request
-	//err := signRequest(req, time.Now().Add(5*time.Minute), string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]))
-	err := signRequest(req, time.Now().Add(5*time.Minute), "xx", "xx")
+	err := signRequest(req, time.Now().Add(5*time.Minute), string(access_key), string(access_secret))
 	if err != nil {
 		log.Error(err, "Cannot sign request")
 		return nil, err

@@ -37,14 +37,14 @@ func (p *IAMKeyPipeline) deleteIAMKey(ctx *pipelineContext) error {
 
 	log.Info("Starting IAM key deletion", "keyName", iamKey.Spec.ForProvider.KeyName)
 
-	_, err := ExecuteRequest(ctx, "DELETE", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+iamKey.Status.AtProvider.KeyID, nil)
+	_, err := ExecuteRequest(ctx, "DELETE", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+iamKey.Status.AtProvider.KeyID, p.apiKey, p.apiSecret, nil)
 	if err != nil {
 		log.Error(err, "Cannot delete apiKey", "keyName", iamKey.Status.AtProvider.KeyID)
 		return err
 	}
 	log.Info("Iam key deleted successfully", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
 
-	_, err = ExecuteRequest(ctx, "DELETE", ctx.iamKey.Spec.ForProvider.Zone, "/v2/iam-role/"+iamKey.Annotations[RoleIDAnnotationKey], nil)
+	_, err = ExecuteRequest(ctx, "DELETE", ctx.iamKey.Spec.ForProvider.Zone, "/v2/iam-role/"+iamKey.Status.AtProvider.KeyID, p.apiKey, p.apiSecret, nil)
 	if err != nil {
 		log.Error(err, "Cannot delete iamRole", "iamrole", iamKey.Annotations[RoleIDAnnotationKey])
 		return err

@@ -99,3 +99,25 @@ func createExoscaleClient(ctx *connectContext) error {
 	ctx.exoscaleClient = ec
 	return err
 }
+
+// FetchProviderConfig returns the apiKey and apiSecret of the given providerConfigRef
+func FetchProviderConfig(ctx context.Context, kube client.Client, providerConfigRef string) (string, string, error) {
+	pctx := &connectContext{
+		Context:            ctx,
+		kube:               kube,
+		ProviderConfigName: providerConfigRef,
+	}
+
+	pipe := pipeline.NewPipeline[*connectContext]()
+	pipe.WithBeforeHooks(DebugLogger(pctx)).
+		WithSteps(
+			pipe.NewStep("fetch provider config", fetchProviderConfig),
+			pipe.NewStep("fetch secret", fetchSecret),
+			pipe.NewStep("validate secret", validateSecret),
+		)
+	err := pipe.RunWithContext(pctx)
+	if err != nil {
+		return "", "", err
+	}
+	return pctx.apiKey, pctx.apiSecret, nil
+}
