@@ -42,7 +42,7 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 	pctx := &pipelineContext{Context: ctx, iamKey: iamKey}
 	err := p.getIAMKey(pctx)
 	if err != nil {
-		return managed.ExternalObservation{ResourceExists: false}, resource.Ignore(isNotFound, err)
+		return managed.ExternalObservation{ResourceExists: false}, nil
 	}
 
 	pipe := pipeline.NewPipeline[*pipelineContext]()
@@ -76,7 +76,7 @@ func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
 	keyDetails := exooapi.IamApiKey{}
 
 	// send request
-	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.ObjectMeta.Annotations[KeyIDAnnotationKey], nil)
+	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.Status.AtProvider.KeyID, nil)
 	if err != nil {
 		log.Error(err, "Cannot list apiKeys")
 		return err

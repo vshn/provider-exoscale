@@ -200,7 +200,7 @@ func ExecuteRequest(ctx context.Context, method, host, path string, unMarshalled
 
 	// sign request
 	//err := signRequest(req, time.Now().Add(5*time.Minute), string(secret.Data["EXOSCALE_API_KEY"]), string(secret.Data["EXOSCALE_API_SECRET"]))
-	err := signRequest(req, time.Now().Add(5*time.Minute), "replace-me-key", "replace-me-secret")
+	err := signRequest(req, time.Now().Add(5*time.Minute), "xx", "xx")
 	if err != nil {
 		log.Error(err, "Cannot sign request")
 		return nil, err

@@ -89,7 +89,6 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 		if *val.Name == iamKey.Spec.ForProvider.KeyName {
 			iamRoleNameFound = true
 			iamRoleID = *val.Id
-			fmt.Println("ZNALEZIONO KURWA: ", iamRoleID)
 		}
 	}
 
