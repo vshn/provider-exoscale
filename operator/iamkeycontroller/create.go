@@ -161,6 +161,7 @@ func (p *IAMKeyPipeline) createIAMKey(ctx *pipelineContext) error {
 
 	metav1.SetMetaDataAnnotation(&ctx.iamKey.ObjectMeta, KeyIDAnnotationKey, *ctx.iamExoscaleKey.Key)
 	metav1.SetMetaDataAnnotation(&ctx.iamKey.ObjectMeta, RoleIDAnnotationKey, iamRoleID)
+	metav1.SetMetaDataAnnotation(&ctx.iamKey.ObjectMeta, "newKeyType", "true")
 	log.Info("IAM Key created", "keyName", ctx.iamKey.Spec.ForProvider.KeyName)
 	defer resp.Body.Close()
 	return nil
