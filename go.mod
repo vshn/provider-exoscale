@@ -6,13 +6,13 @@ require (
 	github.com/ccremer/go-command-pipeline v0.20.0
 	github.com/crossplane/crossplane-runtime v0.18.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
-	github.com/exoscale/egoscale v0.90.1
+	github.com/exoscale/egoscale v0.100.1
 	github.com/go-logr/logr v1.2.3
 	github.com/go-logr/zapr v1.2.3
 	github.com/google/go-cmp v0.5.8
 	github.com/hashicorp/go-version v1.6.0
 	github.com/minio/minio-go/v7 v7.0.45
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.1
 	github.com/urfave/cli/v2 v2.19.2
 	github.com/vektra/mockery/v2 v2.14.1
 	go.uber.org/zap v1.23.0
@@ -88,7 +88,7 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.12.0 // indirect
-	github.com/stretchr/objx v0.4.0 // indirect
+	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20201216005158-039620a65673 // indirect
 	go.uber.org/atomic v1.9.0 // indirect

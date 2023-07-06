@@ -26,6 +26,7 @@ func (p *ProvisioningPipeline) Observe(ctx context.Context, mg resource.Managed)
 
 	bucketName := bucket.GetBucketName()
 	exists, err := bucketExistsFn(ctx, p.minioClient, bucketName)
+
 	if err != nil {
 		errResp := minio.ToErrorResponse(err)
 		if errResp.StatusCode == http.StatusForbidden {
