@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/url"
+	"reflect"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -78,6 +79,7 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 		WithSteps(
 			pipe.NewStep("fetch credentials secret", p.fetchCredentialsSecret),
 			pipe.NewStep("check credentials", p.checkSecret),
+			pipe.NewStep("check if role is up to date", p.isRoleUptodate),
 		).RunWithContext(pctx)
 
 	if err != nil {
@@ -108,7 +110,7 @@ func (p *IAMKeyPipeline) getIAMKey(ctx *pipelineContext) error {
 	keyDetails := exooapi.IamApiKey{}
 
 	// send request
-	resp, err := ExecuteRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.Status.AtProvider.KeyID, p.apiKey, p.apiSecret, nil)
+	resp, err := executeRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/api-key/"+ctx.iamKey.Status.AtProvider.KeyID, p.apiKey, p.apiSecret, nil)
 	if err != nil {
 		return err
 	}
@@ -188,4 +190,47 @@ func isNotFound(err error) bool {
 		return err.(*url.Error).Err.Error() == "resource not found"
 	}
 	return false
+}
+
+func (p *IAMKeyPipeline) isRoleUptodate(ctx *pipelineContext) error {
+
+	// Only new keys support the roles. We don't handle legacy keys.
+	if _, exists := ctx.iamKey.Annotations["newKeyType"]; !exists {
+		return nil
+	}
+
+	errNotUpToDate := fmt.Errorf("roles are not equal, IAM Key is not up to date")
+
+	obsRole, err := p.observeRole(ctx)
+	if err != nil {
+		return errNotUpToDate
+	}
+
+	desiredRole := createRole(ctx.iamKey.Spec.ForProvider.KeyName, ctx.iamKey.Spec.ForProvider.Services.SOS.Buckets)
+
+	// We're only interested in the policy as most fields in the role can't be
+	// changed anyway after creation.
+	if !reflect.DeepEqual(obsRole.Policy, desiredRole.Policy) {
+		return errNotUpToDate
+	}
+
+	return nil
+}
+
+func (p *IAMKeyPipeline) observeRole(ctx *pipelineContext) (*exooapi.IamRole, error) {
+
+	resp, err := executeRequest(ctx, "GET", ctx.iamKey.Spec.ForProvider.Zone, "/v2/iam-role/"+ctx.iamKey.Status.AtProvider.RoleID, p.apiKey, p.apiSecret, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() { _ = resp.Body.Close() }()
+
+	respRole := &exooapi.IamRole{}
+	err = json.NewDecoder(resp.Body).Decode(respRole)
+	if err != nil {
+		return nil, err
+	}
+
+	return respRole, nil
 }
