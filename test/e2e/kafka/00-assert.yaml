@@ -21,7 +21,7 @@ spec:
     size:
       plan: startup-2
     zone: ch-dk-2
-    version: '3.2'
+    version: '3.5'
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:

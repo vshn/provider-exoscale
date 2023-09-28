@@ -149,7 +149,7 @@ func signRequest(req *http.Request, expiration time.Time, apiKey, apiSecret stri
 	return nil
 }
 
-func ExecuteRequest(ctx context.Context, method, host, path, access_key, access_secret string, unMarshalledBody interface{}) (*http.Response, error) {
+func executeRequest(ctx context.Context, method, host, path, access_key, access_secret string, unMarshalledBody interface{}) (*http.Response, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	req := &http.Request{
 		Method: method,
@@ -173,7 +173,7 @@ func ExecuteRequest(ctx context.Context, method, host, path, access_key, access_
 		req.Body = io.NopCloser(bytes.NewReader(jsonbt))
 	}
 
-	if req.Method == "POST" {
+	if req.Method == "POST" || req.Method == "PUT" {
 		req.Header.Set("Content-Type", "application/json")
 	}
 
