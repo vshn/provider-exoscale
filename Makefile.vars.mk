@@ -26,7 +26,7 @@ UPBOUND_PACKAGE_IMG ?= $(UPBOUND_CONTAINER_REGISTRY)/$(PROJECT_OWNER)/$(PROJECT_
 ## KIND:setup
 
 # https://hub.docker.com/r/kindest/node/tags
-KIND_NODE_VERSION ?= v1.24.0
+KIND_NODE_VERSION ?= v1.26.6
 KIND_IMAGE ?= docker.io/kindest/node:$(KIND_NODE_VERSION)
 KIND_KUBECONFIG ?= $(kind_dir)/kind-kubeconfig-$(KIND_NODE_VERSION)
 KIND_CLUSTER ?= $(PROJECT_NAME)-$(KIND_NODE_VERSION)
