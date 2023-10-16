@@ -291,7 +291,7 @@ func (ts *RedisControllerTestSuite) getRedisResponse(mg *exoscalev1.Redis, setti
 	providerSpec := mg.Spec.ForProvider
 	master := oapi.DbaasNodeStateRoleMaster
 	running := oapi.EnumServiceStateRunning
-
+	uri := "https://foo:bar@baz:5321"
 	return &oapi.GetDbaasServiceRedisResponse{
 		JSON200: &oapi.DbaasServiceRedis{
 			Maintenance: &oapi.DbaasServiceMaintenance{
@@ -318,7 +318,7 @@ func (ts *RedisControllerTestSuite) getRedisResponse(mg *exoscalev1.Redis, setti
 			}{
 				Uri: &[]string{"https://foo:bar@baz:5321"},
 			},
-			Uri:       nil,
+			Uri:       &uri,
 			UriParams: nil,
 			Users:     nil,
 			Version:   nil,

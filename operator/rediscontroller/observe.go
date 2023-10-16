@@ -106,10 +106,11 @@ func isUpToDate(current, external *exoscalev1.RedisParameters, log logr.Logger) 
 }
 
 func connectionDetails(in oapi.DbaasServiceRedis) (map[string][]byte, error) {
-	if in.ConnectionInfo == nil || len(*in.ConnectionInfo.Uri) == 0 {
+	if in.Uri == nil {
 		return map[string][]byte{}, nil
 	}
-	uri := (*in.ConnectionInfo.Uri)[0]
+
+	uri := *in.Uri
 	parsed, err := url.Parse(uri)
 	if err != nil {
 		return nil, err
