@@ -31,17 +31,18 @@ func set(s []string) map[string]struct{} {
 	return m
 }
 
-func CompareSettings(a, b runtime.RawExtension) bool {
-	sa, err := ToMap(a)
+// CompareSettings compares 2 instances of service settings
+// Some DBaaS add default settings to their services, which lead to unequal settings between
+// managed and provider's resource
+// Ignore added provider configuration
+func CompareSettings(managed, provider runtime.RawExtension) bool {
+	sa, err := ToMap(managed)
 	if err != nil {
 		// we have to assume they're not the same
 		return false
 	}
-	sb, err := ToMap(b)
+	sb, err := ToMap(provider)
 	if err != nil {
-		return false
-	}
-	if len(sa) != len(sb) {
 		return false
 	}
 	for k, va := range sa {

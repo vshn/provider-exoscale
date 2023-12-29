@@ -346,7 +346,7 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 	})
 	instance.Spec.ForProvider.KafkaSettings = setting
 	found := sampleAPIKafka("foo")
-	found.KafkaRestSettings = &map[string]interface{}{
+	found.KafkaSettings = &map[string]interface{}{
 		"foo":   "bar",
 		"count": 2,
 	}
@@ -361,7 +361,7 @@ func TestObserve_Outdated_Settings(t *testing.T) {
 		assert.NoError(t, err)
 		require.NotNil(t, res)
 		assert.True(t, res.ResourceExists, "report resource exits")
-		assert.False(t, res.ResourceUpToDate, "report resource not uptodate")
+		assert.False(t, res.ResourceUpToDate, "report resource not updated")
 	})
 }
 
