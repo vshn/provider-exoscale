@@ -13,7 +13,7 @@ require (
 	github.com/hashicorp/go-version v1.6.0
 	github.com/minio/minio-go/v7 v7.0.45
 	github.com/stretchr/testify v1.8.1
-	github.com/urfave/cli/v2 v2.19.2
+	github.com/urfave/cli/v2 v2.27.1
 	github.com/vektra/mockery/v2 v2.14.1
 	go.uber.org/zap v1.23.0
 	k8s.io/api v0.25.2
