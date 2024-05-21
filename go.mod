@@ -7,7 +7,7 @@ require (
 	github.com/crossplane/crossplane-runtime v0.18.0
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/exoscale/egoscale v0.100.1
-	github.com/go-logr/logr v1.2.3
+	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.2.3
 	github.com/google/go-cmp v0.5.8
 	github.com/hashicorp/go-version v1.6.0
