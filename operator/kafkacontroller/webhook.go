@@ -54,14 +54,16 @@ func (v *Validator) validateCreateWithExoClient(ctx context.Context, obj runtime
 	}
 	v.log.V(2).WithValues("instance", instance).Info("validate create")
 
-	availableVersions, err := v.getAvailableVersions(ctx, exo)
-	if err != nil {
-		return err
-	}
+	if instance.Spec.ForProvider.Version != "" {
+		availableVersions, err := v.getAvailableVersions(ctx, exo)
+		if err != nil {
+			return err
+		}
 
-	err = v.validateVersion(ctx, obj, *availableVersions)
-	if err != nil {
-		return err
+		err = v.validateVersion(ctx, obj, *availableVersions)
+		if err != nil {
+			return err
+		}
 	}
 
 	return validateSpec(instance.Spec.ForProvider)
