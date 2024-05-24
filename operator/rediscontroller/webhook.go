@@ -3,6 +3,7 @@ package rediscontroller
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
@@ -19,30 +20,30 @@ type Validator struct {
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
 	instance := obj.(*exoscalev1.Redis)
 	v.log.V(1).Info("validate create")
 
-	return v.validateSpec(instance)
+	return nil, v.validateSpec(instance)
 }
 
 // ValidateUpdate implements admission.CustomValidator.
-func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
+func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	newInstance := newObj.(*exoscalev1.Redis)
 	oldInstance := oldObj.(*exoscalev1.Redis)
 	v.log.V(1).Info("validate update")
 
 	err := v.validateSpec(newInstance)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return v.compare(oldInstance, newInstance)
+	return nil, v.compare(oldInstance, newInstance)
 }
 
 // ValidateDelete implements admission.CustomValidator.
-func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	v.log.V(1).Info("validate delete (noop)")
-	return nil
+	return nil, nil
 }
 
 func (v *Validator) validateSpec(obj *exoscalev1.Redis) error {

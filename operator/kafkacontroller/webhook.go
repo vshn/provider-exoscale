@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/exoscale/egoscale/v2/oapi"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 	"strings"
 
 	exoscalesdk "github.com/exoscale/egoscale/v2"
@@ -37,14 +38,14 @@ type Validator struct {
 }
 
 // ValidateCreate validates the spec of a created kafka resource.
-func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	instance := obj.(*exoscalev1.Kafka)
 	v.log.V(1).Info("get kafka available versions")
 	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", instance.Spec.ForProvider.Zone)))
 	if err != nil {
-		return fmt.Errorf("open exoscale client failed: %w", err)
+		return nil, fmt.Errorf("open exoscale client failed: %w", err)
 	}
-	return v.validateCreateWithExoClient(ctx, obj, exo.Exoscale)
+	return nil, v.validateCreateWithExoClient(ctx, obj, exo.Exoscale)
 }
 
 func (v *Validator) validateCreateWithExoClient(ctx context.Context, obj runtime.Object, exo oapi.ClientWithResponsesInterface) error {
@@ -93,28 +94,28 @@ func (v *Validator) validateVersion(_ context.Context, obj runtime.Object, avail
 }
 
 // ValidateUpdate validates the spec of an updated kafka resource and checks that no immutable field has been modified.
-func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
+func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	newInstance, ok := newObj.(*exoscalev1.Kafka)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for kafka webhook", newObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for kafka webhook", newObj)
 	}
 	oldInstance, ok := oldObj.(*exoscalev1.Kafka)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for kafka webhook", oldObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for kafka webhook", oldObj)
 	}
 	v.log.V(2).WithValues("old", oldInstance, "new", newInstance).Info("VALIDATE update")
 
 	err := validateSpec(newInstance.Spec.ForProvider)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return validateImmutable(*oldInstance, *newInstance)
+	return nil, validateImmutable(*oldInstance, *newInstance)
 }
 
 // ValidateDelete validates a delete. Currently does not validate anything.
-func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	v.log.V(2).Info("validate delete (noop)")
-	return nil
+	return nil, nil
 }
 
 func validateSpec(params exoscalev1.KafkaParameters) error {

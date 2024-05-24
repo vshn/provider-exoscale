@@ -3,6 +3,7 @@ package opensearchcontroller
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	exoscalesdk "github.com/exoscale/egoscale/v2"
@@ -24,24 +25,24 @@ type Validator struct {
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	openSearchInstance, ok := obj.(*exoscalev1.OpenSearch)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", obj)
+		return nil, fmt.Errorf("invalid managed resource type %T for opensearch webhook", obj)
 	}
 	v.log.V(1).Info("validate create")
 
 	availableVersions, err := v.getAvailableVersions(ctx, obj)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = v.validateVersion(ctx, obj, *availableVersions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return v.validateSpec(openSearchInstance)
+	return nil, v.validateSpec(openSearchInstance)
 }
 
 func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
@@ -76,28 +77,28 @@ func (v *Validator) validateVersion(_ context.Context, obj runtime.Object, avail
 }
 
 // ValidateUpdate implements admission.CustomValidator.
-func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
+func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	newInstance, ok := newObj.(*exoscalev1.OpenSearch)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", newObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for opensearch webhook", newObj)
 	}
 	oldInstance, ok := oldObj.(*exoscalev1.OpenSearch)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for opensearch webhook", oldObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for opensearch webhook", oldObj)
 	}
 	v.log.V(1).Info("validate update")
 
 	err := v.validateSpec(newInstance)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return v.compare(oldInstance, newInstance)
+	return nil, v.compare(oldInstance, newInstance)
 }
 
 // ValidateDelete implements admission.CustomValidator.
-func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	v.log.V(1).Info("validate delete (noop)")
-	return nil
+	return nil, nil
 }
 
 func (v *Validator) validateSpec(obj *exoscalev1.OpenSearch) error {

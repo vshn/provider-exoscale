@@ -99,9 +99,7 @@ func (ts *Suite) SetupSuite() {
 	ts.Client = k8sClient
 
 	mgr, err := ctrl.NewManager(config, ctrl.Options{
-		MetricsBindAddress: "0",
-		Scheme:             ts.Scheme,
-		Port:               0,
+		Scheme: ts.Scheme,
 	})
 	ts.Require().NoError(err)
 	ts.Require().NotNil(mgr)

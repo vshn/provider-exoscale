@@ -3,6 +3,7 @@ package mysqlcontroller
 import (
 	"context"
 	"fmt"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	exoscalesdk "github.com/exoscale/egoscale/v2"
 	"github.com/go-logr/logr"
@@ -22,25 +23,25 @@ type Validator struct {
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	mySQLInstance, ok := obj.(*exoscalev1.MySQL)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for mysql webhook", obj)
+		return nil, fmt.Errorf("invalid managed resource type %T for mysql webhook", obj)
 	}
 
 	v.log.V(1).Info("validate create")
 
 	availableVersions, err := v.getAvailableVersions(ctx, obj)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	err = v.validateVersion(ctx, obj, *availableVersions)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return validateSpec(mySQLInstance)
+	return nil, validateSpec(mySQLInstance)
 }
 
 func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
@@ -75,28 +76,28 @@ func (v *Validator) validateVersion(ctx context.Context, obj runtime.Object, ava
 }
 
 // ValidateUpdate implements admission.CustomValidator.
-func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) error {
+func (v *Validator) ValidateUpdate(_ context.Context, oldObj, newObj runtime.Object) (admission.Warnings, error) {
 	newInstance, ok := newObj.(*exoscalev1.MySQL)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for mysql webhook", newObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for mysql webhook", newObj)
 	}
 	oldInstance, ok := oldObj.(*exoscalev1.MySQL)
 	if !ok {
-		return fmt.Errorf("invalid managed resource type %T for mysql webhook", oldObj)
+		return nil, fmt.Errorf("invalid managed resource type %T for mysql webhook", oldObj)
 	}
 	v.log.V(1).Info("validate update")
 
 	err := validateSpec(newInstance)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return validateImmutable(*oldInstance, *newInstance)
+	return nil, validateImmutable(*oldInstance, *newInstance)
 }
 
 // ValidateDelete implements admission.CustomValidator.
-func (v *Validator) ValidateDelete(_ context.Context, obj runtime.Object) error {
+func (v *Validator) ValidateDelete(_ context.Context, _ runtime.Object) (admission.Warnings, error) {
 	v.log.V(1).Info("validate delete (noop)")
-	return nil
+	return nil, nil
 }
 
 func validateSpec(obj *exoscalev1.MySQL) error {

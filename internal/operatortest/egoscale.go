@@ -886,6 +886,66 @@ func (_m *ClientWithResponsesInterface) CreateDbaasKafkaUserWithResponse(ctx con
 	return r0, r1
 }
 
+// CreateDbaasMysqlDatabaseWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasMysqlDatabaseWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasMysqlDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasMysqlDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasMysqlDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasMysqlDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasMysqlDatabaseWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasMysqlDatabaseWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasMysqlDatabaseJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasMysqlDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasMysqlDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasMysqlDatabaseJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasMysqlDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasMysqlDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasMysqlDatabaseJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateDbaasMysqlUserWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
 func (_m *ClientWithResponsesInterface) CreateDbaasMysqlUserWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasMysqlUserResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -1059,6 +1119,126 @@ func (_m *ClientWithResponsesInterface) CreateDbaasPgConnectionPoolWithResponse(
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgConnectionPoolJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgDatabaseWithBodyWithResponse provides a mock function with given fields: ctx, serviceName, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgDatabaseWithBodyWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgDatabaseWithResponse provides a mock function with given fields: ctx, serviceName, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgDatabaseWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, body oapi.CreateDbaasPgDatabaseJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgDatabaseJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgDatabaseJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgUpgradeCheckWithBodyWithResponse provides a mock function with given fields: ctx, service, contentType, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgUpgradeCheckWithBodyWithResponse(ctx context.Context, service oapi.DbaasServiceName, contentType string, body io.Reader, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgUpgradeCheckResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, service, contentType, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgUpgradeCheckResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgUpgradeCheckResponse); ok {
+		r0 = rf(ctx, service, contentType, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgUpgradeCheckResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, string, io.Reader, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, service, contentType, body, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// CreateDbaasPgUpgradeCheckWithResponse provides a mock function with given fields: ctx, service, body, reqEditors
+func (_m *ClientWithResponsesInterface) CreateDbaasPgUpgradeCheckWithResponse(ctx context.Context, service oapi.DbaasServiceName, body oapi.CreateDbaasPgUpgradeCheckJSONRequestBody, reqEditors ...oapi.RequestEditorFn) (*oapi.CreateDbaasPgUpgradeCheckResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, service, body)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.CreateDbaasPgUpgradeCheckResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgUpgradeCheckJSONRequestBody, ...oapi.RequestEditorFn) *oapi.CreateDbaasPgUpgradeCheckResponse); ok {
+		r0 = rf(ctx, service, body, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.CreateDbaasPgUpgradeCheckResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.CreateDbaasPgUpgradeCheckJSONRequestBody, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, service, body, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -2416,6 +2596,36 @@ func (_m *ClientWithResponsesInterface) DeleteDbaasKafkaUserWithResponse(ctx con
 	return r0, r1
 }
 
+// DeleteDbaasMysqlDatabaseWithResponse provides a mock function with given fields: ctx, serviceName, databaseName, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasMysqlDatabaseWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, databaseName oapi.DbaasMysqlDatabaseName, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasMysqlDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, databaseName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasMysqlDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasMysqlDatabaseName, ...oapi.RequestEditorFn) *oapi.DeleteDbaasMysqlDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, databaseName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasMysqlDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasMysqlDatabaseName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, databaseName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteDbaasMysqlUserWithResponse provides a mock function with given fields: ctx, serviceName, username, reqEditors
 func (_m *ClientWithResponsesInterface) DeleteDbaasMysqlUserWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, username oapi.DbaasUserUsername, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasMysqlUserResponse, error) {
 	_va := make([]interface{}, len(reqEditors))
@@ -2499,6 +2709,36 @@ func (_m *ClientWithResponsesInterface) DeleteDbaasPgConnectionPoolWithResponse(
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgPoolName, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, serviceName, connectionPoolName, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// DeleteDbaasPgDatabaseWithResponse provides a mock function with given fields: ctx, serviceName, databaseName, reqEditors
+func (_m *ClientWithResponsesInterface) DeleteDbaasPgDatabaseWithResponse(ctx context.Context, serviceName oapi.DbaasServiceName, databaseName oapi.DbaasPgDatabaseName, reqEditors ...oapi.RequestEditorFn) (*oapi.DeleteDbaasPgDatabaseResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, serviceName, databaseName)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.DeleteDbaasPgDatabaseResponse
+	if rf, ok := ret.Get(0).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgDatabaseName, ...oapi.RequestEditorFn) *oapi.DeleteDbaasPgDatabaseResponse); ok {
+		r0 = rf(ctx, serviceName, databaseName, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.DeleteDbaasPgDatabaseResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, oapi.DbaasServiceName, oapi.DbaasPgDatabaseName, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, serviceName, databaseName, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -6699,6 +6939,36 @@ func (_m *ClientWithResponsesInterface) ResetInstanceFieldWithResponse(ctx conte
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, string, oapi.ResetInstanceFieldParamsField, ...oapi.RequestEditorFn) error); ok {
 		r1 = rf(ctx, id, field, reqEditors...)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ResetInstancePasswordWithResponse provides a mock function with given fields: ctx, id, reqEditors
+func (_m *ClientWithResponsesInterface) ResetInstancePasswordWithResponse(ctx context.Context, id string, reqEditors ...oapi.RequestEditorFn) (*oapi.ResetInstancePasswordResponse, error) {
+	_va := make([]interface{}, len(reqEditors))
+	for _i := range reqEditors {
+		_va[_i] = reqEditors[_i]
+	}
+	var _ca []interface{}
+	_ca = append(_ca, ctx, id)
+	_ca = append(_ca, _va...)
+	ret := _m.Called(_ca...)
+
+	var r0 *oapi.ResetInstancePasswordResponse
+	if rf, ok := ret.Get(0).(func(context.Context, string, ...oapi.RequestEditorFn) *oapi.ResetInstancePasswordResponse); ok {
+		r0 = rf(ctx, id, reqEditors...)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*oapi.ResetInstancePasswordResponse)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, ...oapi.RequestEditorFn) error); ok {
+		r1 = rf(ctx, id, reqEditors...)
 	} else {
 		r1 = ret.Error(1)
 	}
