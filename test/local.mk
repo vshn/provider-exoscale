@@ -5,11 +5,15 @@ registry_sentinel = $(kind_dir)/registry_sentinel
 local-install: export KUBECONFIG = $(KIND_KUBECONFIG)
 # for ControllerConfig:
 local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluster.local:5000/$(PROJECT_OWNER)/$(PROJECT_NAME)/package:$(IMG_TAG)
-local-install: kind-load-image crossplane-setup registry-setup .local-package-push  ## Install Operator in local cluster
+local-install: local-debug ## Install Operator in local cluster
 	yq e '.spec.metadata.annotations."local.dev/installed"="$(shell date)"' test/controllerconfig-exoscale.yaml | kubectl apply -f -
 	yq e '.spec.package=strenv(INTERNAL_PACKAGE_IMG)' test/provider-exoscale.yaml | kubectl apply -f -
 	kubectl wait --for condition=Healthy provider.pkg.crossplane.io/provider-exoscale --timeout 60s
 	kubectl -n crossplane-system wait --for condition=Ready $$(kubectl -n crossplane-system get pods -o name -l pkg.crossplane.io/provider=provider-exoscale) --timeout 60s
+
+.PHONY: local-debug
+local-debug: export KUBECONFIG = $(KIND_KUBECONFIG)
+local-debug: kind-load-image crossplane-setup registry-setup .local-package-push  ## Install Operator in local cluster
 
 .PHONY: crossplane-setup
 crossplane-setup: $(crossplane_sentinel) ## Installs Crossplane in kind cluster.
@@ -95,18 +99,6 @@ webhook_key = $(kind_dir)/tls.key
 webhook_cert = $(kind_dir)/tls.crt
 webhook_service_name = provider-exocale.crossplane-system.svc
 
-# Generate webhook certificates.
-# This is only relevant when running in IDE with debugger.
-# When installed as a provider, Crossplane handles the certificate generation.
-.PHONY: webhook-cert
-webhook-cert: $(webhook_cert) ## Generate webhook certificates for out-of-cluster debugging in an IDE
-
-$(webhook_key):
-	openssl req -x509 -newkey rsa:4096 -nodes -keyout $@ --noout -days 3650 -subj "/CN=$(webhook_service_name)" -addext "subjectAltName = DNS:$(webhook_service_name)"
-
-$(webhook_cert): $(webhook_key)
-	openssl req -x509 -key $(webhook_key) -nodes -out $@ -days 3650 -subj "/CN=$(webhook_service_name)" -addext "subjectAltName = DNS:$(webhook_service_name)"
-
 ###
 ### E2E Tests
 ### with KUTTL (https://kuttl.dev)
@@ -148,3 +140,41 @@ run-single-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## Run spec
 		echo "no kubeconfig found"; \
 	fi
 	rm -f $(kuttl_bin) $(mc_bin)
+
+.PHONY: webhook-debug
+webhook_service_name = host.docker.internal
+
+webhook-debug: export KUBECONFIG = $(KIND_KUBECONFIG)
+webhook-debug: $(webhook_cert) ## Creates certificates, patches the webhook registrations and applies everything to the given kube cluster
+webhook-debug:
+	kubectl apply -f package/crds/
+	kubectl apply -f package/webhook/manifests.yaml
+	kubectl apply -f samples/exoscale.crossplane.io_providerconfig.yaml
+	kubectl apply -f samples/lab-provider-keys-exo.yaml
+	cabundle=$$(cat $(kind_dir)/tls.crt | base64) && \
+	kubectl annotate validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration kubectl.kubernetes.io/last-applied-configuration- && \
+	kubectl annotate validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration cert-manager.io/inject-ca-from- && \
+	kubectl get validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration -oyaml | \
+	yq e "with(.webhooks[]; .clientConfig.caBundle = \"$$cabundle\") | with(.webhooks[]; .clientConfig.url = \"https://$(webhook_service_name):9443\" + .clientConfig.service.path) | with(.webhooks[]; del(.clientConfig.service))"  | \
+	kubectl replace -f - && \
+	kubectl annotate validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration kubectl.kubernetes.io/last-applied-configuration-
+
+# Generate webhook certificates.
+# This is only relevant when debugging.
+# Component-appcat installs a proper certificate for this.
+.PHONY: webhook-cert
+webhook-cert: $(webhook_cert) ## Generate webhook certificates for out-of-cluster debugging in an IDE
+
+$(webhook_key):
+	ipsan="" && \
+	if [[ $(webhook_service_name) =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
+		ipsan=", IP:$(webhook_service_name)"; \
+	fi; \
+	openssl req -x509 -newkey rsa:4096 -nodes -keyout $@ --noout -days 3650 -subj "/CN=$(webhook_service_name)" -addext "subjectAltName = DNS:$(webhook_service_name)$$ipsan"
+
+$(webhook_cert): $(webhook_key)
+	ipsan="" && \
+	if [[ $(webhook_service_name) =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$$ ]]; then \
+		ipsan=", IP:$(webhook_service_name)"; \
+	fi; \
+	openssl req -x509 -key $(webhook_key) -nodes -out $@ -days 3650 -subj "/CN=$(webhook_service_name)" -addext "subjectAltName = DNS:$(webhook_service_name)$$ipsan"

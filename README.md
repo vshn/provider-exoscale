@@ -39,27 +39,38 @@ See all targets with `make help`
 ### QuickStart Demonstration
 
 1. Get an API token exoscale.com
-1. `export EXOSCALE_API_KEY=<the-key>`
-1. `export EXOSCALE_API_SECRET=<the-secret>`
-1. `make local-install`
+2. `export EXOSCALE_API_KEY=<the-key>`
+3. `export EXOSCALE_API_SECRET=<the-secret>`
+4. `make local-install`
 
 ### Kubernetes Webhook Troubleshooting
 
 The provider comes with mutating and validation admission webhook server.
 
-To test and troubleshoot the webhooks on the cluster, simply apply your changes with `kubectl`.
+1. `make local-debug`
 
-1.  To debug the webhook in an IDE, we need to generate certificates:
+2.  Set the right host ip:
     ```bash
-    make webhook-cert
+    HOSTIP=$(docker inspect kindev-control-plane | jq '.[0].NetworkSettings.Networks.kind.Gateway') # On kind MacOS/Windows
+    HOSTIP=host.docker.internal # On Docker Desktop distributions
+    HOSTIP=host.lima.internal # On Lima backed Docker distributions
+    For Linux users: `ip -4 addr show dev docker0 | grep inet | awk -F' ' '{print $2}' | awk -F'/' '{print $1}'`
     ```
-2.  Start the operator in your IDE with `WEBHOOK_TLS_CERT_DIR` environment set to `.kind`.
-
-3.  Send an admission request sample of the spec:
+    
+3.  Get an Exoscale API secret and key and create the following secret:
     ```bash
-    # send an admission request
-    curl -k -v -H "Content-Type: application/json" --data @samples/admission.k8s.io_admissionreview.json https://localhost:9443/validate-exoscale-crossplane-io-v1-iamkey
+    EXOSCALE_API_KEY=<your api key>
+    EXOSCALE_API_SECRET=<your api secret>
+    kubectl -n crossplane-system create secret generic api-secret-1 --from-literal=EXOSCALE_API_KEY="$EXOSCALE_API_KEY" --from-literal=EXOSCALE_API_SECRET="$EXOSCALE_API_SECRET"
     ```
+4.  Run the debug target:
+    ```bash
+    make webhook-debug -e webhook_service_name=$HOSTIP
+    ```
+5.  Run the operator from IDE in debug mode with env variable:
+    ```bash
+    WEBHOOK_TLS_CERT_DIR=.kind # or full path if does not work
+    ```    
 
 ### Crossplane Provider Mechanics
 

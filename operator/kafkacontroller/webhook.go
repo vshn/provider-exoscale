@@ -63,7 +63,7 @@ func (v *Validator) validateCreateWithExoClient(ctx context.Context, obj runtime
 
 		err = v.validateVersion(ctx, obj, *availableVersions)
 		if err != nil {
-			return err
+			return fmt.Errorf("invalid version, allowed versions are %v: %w", *availableVersions, err)
 		}
 	}
 
