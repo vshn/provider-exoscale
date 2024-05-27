@@ -22,7 +22,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -162,7 +162,7 @@ func (p *IAMKeyPipeline) createCredentialsSecret(ctx *pipelineContext) error {
 		for k, v := range connDetails {
 			secret.Data[k] = v
 		}
-		secret.Immutable = pointer.Bool(true)
+		secret.Immutable = ptr.To[bool](true)
 
 		err = controllerutil.SetOwnerReference(ctx.iamKey, secret, p.kube.Scheme())
 		if err != nil {

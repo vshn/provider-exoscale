@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/utils/ptr"
 	"net/url"
 	"strings"
 
@@ -14,7 +15,6 @@ import (
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
-	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -86,7 +86,7 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func connectionDetails(in oapi.DbaasServiceMysql, ca string) (managed.ConnectionDetails, error) {
-	uri := pointer.StringDeref(in.Uri, "")
+	uri := ptr.Deref[string](in.Uri, "")
 	// uri may be absent
 	if uri == "" {
 		if in.ConnectionInfo == nil || in.ConnectionInfo.Uri == nil || len(*in.ConnectionInfo.Uri) == 0 {
@@ -141,7 +141,7 @@ func isUpToDate(current, external *exoscalev1.MySQLParameters, log logr.Logger) 
 
 func mapObservation(instance oapi.DbaasServiceMysql) (exoscalev1.MySQLObservation, error) {
 	observation := exoscalev1.MySQLObservation{
-		Version:    pointer.StringDeref(instance.Version, ""),
+		Version:    ptr.Deref[string](instance.Version, ""),
 		NodeStates: mapper.ToNodeStates(instance.NodeStates),
 	}
 
@@ -178,7 +178,7 @@ func mapParameters(in oapi.DbaasServiceMysql, zone string) (*exoscalev1.MySQLPar
 		Zone:    exoscalev1.Zone(zone),
 		Version: *in.Version,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: pointer.BoolDeref(in.TerminationProtection, false),
+			TerminationProtection: ptr.Deref[bool](in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},

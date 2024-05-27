@@ -12,7 +12,7 @@ import (
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -118,7 +118,7 @@ func isUpToDate(current, external *exoscalev1.OpenSearchParameters, log logr.Log
 
 func mapObservation(instance oapi.DbaasServiceOpensearch) (exoscalev1.OpenSearchObservation, error) {
 	observation := exoscalev1.OpenSearchObservation{
-		MajorVersion: pointer.StringDeref(instance.Version, ""),
+		MajorVersion: ptr.Deref[string](instance.Version, ""),
 		NodeStates:   mapper.ToNodeStates(instance.NodeStates),
 	}
 

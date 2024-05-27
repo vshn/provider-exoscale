@@ -3,6 +3,7 @@ package postgresqlcontroller
 import (
 	"context"
 	"fmt"
+	"k8s.io/utils/ptr"
 	"net/url"
 	"strings"
 
@@ -13,7 +14,6 @@ import (
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
-	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -81,13 +81,13 @@ func mapParameters(in oapi.DbaasServicePg, zone exoscalev1.Zone) (*exoscalev1.Po
 		Backup: mapper.ToBackupSpec(in.BackupSchedule),
 		Zone:   zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: pointer.BoolDeref(in.TerminationProtection, false),
+			TerminationProtection: ptr.Deref[bool](in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},
 			IPFilter: *in.IpFilter,
 		},
-		Version:    pointer.StringDeref(in.Version, ""),
+		Version:    ptr.Deref[string](in.Version, ""),
 		PGSettings: settings,
 	}, nil
 }
@@ -119,13 +119,13 @@ var variantAiven = oapi.EnumPgVariantAiven
 func mapObservation(pg oapi.DbaasServicePg) (exoscalev1.PostgreSQLObservation, error) {
 	observation := exoscalev1.PostgreSQLObservation{
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: pointer.BoolDeref(pg.TerminationProtection, false),
+			TerminationProtection: ptr.Deref[bool](pg.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: pg.Plan,
 			},
 			IPFilter: *pg.IpFilter,
 		},
-		Version: pointer.StringDeref(pg.Version, ""),
+		Version: ptr.Deref[string](pg.Version, ""),
 		Maintenance: exoscalev1.MaintenanceSpec{
 			DayOfWeek: pg.Maintenance.Dow,
 			TimeOfDay: exoscalev1.TimeOfDay(pg.Maintenance.Time),
@@ -174,7 +174,7 @@ func isUpToDate(current, external *exoscalev1.PostgreSQLParameters, log logr.Log
 
 // connectionDetails parses the connection details from the given observation.
 func connectionDetails(pgExo oapi.DbaasServicePg, ca string) (managed.ConnectionDetails, error) {
-	raw := pointer.StringDeref(pgExo.Uri, "")
+	raw := ptr.Deref[string](pgExo.Uri, "")
 	parsed, err := url.Parse(raw)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse connection URL: %w", err)
