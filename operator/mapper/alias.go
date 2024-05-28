@@ -18,8 +18,8 @@ type BackupSchedule = struct {
 func ToBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
 	backupHour, backupMin, _, err := day.Parse()
 	return BackupSchedule{
-		BackupHour:   ptr.To[int64](backupHour),
-		BackupMinute: ptr.To[int64](backupMin),
+		BackupHour:   ptr.To(backupHour),
+		BackupMinute: ptr.To(backupMin),
 	}, err
 }
 
@@ -79,7 +79,7 @@ func ToBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {
 	if schedule == nil {
 		return exoscalev1.BackupSpec{}
 	}
-	hour, min := ptr.Deref[int64](schedule.BackupHour, 0), ptr.Deref[int64](schedule.BackupMinute, 0)
+	hour, min := ptr.Deref(schedule.BackupHour, 0), ptr.Deref(schedule.BackupMinute, 0)
 	return exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay(fmt.Sprintf("%02d:%02d:00", hour, min))}
 }
 
@@ -102,7 +102,7 @@ func ToRawExtension(m *map[string]interface{}) (runtime.RawExtension, error) {
 
 func ToDBaaSParameters(tp *bool, plan string, ipf *[]string) exoscalev1.DBaaSParameters {
 	return exoscalev1.DBaaSParameters{
-		TerminationProtection: ptr.Deref[bool](tp, false),
+		TerminationProtection: ptr.Deref(tp, false),
 		Size: exoscalev1.SizeSpec{
 			Plan: plan,
 		},

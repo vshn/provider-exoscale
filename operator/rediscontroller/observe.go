@@ -127,7 +127,7 @@ func connectionDetails(in oapi.DbaasServiceRedis) (map[string][]byte, error) {
 
 func mapObservation(instance oapi.DbaasServiceRedis) (exoscalev1.RedisObservation, error) {
 	observation := exoscalev1.RedisObservation{
-		Version:    ptr.Deref[string](instance.Version, ""),
+		Version:    ptr.Deref(instance.Version, ""),
 		NodeStates: mapper.ToNodeStates(instance.NodeStates),
 	}
 
@@ -158,7 +158,7 @@ func mapParameters(in oapi.DbaasServiceRedis, zone exoscalev1.Zone) (*exoscalev1
 		},
 		Zone: zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref[bool](in.TerminationProtection, false),
+			TerminationProtection: ptr.Deref(in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},

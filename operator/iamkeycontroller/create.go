@@ -162,7 +162,7 @@ func (p *IAMKeyPipeline) createCredentialsSecret(ctx *pipelineContext) error {
 		for k, v := range connDetails {
 			secret.Data[k] = v
 		}
-		secret.Immutable = ptr.To[bool](true)
+		secret.Immutable = ptr.To(true)
 
 		err = controllerutil.SetOwnerReference(ctx.iamKey, secret, p.kube.Scheme())
 		if err != nil {

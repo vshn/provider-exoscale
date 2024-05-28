@@ -86,7 +86,7 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 }
 
 func connectionDetails(in oapi.DbaasServiceMysql, ca string) (managed.ConnectionDetails, error) {
-	uri := ptr.Deref[string](in.Uri, "")
+	uri := ptr.Deref(in.Uri, "")
 	// uri may be absent
 	if uri == "" {
 		if in.ConnectionInfo == nil || in.ConnectionInfo.Uri == nil || len(*in.ConnectionInfo.Uri) == 0 {
@@ -141,7 +141,7 @@ func isUpToDate(current, external *exoscalev1.MySQLParameters, log logr.Logger) 
 
 func mapObservation(instance oapi.DbaasServiceMysql) (exoscalev1.MySQLObservation, error) {
 	observation := exoscalev1.MySQLObservation{
-		Version:    ptr.Deref[string](instance.Version, ""),
+		Version:    ptr.Deref(instance.Version, ""),
 		NodeStates: mapper.ToNodeStates(instance.NodeStates),
 	}
 
@@ -178,7 +178,7 @@ func mapParameters(in oapi.DbaasServiceMysql, zone string) (*exoscalev1.MySQLPar
 		Zone:    exoscalev1.Zone(zone),
 		Version: *in.Version,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref[bool](in.TerminationProtection, false),
+			TerminationProtection: ptr.Deref(in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},

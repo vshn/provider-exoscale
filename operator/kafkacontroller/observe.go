@@ -103,9 +103,9 @@ func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservati
 	}
 
 	return exoscalev1.KafkaObservation{
-		Version:           ptr.Deref[string](external.Version, ""),
+		Version:           ptr.Deref(external.Version, ""),
 		KafkaSettings:     settings,
-		KafkaRestEnabled:  ptr.Deref[bool](external.KafkaRestEnabled, false),
+		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
 		KafkaRestSettings: restSettings,
 		NodeStates:        nodeStates,
 		Notifications:     notifications,
@@ -200,7 +200,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 		},
 		Zone: expected.Zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref[bool](external.TerminationProtection, false),
+			TerminationProtection: ptr.Deref(external.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: external.Plan,
 			},
@@ -208,7 +208,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 		},
 		Version:           expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
 		KafkaSettings:     actualKafkaSettings,
-		KafkaRestEnabled:  ptr.Deref[bool](external.KafkaRestEnabled, false),
+		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
 		KafkaRestSettings: actualKafkaRestSettings,
 	}
 	settingComparer := cmp.Comparer(mapper.CompareSettings)
