@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	github.com/ccremer/go-command-pipeline v0.20.0
-	github.com/crossplane/crossplane-runtime v0.19.2
+	github.com/crossplane/crossplane-runtime v0.20.1
 	github.com/crossplane/crossplane-tools v0.0.0-20220901191540-806c0b01097b
 	github.com/exoscale/egoscale v0.102.3
 	github.com/go-logr/logr v1.4.2
@@ -25,6 +25,7 @@ require (
 )
 
 require (
+	dario.cat/mergo v1.0.0 // indirect
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
