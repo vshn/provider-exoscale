@@ -6,7 +6,7 @@ import (
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/stretchr/testify/assert"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 func TestToBackupSpec(t *testing.T) {
@@ -19,7 +19,7 @@ func TestToBackupSpec(t *testing.T) {
 			expectedSpec:  exoscalev1.BackupSpec{},
 		},
 		"ScheduleWithZero": {
-			givenSchedule: &BackupSchedule{BackupHour: pointer.Int64(0), BackupMinute: pointer.Int64(0)},
+			givenSchedule: &BackupSchedule{BackupHour: ptr.To[int64](0), BackupMinute: ptr.To[int64](0)},
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("00:00:00")},
 		},
 		"ScheduleWithoutNumbers": {
@@ -27,7 +27,7 @@ func TestToBackupSpec(t *testing.T) {
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("00:00:00")},
 		},
 		"ScheduleWithNumbers": {
-			givenSchedule: &BackupSchedule{BackupHour: pointer.Int64(12), BackupMinute: pointer.Int64(34)},
+			givenSchedule: &BackupSchedule{BackupHour: ptr.To[int64](12), BackupMinute: ptr.To[int64](34)},
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("12:34:00")},
 		},
 	}
@@ -46,11 +46,11 @@ func TestToBackupSchedule(t *testing.T) {
 	}{
 		"EmptyTime": {
 			givenTime:        "0:00:00",
-			expectedSchedule: BackupSchedule{BackupHour: pointer.Int64(0), BackupMinute: pointer.Int64(0)},
+			expectedSchedule: BackupSchedule{BackupHour: ptr.To[int64](0), BackupMinute: ptr.To[int64](0)},
 		},
 		"TimeGiven": {
 			givenTime:        "12:34:56",
-			expectedSchedule: BackupSchedule{BackupHour: pointer.Int64(12), BackupMinute: pointer.Int64(34)},
+			expectedSchedule: BackupSchedule{BackupHour: ptr.To[int64](12), BackupMinute: ptr.To[int64](34)},
 		},
 	}
 	for name, tc := range tests {

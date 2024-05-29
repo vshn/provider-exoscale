@@ -2,6 +2,7 @@ package kafkacontroller
 
 import (
 	"context"
+	"k8s.io/utils/ptr"
 	"testing"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -17,7 +18,6 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/utils/pointer"
 )
 
 func TestObserve_NotExits(t *testing.T) {
@@ -46,7 +46,7 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 
 	instance := sampleKafka("foo")
 	found := sampleAPIKafka("foo")
-	found.Uri = pointer.String("foobar.com:21701")
+	found.Uri = ptr.To("foobar.com:21701")
 	found.UriParams = &map[string]interface{}{
 		"host": "foobar.com",
 		"port": "21701",
@@ -56,8 +56,8 @@ func TestObserve_UpToDate_ConnectionDetails(t *testing.T) {
 		"10.10.1.2:21701",
 		"10.10.1.3:21701",
 	}
-	found.ConnectionInfo.AccessCert = pointer.String("CERT")
-	found.ConnectionInfo.AccessKey = pointer.String("KEY")
+	found.ConnectionInfo.AccessCert = ptr.To("CERT")
+	found.ConnectionInfo.AccessKey = ptr.To("KEY")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
@@ -94,7 +94,7 @@ func TestObserve_UpToDate_ConnectionDetails_with_REST(t *testing.T) {
 	instance := sampleKafka("foo")
 	instance.Spec.ForProvider.KafkaRestEnabled = true
 	found := sampleAPIKafka("foo")
-	found.Uri = pointer.String("foobar.com:21701")
+	found.Uri = ptr.To("foobar.com:21701")
 	found.UriParams = &map[string]interface{}{
 		"host": "foobar.com",
 		"port": "21701",
@@ -104,10 +104,10 @@ func TestObserve_UpToDate_ConnectionDetails_with_REST(t *testing.T) {
 		"10.10.1.2:21701",
 		"10.10.1.3:21701",
 	}
-	found.ConnectionInfo.AccessCert = pointer.String("CERT")
-	found.ConnectionInfo.AccessKey = pointer.String("KEY")
-	found.KafkaRestEnabled = pointer.Bool(true)
-	found.ConnectionInfo.RestUri = pointer.String("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701")
+	found.ConnectionInfo.AccessCert = ptr.To("CERT")
+	found.ConnectionInfo.AccessKey = ptr.To("KEY")
+	found.KafkaRestEnabled = ptr.To(true)
+	found.ConnectionInfo.RestUri = ptr.To("https://admin:BGAUNBS2afjwQ@test.foobar.com:21701")
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
 	mockCACall(exoMock)
@@ -142,7 +142,7 @@ func TestObserve_UpToDate_Status(t *testing.T) {
 	}
 	instance := sampleKafka("foo")
 	found := sampleAPIKafka("foo")
-	found.Version = pointer.String("3.2.1")
+	found.Version = ptr.To("3.2.1")
 	found.NodeStates = &[]oapi.DbaasNodeState{
 		{
 			Name:  "node-1",
@@ -240,7 +240,7 @@ func TestObserve_UpToDate_WithVersion(t *testing.T) {
 	instance := sampleKafka("foo")
 	instance.Spec.ForProvider.Version = "3.2"
 	found := sampleAPIKafka("foo")
-	found.Version = pointer.String("3.2.1")
+	found.Version = ptr.To("3.2.1")
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
@@ -265,7 +265,7 @@ func TestObserve_UpToDate_EmptyRestSettings(t *testing.T) {
 	instance.Spec.ForProvider.KafkaRestEnabled = true
 	instance.Spec.ForProvider.KafkaRestSettings = runtime.RawExtension{}
 	found := sampleAPIKafka("foo")
-	found.KafkaRestEnabled = pointer.Bool(true)
+	found.KafkaRestEnabled = ptr.To(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
@@ -295,7 +295,7 @@ func TestObserve_UpToDate_RestSettings(t *testing.T) {
 	instance.Spec.ForProvider.KafkaRestEnabled = true
 	instance.Spec.ForProvider.KafkaRestSettings = restsetting
 	found := sampleAPIKafka("foo")
-	found.KafkaRestEnabled = pointer.Bool(true)
+	found.KafkaRestEnabled = ptr.To(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
@@ -378,7 +378,7 @@ func TestObserve_Outdated_RestSettings(t *testing.T) {
 	instance.Spec.ForProvider.KafkaRestEnabled = true
 	instance.Spec.ForProvider.KafkaRestSettings = restsetting
 	found := sampleAPIKafka("foo")
-	found.KafkaRestEnabled = pointer.Bool(true)
+	found.KafkaRestEnabled = ptr.To(true)
 
 	mockGetKafkaCall(exoMock, "foo", found, nil)
 	mockGetKafkaSettingsCall(exoMock, nil)
@@ -444,15 +444,15 @@ func sampleAPIKafka(name string) *oapi.DbaasServiceKafka {
 		RegistryUri *string   "json:\"registry-uri,omitempty\""
 		RestUri     *string   "json:\"rest-uri,omitempty\""
 	}{
-		AccessCert: pointer.String("SOME ACCESS CERT"),
-		AccessKey:  pointer.String("SOME ACCESS KEY"),
+		AccessCert: ptr.To("SOME ACCESS CERT"),
+		AccessKey:  ptr.To("SOME ACCESS KEY"),
 		Nodes:      &nodes,
 	}
 
-	res.Uri = pointer.String("foo-exoscale-8fa13713-1027-4b9c-bca7-4c14f9ff9928.aivencloud.com")
+	res.Uri = ptr.To("foo-exoscale-8fa13713-1027-4b9c-bca7-4c14f9ff9928.aivencloud.com")
 	res.UriParams = &map[string]interface{}{}
 
-	res.Version = pointer.String("3.2.1")
+	res.Version = ptr.To("3.2.1")
 
 	return &res
 }
@@ -488,7 +488,7 @@ func mockCACall(m *operatortest.ClientWithResponsesInterface) {
 			JSON200: &struct {
 				Certificate *string "json:\"certificate,omitempty\""
 			}{
-				Certificate: pointer.String("CA"),
+				Certificate: ptr.To("CA"),
 			},
 		}, nil).
 		Once()

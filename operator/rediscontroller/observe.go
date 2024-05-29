@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/utils/ptr"
 	"net/url"
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
@@ -14,7 +15,6 @@ import (
 	exoscaleapi "github.com/exoscale/egoscale/v2/api"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/go-logr/logr"
-	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -127,7 +127,7 @@ func connectionDetails(in oapi.DbaasServiceRedis) (map[string][]byte, error) {
 
 func mapObservation(instance oapi.DbaasServiceRedis) (exoscalev1.RedisObservation, error) {
 	observation := exoscalev1.RedisObservation{
-		Version:    pointer.StringDeref(instance.Version, ""),
+		Version:    ptr.Deref(instance.Version, ""),
 		NodeStates: mapper.ToNodeStates(instance.NodeStates),
 	}
 
@@ -158,7 +158,7 @@ func mapParameters(in oapi.DbaasServiceRedis, zone exoscalev1.Zone) (*exoscalev1
 		},
 		Zone: zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: pointer.BoolDeref(in.TerminationProtection, false),
+			TerminationProtection: ptr.Deref(in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},

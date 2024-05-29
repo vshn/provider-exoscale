@@ -2,12 +2,11 @@ package mapper
 
 import (
 	"fmt"
-
 	"github.com/exoscale/egoscale/v2/oapi"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/json"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 )
 
 // BackupSchedule is a type alias for the embedded struct in opai.CreateDbaasServicePgJSONRequestBody.
@@ -19,8 +18,8 @@ type BackupSchedule = struct {
 func ToBackupSchedule(day exoscalev1.TimeOfDay) (BackupSchedule, error) {
 	backupHour, backupMin, _, err := day.Parse()
 	return BackupSchedule{
-		BackupHour:   pointer.Int64(backupHour),
-		BackupMinute: pointer.Int64(backupMin),
+		BackupHour:   ptr.To(backupHour),
+		BackupMinute: ptr.To(backupMin),
 	}, err
 }
 
@@ -80,7 +79,7 @@ func ToBackupSpec(schedule *BackupSchedule) exoscalev1.BackupSpec {
 	if schedule == nil {
 		return exoscalev1.BackupSpec{}
 	}
-	hour, min := pointer.Int64Deref(schedule.BackupHour, 0), pointer.Int64Deref(schedule.BackupMinute, 0)
+	hour, min := ptr.Deref(schedule.BackupHour, 0), ptr.Deref(schedule.BackupMinute, 0)
 	return exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay(fmt.Sprintf("%02d:%02d:00", hour, min))}
 }
 
@@ -103,7 +102,7 @@ func ToRawExtension(m *map[string]interface{}) (runtime.RawExtension, error) {
 
 func ToDBaaSParameters(tp *bool, plan string, ipf *[]string) exoscalev1.DBaaSParameters {
 	return exoscalev1.DBaaSParameters{
-		TerminationProtection: pointer.BoolDeref(tp, false),
+		TerminationProtection: ptr.Deref(tp, false),
 		Size: exoscalev1.SizeSpec{
 			Plan: plan,
 		},

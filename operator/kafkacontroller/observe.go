@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"k8s.io/utils/ptr"
 	"strings"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
@@ -12,7 +13,6 @@ import (
 	exoscaleapi "github.com/exoscale/egoscale/v2/api"
 	"github.com/exoscale/egoscale/v2/oapi"
 	"github.com/google/go-cmp/cmp"
-	"k8s.io/utils/pointer"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
@@ -103,9 +103,9 @@ func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservati
 	}
 
 	return exoscalev1.KafkaObservation{
-		Version:           pointer.StringDeref(external.Version, ""),
+		Version:           ptr.Deref(external.Version, ""),
 		KafkaSettings:     settings,
-		KafkaRestEnabled:  pointer.BoolDeref(external.KafkaRestEnabled, false),
+		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
 		KafkaRestSettings: restSettings,
 		NodeStates:        nodeStates,
 		Notifications:     notifications,
@@ -200,7 +200,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 		},
 		Zone: expected.Zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: pointer.BoolDeref(external.TerminationProtection, false),
+			TerminationProtection: ptr.Deref(external.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: external.Plan,
 			},
@@ -208,7 +208,7 @@ func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaP
 		},
 		Version:           expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
 		KafkaSettings:     actualKafkaSettings,
-		KafkaRestEnabled:  pointer.BoolDeref(external.KafkaRestEnabled, false),
+		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
 		KafkaRestSettings: actualKafkaRestSettings,
 	}
 	settingComparer := cmp.Comparer(mapper.CompareSettings)

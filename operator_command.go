@@ -84,9 +84,6 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 	})
 	p.AddStep(p.When(pipeline.Bool[context.Context](c.WebhookCertDir != ""), "setup webhook server",
 		func(ctx context.Context) error {
-			ws := c.manager.GetWebhookServer()
-			ws.CertDir = c.WebhookCertDir
-			ws.TLSMinVersion = "1.3"
 			return operator.SetupWebhooks(c.manager)
 		}))
 	p.AddStepFromFunc("run manager", func(ctx context.Context) error {
