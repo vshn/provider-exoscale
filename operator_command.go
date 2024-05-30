@@ -55,9 +55,6 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 		return err
 	})
 	p.AddStepFromFunc("create manager", func(ctx context.Context) error {
-		// configure client-side throttling
-		c.kubeconfig.QPS = 100
-		c.kubeconfig.Burst = 150 // more Openshift friendly
 
 		mgr, err := ctrl.NewManager(c.kubeconfig, ctrl.Options{
 			// controller-runtime uses both ConfigMaps and Leases for leader election by default.
