@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"time"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
@@ -55,9 +56,6 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 		return err
 	})
 	p.AddStepFromFunc("create manager", func(ctx context.Context) error {
-		// configure client-side throttling
-		c.kubeconfig.QPS = 100
-		c.kubeconfig.Burst = 150 // more Openshift friendly
 
 		mgr, err := ctrl.NewManager(c.kubeconfig, ctrl.Options{
 			// controller-runtime uses both ConfigMaps and Leases for leader election by default.
@@ -70,6 +68,10 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 			LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
 			LeaseDuration:              func() *time.Duration { d := 60 * time.Second; return &d }(),
 			RenewDeadline:              func() *time.Duration { d := 50 * time.Second; return &d }(),
+			WebhookServer: webhook.NewServer(webhook.Options{
+				Port:    9443,
+				CertDir: c.WebhookCertDir,
+			}),
 		})
 		c.manager = mgr
 		return err
