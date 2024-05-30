@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"time"
 
 	pipeline "github.com/ccremer/go-command-pipeline"
@@ -67,6 +68,10 @@ func (c *operatorCommand) execute(ctx *cli.Context) error {
 			LeaderElectionResourceLock: resourcelock.LeasesResourceLock,
 			LeaseDuration:              func() *time.Duration { d := 60 * time.Second; return &d }(),
 			RenewDeadline:              func() *time.Duration { d := 50 * time.Second; return &d }(),
+			WebhookServer: webhook.NewServer(webhook.Options{
+				Port:    9443,
+				CertDir: c.WebhookCertDir,
+			}),
 		})
 		c.manager = mgr
 		return err
