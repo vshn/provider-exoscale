@@ -20,6 +20,8 @@ include Makefile.vars.mk
 -include test/local.mk
 # Crossplane packaging
 -include package/package.mk
+# Include CI targets
+-include ci.mk
 
 golangci_bin = $(go_bin)/golangci-lint
 
@@ -97,7 +99,7 @@ run-operator: ## Run in Operator mode against your current kube context
 	go run . -v 1 operator
 
 .PHONY: clean
-clean: .e2e-test-clean .package-clean .envtest-clean kind-clean ## Cleans local build artifacts
+clean: .e2e-test-clean .envtest-clean kind-clean ## Cleans local build artifacts
 	rm -rf docs/node_modules $(docs_out_dir) dist .cache .work
 	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true
 
