@@ -10,7 +10,7 @@ require (
 	github.com/go-logr/logr v1.4.2
 	github.com/go-logr/zapr v1.3.0
 	github.com/google/go-cmp v0.6.0
-	github.com/hashicorp/go-version v1.6.0
+	github.com/hashicorp/go-version v1.7.0
 	github.com/minio/minio-go/v7 v7.0.70
 	github.com/stretchr/testify v1.8.4
 	github.com/urfave/cli/v2 v2.19.2
