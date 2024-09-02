@@ -1,6 +1,6 @@
 {
   "template": "https://github.com/vshn/appcat-cookiecutter",
-  "commit": "177c050321535d6b35d1942c2a58ab402aea2486",
+  "commit": "5309ae05edb3c118e23e64e8ec0bed2b6768ac86",
   "checkout": null,
   "context": {
     "cookiecutter": {
