@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: docker://agilepathway/pull-request-label-checker:v1.6.51
         with:
-          one_of: major,minor,patch,documentation,dependencies
+          one_of: major,minor,patch,documentation,dependency
           repo_token: ${{ secrets.GITHUB_TOKEN }}
   publish-branch-images:
     if: github.event.action != 'closed'
@@ -120,7 +120,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check for patch label
-        if: contains(github.event.pull_request.labels.*.name, 'patch') || contains(github.event.pull_request.labels.*.name, 'dependencies') || contains(github.event.pull_request.labels.*.name, 'documentation')
+        if: contains(github.event.pull_request.labels.*.name, 'patch') || contains(github.event.pull_request.labels.*.name, 'dependency') || contains(github.event.pull_request.labels.*.name, 'documentation')
         id: patch
         run: |
           echo "set=true" >> $GITHUB_OUTPUT
