@@ -24,7 +24,7 @@ jobs:
     steps:
       - uses: docker://agilepathway/pull-request-label-checker:v1.6.51
         with:
-          one_of: major,minor,patch,documentation,dependency
+          one_of: major,minor,patch,documentation,dependencies
           repo_token: ${{ secrets.GITHUB_TOKEN }}
   publish-branch-images:
     if: github.event.action != 'closed'
@@ -174,7 +174,7 @@ jobs:
           major_ver="${major_ver:1}"
 
           # Check for patch label
-          [ ! -z "$bug" ] && [ -z "$minor" ] && [ -z "$major" ] && ((patch_ver++)) || true
+          [ ! -z "$patch" ] && [ -z "$minor" ] && [ -z "$major" ] && ((patch_ver++)) || true
 
           # check for minor label
           if [ ! -z "$minor" ] && [ -z "$major" ]; then
