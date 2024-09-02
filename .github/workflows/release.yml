@@ -10,6 +10,7 @@ env:
   PUSH_UPBOUND: "True"
   PUSH_PACKAGE: "True"
   PUSH_IMAGE: "False"
+  SUFFIX: "/controller"
 
 jobs:
   dist:
@@ -86,4 +87,6 @@ jobs:
           args: release --release-notes .github/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CONTAINER_REGISTRY: ghcr.io
+          IMAGE_NAME: ${{ github.repository }}{{ env.SUFFIX }}
 
