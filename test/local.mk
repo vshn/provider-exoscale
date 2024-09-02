@@ -4,7 +4,7 @@ registry_sentinel = $(kind_dir)/registry_sentinel
 .PHONY: local-install
 local-install: export KUBECONFIG = $(KIND_KUBECONFIG)
 # for ControllerConfig:
-local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluster.local:5000/$(PROJECT_OWNER)/$(PROJECT_NAME)/package:$(IMG_TAG)
+local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluster.local:5000/$(ORG)/$(APP_NAME):$(IMG_TAG)
 local-install: local-debug ## Install Operator in local cluster
 	yq e '.spec.metadata.annotations."local.dev/installed"="$(shell date)"' test/controllerconfig-exoscale.yaml | kubectl apply -f -
 	yq e '.spec.package=strenv(INTERNAL_PACKAGE_IMG)' test/provider-exoscale.yaml | kubectl apply -f -
@@ -13,7 +13,7 @@ local-install: local-debug ## Install Operator in local cluster
 
 .PHONY: local-debug
 local-debug: export KUBECONFIG = $(KIND_KUBECONFIG)
-local-debug: kind-load-image crossplane-setup registry-setup .local-package-push  ## Install Operator in local cluster
+local-debug: kind-load-image crossplane-setup registry-setup mirror-setup package-push-local  ## Install Operator in local cluster
 
 .PHONY: crossplane-setup
 crossplane-setup: $(crossplane_sentinel) ## Installs Crossplane in kind cluster.
@@ -129,13 +129,13 @@ run-single-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## Run spec
 .e2e-test-clean: export KUBECONFIG = $(KIND_KUBECONFIG)
 .e2e-test-clean:
 	@if [ -f $(KIND_KUBECONFIG) ]; then \
-		kubectl delete buckets --all; \
-		kubectl delete iamkeys --all; \
-		kubectl delete postgresql --all; \
-		kubectl delete mysql --all; \
-		kubectl delete redis --all; \
-		kubectl delete kafka --all; \
-		kubectl delete opensearch --all; \
+		kubectl delete buckets --all || true; \
+		kubectl delete iamkeys --all || true; \
+		kubectl delete postgresql --all || true; \
+		kubectl delete mysql --all || true; \
+		kubectl delete redis --all || true; \
+		kubectl delete kafka --all || true; \
+		kubectl delete opensearch --all || true; \
 	else \
 		echo "no kubeconfig found"; \
 	fi

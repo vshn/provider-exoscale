@@ -1,0 +1,20 @@
+{
+  "template": "https://github.com/vshn/appcat-cookiecutter",
+  "commit": "19833377a5eee5414c3e384a22f0aa15290845bf",
+  "checkout": null,
+  "context": {
+    "cookiecutter": {
+      "app_name": "provider-exoscale",
+      "component_repo": "vshn/component-appcat",
+      "push_upbound": true,
+      "push_package": true,
+      "push_image": false,
+      "_copy_without_render": [
+        ".github/workflows/cruft-update.yml",
+        ".github/changelog-configuration.json"
+      ],
+      "_template": "https://github.com/vshn/appcat-cookiecutter"
+    }
+  },
+  "directory": null
+}

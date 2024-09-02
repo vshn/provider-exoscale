@@ -16,8 +16,5 @@ metadata:
       If you encounter an issue please create an issue in the
       [vshn/provider-exoscale](https://github.com/vshn/provider-exoscale/issues) repo.
 spec:
-  controller:
-    image: ghcr.io/vshn/provider-exoscale/controller:latest
-    permissionRequests: []
   crossplane:
     version: ">=v1.9.0"
