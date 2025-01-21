@@ -15,10 +15,10 @@ func (p *pipeline) Delete(ctx context.Context, mg resource.Managed) error {
 	log.Info("deleting resource")
 
 	mySQLInstance := mg.(*exoscalev1.MySQL)
-	resp, err := p.exo.DeleteDbaasServiceWithResponse(ctx, mySQLInstance.GetInstanceName())
+	resp, err := p.exo.DeleteDBAASServiceMysql(ctx, mySQLInstance.GetInstanceName())
 	if err != nil {
 		return fmt.Errorf("cannot delete mySQLInstance: %w", err)
 	}
-	log.V(1).Info("response", "json", string(resp.Body))
+	log.V(1).Info("response", "message", string(resp.Message))
 	return nil
 }

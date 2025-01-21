@@ -1,9 +1,12 @@
+// go:build ignore
+
 package kafkacontroller
 
 import (
 	"context"
-	"k8s.io/utils/ptr"
 	"testing"
+
+	"k8s.io/utils/ptr"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"

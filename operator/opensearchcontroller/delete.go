@@ -15,10 +15,10 @@ func (p *pipeline) Delete(ctx context.Context, mg resource.Managed) error {
 	log.Info("deleting resource")
 
 	openSearch := mg.(*exoscalev1.OpenSearch)
-	resp, err := p.exo.DeleteDbaasServiceWithResponse(ctx, openSearch.GetInstanceName())
+	resp, err := p.exo.DeleteDBAASServiceOpensearch(ctx, openSearch.GetInstanceName())
 	if err != nil {
 		return fmt.Errorf("cannot delete OpenSearch: %w", err)
 	}
-	log.V(1).Info("response", "json", string(resp.Body))
+	log.V(1).Info("response", "message", string(resp.Message))
 	return nil
 }

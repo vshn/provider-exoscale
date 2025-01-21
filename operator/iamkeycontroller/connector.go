@@ -7,7 +7,10 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+	"github.com/vshn/provider-exoscale/operator/common"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
+
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -25,7 +28,7 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 
 	iamKey := fromManaged(mg)
 
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, iamKey.GetProviderConfigName())
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, iamKey.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[iamKey.Spec.ForProvider.Zone]))
 	if err != nil {
 		return nil, err
 	}

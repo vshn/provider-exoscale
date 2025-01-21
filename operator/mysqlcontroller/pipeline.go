@@ -2,7 +2,7 @@ package mysqlcontroller
 
 import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
-	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 

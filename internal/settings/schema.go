@@ -77,7 +77,7 @@ func setDefaults(sc schema, input map[string]interface{}) bool {
 				continue
 			}
 
-			if val.Default != nil {
+			if val.Default != nil && val.Default != "null" {
 				input[key] = val.Default
 				hasSetDefaults = true
 			}

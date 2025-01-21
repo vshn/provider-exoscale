@@ -15,10 +15,10 @@ func (p pipeline) Delete(ctx context.Context, mg resource.Managed) error {
 	log.Info("deleting resource")
 
 	redisInstance := mg.(*exoscalev1.Redis)
-	resp, err := p.exo.DeleteDbaasServiceWithResponse(ctx, redisInstance.GetInstanceName())
+	resp, err := p.exo.DeleteDBAASServiceRedis(ctx, redisInstance.GetInstanceName())
 	if err != nil {
 		return fmt.Errorf("cannot delete instance: %w", err)
 	}
-	log.V(1).Info("response", "body", string(resp.Body))
+	log.V(1).Info("response", "message", string(resp.Message))
 	return nil
 }

@@ -3,15 +3,14 @@ package mapper
 import (
 	"testing"
 
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"github.com/stretchr/testify/assert"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"k8s.io/utils/ptr"
 )
 
 func TestToBackupSpec(t *testing.T) {
 	tests := map[string]struct {
-		givenSchedule *BackupSchedule
+		givenSchedule *exoscalesdk.DBAASServiceMysqlBackupSchedule
 		expectedSpec  exoscalev1.BackupSpec
 	}{
 		"NilSchedule": {
@@ -19,15 +18,15 @@ func TestToBackupSpec(t *testing.T) {
 			expectedSpec:  exoscalev1.BackupSpec{},
 		},
 		"ScheduleWithZero": {
-			givenSchedule: &BackupSchedule{BackupHour: ptr.To[int64](0), BackupMinute: ptr.To[int64](0)},
+			givenSchedule: &exoscalesdk.DBAASServiceMysqlBackupSchedule{BackupHour: 0, BackupMinute: 0},
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("00:00:00")},
 		},
 		"ScheduleWithoutNumbers": {
-			givenSchedule: &BackupSchedule{},
+			givenSchedule: &exoscalesdk.DBAASServiceMysqlBackupSchedule{},
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("00:00:00")},
 		},
 		"ScheduleWithNumbers": {
-			givenSchedule: &BackupSchedule{BackupHour: ptr.To[int64](12), BackupMinute: ptr.To[int64](34)},
+			givenSchedule: &exoscalesdk.DBAASServiceMysqlBackupSchedule{BackupHour: 12, BackupMinute: 34},
 			expectedSpec:  exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay("12:34:00")},
 		},
 	}
@@ -46,11 +45,11 @@ func TestToBackupSchedule(t *testing.T) {
 	}{
 		"EmptyTime": {
 			givenTime:        "0:00:00",
-			expectedSchedule: BackupSchedule{BackupHour: ptr.To[int64](0), BackupMinute: ptr.To[int64](0)},
+			expectedSchedule: BackupSchedule{BackupHour: 0, BackupMinute: 0},
 		},
 		"TimeGiven": {
 			givenTime:        "12:34:56",
-			expectedSchedule: BackupSchedule{BackupHour: ptr.To[int64](12), BackupMinute: ptr.To[int64](34)},
+			expectedSchedule: BackupSchedule{BackupHour: 12, BackupMinute: 34},
 		},
 	}
 	for name, tc := range tests {
@@ -63,23 +62,23 @@ func TestToBackupSchedule(t *testing.T) {
 }
 
 func TestToNodeState(t *testing.T) {
-	roleMaster := oapi.DbaasNodeStateRoleMaster
-	roleReplica := oapi.DbaasNodeStateRoleReadReplica
+	roleMaster := exoscalesdk.DBAASNodeStateRoleMaster
+	roleReplica := exoscalesdk.DBAASNodeStateRoleReadReplica
 
 	tests := map[string]struct {
-		given  *[]oapi.DbaasNodeState
+		given  *[]exoscalesdk.DBAASNodeState
 		expect []exoscalev1.NodeState
 	}{
 		"Normal": {
-			given: &[]oapi.DbaasNodeState{
+			given: &[]exoscalesdk.DBAASNodeState{
 				{
 					Name:  "foo",
-					Role:  &roleMaster,
+					Role:  roleMaster,
 					State: "running",
 				},
 				{
 					Name:  "bar",
-					Role:  &roleReplica,
+					Role:  roleReplica,
 					State: "running",
 				},
 			},
@@ -98,7 +97,7 @@ func TestToNodeState(t *testing.T) {
 		},
 		"Nil": {},
 		"NilRole": {
-			given: &[]oapi.DbaasNodeState{
+			given: &[]exoscalesdk.DBAASNodeState{
 				{
 					Name:  "foo",
 					State: "running",

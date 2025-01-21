@@ -1,4 +1,4 @@
-package postgresqlcontroller
+package kafkacontroller
 
 import (
 	"github.com/crossplane/crossplane-runtime/pkg/event"
@@ -6,7 +6,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-// pipeline is a managed.ExternalClient and implements a crossplane reconciler for redis.
+// pipeline is a managed.ExternalClient and implements a crossplane reconciler for MySQL.
 type pipeline struct {
 	kube     client.Client
 	recorder event.Recorder

@@ -13,7 +13,7 @@ metadata:
 spec:
   forProvider:
     backup:
-      timeOfDay: '13:00:00'
+      timeOfDay: '13:01:00'
     ipFilter:
       - 0.0.0.0/0
     maintenance:
@@ -33,7 +33,7 @@ spec:
 status:
   atProvider:
     backup:
-      timeOfDay: '13:00:00'
+      timeOfDay: '13:01:00'
     maintenance:
       dayOfWeek: monday
       timeOfDay: '12:00:00'

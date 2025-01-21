@@ -1,9 +1,10 @@
 package postgresqlcontroller
 
 import (
+	"context"
 	"testing"
 
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,10 +28,13 @@ func Test_connectionDetails(t *testing.T) {
 			expectedDatabase: "defaultdb",
 		},
 	}
+	ctx := context.TODO()
+	client := exoscalesdk.Client{}
+
 	for name, tc := range tests {
 		t.Run(name, func(t *testing.T) {
-			exo := oapi.DbaasServicePg{Uri: &tc.givenUri}
-			secrets, err := connectionDetails(exo, "somebase64string")
+			exo := exoscalesdk.DBAASServicePG{URI: tc.givenUri}
+			secrets, err := connectionDetails(ctx, &exo, "somebase64string", &client)
 			assert.NoError(t, err)
 			assert.Equal(t, tc.expectedUser, string(secrets["POSTGRESQL_USER"]), "username")
 			assert.Equal(t, tc.expectedPassword, string(secrets["POSTGRESQL_PASSWORD"]), "password")
