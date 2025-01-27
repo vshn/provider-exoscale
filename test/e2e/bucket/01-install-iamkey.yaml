@@ -10,7 +10,7 @@ spec:
       sos:
         buckets:
           - e2e-test-kuttl-provider-exoscale
-    zone: CH-DK-2
+    zone: ch-dk-2
   providerConfigRef:
     name: provider-config
   writeConnectionSecretToRef:

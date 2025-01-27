@@ -28,7 +28,7 @@ type BucketParameters struct {
 	// Be aware that S3 providers may require a unique name across the platform or zone.
 	BucketName string `json:"bucketName,omitempty"`
 
-	// +kubebuilder:validation:Required
+	// +kubebuilder:validation:Optional
 
 	// Deprecated: Only here for compatibility with legacy Bucket objects
 	EndpointURL string `json:"endpointURL,omitempty"`

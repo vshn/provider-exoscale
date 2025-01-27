@@ -30,6 +30,10 @@ func (n *NoopClient) Update(ctx context.Context, mg resource.Managed) (managed.E
 
 // Delete implement managed.ExternalClient.
 // It returns nil.
-func (n *NoopClient) Delete(ctx context.Context, mg resource.Managed) error {
+func (n *NoopClient) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
+	return managed.ExternalDelete{}, nil
+}
+
+func (n *NoopClient) Disconnect(ctx context.Context) error {
 	return nil
 }

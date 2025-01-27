@@ -6,6 +6,7 @@ import (
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/event"
+	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
 	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
@@ -15,7 +16,7 @@ import (
 )
 
 // Delete implements managed.ExternalClient.
-func (p *IAMKeyPipeline) Delete(ctx context.Context, mg resource.Managed) error {
+func (p *IAMKeyPipeline) Delete(ctx context.Context, mg resource.Managed) (managed.ExternalDelete, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.Info("Deleting resource")
 
@@ -30,7 +31,7 @@ func (p *IAMKeyPipeline) Delete(ctx context.Context, mg resource.Managed) error 
 			pipe.NewStep("emit event", p.emitDeletionEvent),
 		)
 	err := pipe.RunWithContext(pctx)
-	return errors.Wrap(err, "cannot deprovision iam key")
+	return managed.ExternalDelete{}, errors.Wrap(err, "cannot deprovision iam key")
 }
 
 // deleteIAMKey deletes the IAM key from the project associated with the API Key and Secret.
