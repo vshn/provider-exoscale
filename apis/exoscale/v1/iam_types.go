@@ -77,6 +77,10 @@ type IAMKeyObservation struct {
 	ServicesSpec `json:"services,omitempty"`
 }
 
+func (iamObs IAMKeyObservation) Equals(other IAMKeyObservation) bool {
+	return iamObs.KeyID == other.KeyID && iamObs.RoleID == other.RoleID && iamObs.KeyName == other.KeyName
+}
+
 // IAMKeyStatus represents the observed state of a IAMKey.
 type IAMKeyStatus struct {
 	xpv1.ResourceStatus `json:",inline"`
