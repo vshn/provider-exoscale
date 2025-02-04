@@ -3,11 +3,13 @@ package mysqlcontroller
 import (
 	"context"
 	"fmt"
+
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/common"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"github.com/vshn/provider-exoscale/operator/webhook"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -36,7 +38,7 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 		return nil, err
 	}
 
-	err = v.validateVersion(ctx, obj, *availableVersions)
+	err = v.validateVersion(ctx, obj, availableVersions)
 	if err != nil {
 		return nil, err
 	}
@@ -44,31 +46,30 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 	return nil, validateSpec(mySQLInstance)
 }
 
-func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
+func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) ([]string, error) {
 	mySQLInstance := obj.(*exoscalev1.MySQL)
 
 	v.log.V(1).Info("get mysql available versions")
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, mySQLInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", mySQLInstance.Spec.ForProvider.Zone)))
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, mySQLInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[mySQLInstance.Spec.ForProvider.Zone]))
 	if err != nil {
 		return nil, fmt.Errorf("open exoscale client failed: %w", err)
 	}
 
 	// get mysql available versions
-	resp, err := exo.Exoscale.GetDbaasServiceTypeWithResponse(ctx, serviceType)
+	resp, err := exo.Exoscale.GetDBAASServiceType(ctx, serviceType)
 	if err != nil {
 		return nil, fmt.Errorf("get DBaaS service type failed: %w", err)
 	}
 
-	v.log.V(1).Info("DBaaS service type", "body", string(resp.Body))
+	v.log.V(1).Info("DBaaS service type", "name", string(resp.Name), "description", string(resp.Description))
 
-	serviceType := *resp.JSON200
-	if serviceType.AvailableVersions == nil {
+	if resp.AvailableVersions == nil {
 		return nil, fmt.Errorf("mysql available versions not found")
 	}
-	return serviceType.AvailableVersions, nil
+	return resp.AvailableVersions, nil
 }
 
-func (v *Validator) validateVersion(ctx context.Context, obj runtime.Object, availableVersions []string) error {
+func (v *Validator) validateVersion(_ context.Context, obj runtime.Object, availableVersions []string) error {
 	mySQLInstance := obj.(*exoscalev1.MySQL)
 
 	v.log.V(1).Info("validate version")

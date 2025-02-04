@@ -7,7 +7,8 @@ import (
 	"strings"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
-	exoscaleoapi "github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -27,19 +28,19 @@ type NodeState struct {
 	// Name of the service node
 	Name string `json:"name,omitempty"`
 	// Role of this node.
-	Role exoscaleoapi.DbaasNodeStateRole `json:"role,omitempty"`
+	Role exoscalesdk.DBAASNodeStateRole `json:"role,omitempty"`
 	// State of the service node.
-	State exoscaleoapi.DbaasNodeStateState `json:"state,omitempty"`
+	State exoscalesdk.DBAASNodeStateState `json:"state,omitempty"`
 }
 
 // Notification contains a service message.
 type Notification struct {
 	// Level of the notification.
-	Level exoscaleoapi.DbaasServiceNotificationLevel `json:"level,omitempty"`
+	Level exoscalesdk.DBAASServiceNotificationLevel `json:"level,omitempty"`
 	// Message contains the notification.
 	Message string `json:"message,omitempty"`
 	// Type of the notification.
-	Type exoscaleoapi.DbaasServiceNotificationType `json:"type,omitempty"`
+	Type exoscalesdk.DBAASServiceNotificationType `json:"type,omitempty"`
 	// Metadata contains additional data.
 	Metadata runtime.RawExtension `json:"metadata,omitempty"`
 }
@@ -61,7 +62,7 @@ type MaintenanceSpec struct {
 
 	// DayOfWeek specifies at which weekday the maintenance is held place.
 	// Allowed values are [monday, tuesday, wednesday, thursday, friday, saturday, sunday, never]
-	DayOfWeek exoscaleoapi.DbaasServiceMaintenanceDow `json:"dayOfWeek,omitempty"`
+	DayOfWeek exoscalesdk.DBAASServiceMaintenanceDow `json:"dayOfWeek,omitempty"`
 
 	// TimeOfDay for installing updates in UTC.
 	// Format: "hh:mm:ss".

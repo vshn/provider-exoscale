@@ -16,7 +16,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	exoscaleoapi "github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+
 	"github.com/vshn/provider-exoscale/apis"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
@@ -65,7 +66,7 @@ func newPostgresqlSample() *exoscalev1.PostgreSQL {
 			ForProvider: exoscalev1.PostgreSQLParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
 					TimeOfDay: "12:00:00",
-					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 				},
 				Backup: exoscalev1.BackupSpec{
 					TimeOfDay: "13:00:00",
@@ -104,7 +105,7 @@ func newMysqlSample() *exoscalev1.MySQL {
 			ForProvider: exoscalev1.MySQLParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
 					TimeOfDay: "12:00:00",
-					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 				},
 				Backup: exoscalev1.BackupSpec{
 					TimeOfDay: "13:00:00",
@@ -256,7 +257,7 @@ func newRedisSample() *exoscalev1.Redis {
 			ForProvider: exoscalev1.RedisParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
 					TimeOfDay: "12:00:00",
-					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 				},
 				Zone: "ch-dk-2",
 				DBaaSParameters: exoscalev1.DBaaSParameters{
@@ -290,7 +291,7 @@ func newKafkaSample() *exoscalev1.Kafka {
 			ForProvider: exoscalev1.KafkaParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
 					TimeOfDay: "12:00:00",
-					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 				},
 				Zone: "ch-dk-2",
 				DBaaSParameters: exoscalev1.DBaaSParameters{
@@ -326,7 +327,7 @@ func newOpensearchSample() *exoscalev1.OpenSearch {
 			},
 			ForProvider: exoscalev1.OpenSearchParameters{
 				Maintenance: exoscalev1.MaintenanceSpec{
-					DayOfWeek: exoscaleoapi.DbaasServiceMaintenanceDowMonday,
+					DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 					TimeOfDay: "12:01:55",
 				},
 				DBaaSParameters: exoscalev1.DBaaSParameters{

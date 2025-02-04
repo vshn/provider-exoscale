@@ -2,16 +2,17 @@ package mysqlcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"k8s.io/utils/ptr"
 	"net/url"
 	"strings"
 
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscaleapi "github.com/exoscale/egoscale/v2/api"
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
@@ -25,54 +26,52 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	mySQLInstance := mg.(*exoscalev1.MySQL)
 
-	resp, err := p.exo.GetDbaasServiceMysqlWithResponse(ctx, oapi.DbaasServiceName(mySQLInstance.GetInstanceName()))
+	mysql, err := p.exo.GetDBAASServiceMysql(ctx, mySQLInstance.GetInstanceName())
 	if err != nil {
-		if errors.Is(err, exoscaleapi.ErrNotFound) {
+		if errors.Is(err, exoscalesdk.ErrNotFound) {
 			return managed.ExternalObservation{ResourceExists: false}, nil
 		}
 		return managed.ExternalObservation{}, fmt.Errorf("cannot observe mySQLInstance: %w", err)
 	}
 
-	mysql := *resp.JSON200
-	log.V(2).Info("response", "raw", string(resp.Body))
 	log.V(1).Info("retrieved mySQLInstance", "state", mysql.State)
 
 	mySQLInstance.Status.AtProvider, err = mapObservation(mysql)
 	if err != nil {
 		log.Error(err, "cannot map mySQLInstance observation, ignoring")
 	}
-	var state oapi.EnumServiceState
-	if mysql.State != nil {
-		state = *mysql.State
+	var state exoscalesdk.EnumServiceState
+	if mysql.State != "" {
+		state = mysql.State
 	}
 	switch state {
-	case oapi.EnumServiceStateRunning:
+	case exoscalesdk.EnumServiceStateRunning:
 		mySQLInstance.SetConditions(exoscalev1.Running())
-	case oapi.EnumServiceStateRebuilding:
+	case exoscalesdk.EnumServiceStateRebuilding:
 		mySQLInstance.SetConditions(exoscalev1.Rebuilding())
-	case oapi.EnumServiceStatePoweroff:
+	case exoscalesdk.EnumServiceStatePoweroff:
 		mySQLInstance.SetConditions(exoscalev1.PoweredOff())
-	case oapi.EnumServiceStateRebalancing:
+	case exoscalesdk.EnumServiceStateRebalancing:
 		mySQLInstance.SetConditions(exoscalev1.Rebalancing())
 	default:
 		log.V(2).Info("ignoring unknown mySQLInstance state", "state", state)
 	}
 
-	caCert, err := p.exo.GetDatabaseCACertificate(ctx, mySQLInstance.Spec.ForProvider.Zone.String())
+	caCert, err := p.exo.GetDBAASCACertificate(ctx)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot retrieve CA certificate: %w", err)
 	}
 
-	connDetails, err := connectionDetails(mysql, caCert)
+	connDetails, err := connectionDetails(ctx, mysql, caCert.Certificate, p.exo)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
 	}
 
-	params, err := mapParameters(mysql, mySQLInstance.Spec.ForProvider.Zone.String())
+	params, err := mapParameters(mysql, mySQLInstance.Spec.ForProvider.Zone)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse parameters: %w", err)
 	}
-	currentParams, err := setSettingsDefaults(ctx, p.exo, &mySQLInstance.Spec.ForProvider)
+	currentParams, err := setSettingsDefaults(ctx, *p.exo, &mySQLInstance.Spec.ForProvider)
 	if err != nil {
 		log.Error(err, "unable to set mysql settings schema")
 		currentParams = &mySQLInstance.Spec.ForProvider
@@ -85,23 +84,26 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func connectionDetails(in oapi.DbaasServiceMysql, ca string) (managed.ConnectionDetails, error) {
-	uri := ptr.Deref(in.Uri, "")
+func connectionDetails(ctx context.Context, in *exoscalesdk.DBAASServiceMysql, ca string, client *exoscalesdk.Client) (managed.ConnectionDetails, error) {
+	uri := in.URI
 	// uri may be absent
 	if uri == "" {
-		if in.ConnectionInfo == nil || in.ConnectionInfo.Uri == nil || len(*in.ConnectionInfo.Uri) == 0 {
+		if in.ConnectionInfo == nil || in.ConnectionInfo.URI == nil || len(in.ConnectionInfo.URI) == 0 {
 			return map[string][]byte{}, nil
 		}
-		uri = (*in.ConnectionInfo.Uri)[0]
+		uri = in.ConnectionInfo.URI[0]
 	}
 	parsed, err := url.Parse(uri)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse connection URI: %w", err)
 	}
-	password, _ := parsed.User.Password()
+	password, err := client.RevealDBAASMysqlUserPassword(ctx, string(in.Name), parsed.User.Username())
+	if err != nil {
+		return nil, fmt.Errorf("cannot reveal password for MySQL instance: %w", err)
+	}
 	return map[string][]byte{
 		"MYSQL_USER":     []byte(parsed.User.Username()),
-		"MYSQL_PASSWORD": []byte(password),
+		"MYSQL_PASSWORD": []byte(password.Password),
 		"MYSQL_URL":      []byte(uri),
 		"MYSQL_DB":       []byte(strings.TrimPrefix(parsed.Path, "/")),
 		"MYSQL_HOST":     []byte(parsed.Hostname()),
@@ -139,21 +141,29 @@ func isUpToDate(current, external *exoscalev1.MySQLParameters, log logr.Logger) 
 	return ok
 }
 
-func mapObservation(instance oapi.DbaasServiceMysql) (exoscalev1.MySQLObservation, error) {
-	observation := exoscalev1.MySQLObservation{
-		Version:    ptr.Deref(instance.Version, ""),
-		NodeStates: mapper.ToNodeStates(instance.NodeStates),
+func mapObservation(instance *exoscalesdk.DBAASServiceMysql) (exoscalev1.MySQLObservation, error) {
+
+	jsonSettings, err := json.Marshal(instance.MysqlSettings)
+	if err != nil {
+		return exoscalev1.MySQLObservation{}, fmt.Errorf("error parsing MysqlSettings")
 	}
 
-	settings, err := mapper.ToRawExtension(instance.MysqlSettings)
-	if err != nil {
-		return observation, fmt.Errorf("mySQLInstance settings: %w", err)
+	settings := runtime.RawExtension{Raw: jsonSettings}
+
+	nodeStates := []exoscalev1.NodeState{}
+	if instance.NodeStates != nil {
+		nodeStates = mapper.ToNodeStates(&instance.NodeStates)
 	}
+	observation := exoscalev1.MySQLObservation{
+		Version:    instance.Version,
+		NodeStates: nodeStates,
+	}
+
 	observation.MySQLSettings = settings
 
-	observation.DBaaSParameters = mapper.ToDBaaSParameters(instance.TerminationProtection, instance.Plan, instance.IpFilter)
+	observation.DBaaSParameters = mapper.ToDBaaSParameters(instance.TerminationProtection, instance.Plan, &instance.IPFilter)
 	observation.Maintenance = mapper.ToMaintenance(instance.Maintenance)
-	observation.Backup = mapper.ToBackupSpec(instance.BackupSchedule)
+	observation.Backup = toBackupSpec(instance.BackupSchedule)
 
 	notifications, err := mapper.ToNotifications(instance.Notifications)
 	if err != nil {
@@ -164,26 +174,37 @@ func mapObservation(instance oapi.DbaasServiceMysql) (exoscalev1.MySQLObservatio
 	return observation, nil
 }
 
-func mapParameters(in oapi.DbaasServiceMysql, zone string) (*exoscalev1.MySQLParameters, error) {
-	settings, err := mapper.ToRawExtension(in.MysqlSettings)
+func mapParameters(in *exoscalesdk.DBAASServiceMysql, zone exoscalev1.Zone) (*exoscalev1.MySQLParameters, error) {
+	jsonSettings, err := json.Marshal(in.MysqlSettings)
 	if err != nil {
-		return nil, fmt.Errorf("cannot parse mySQLInstance settings: %w", err)
+		return nil, fmt.Errorf("cannot parse mysqlInstance settings: %w", err)
 	}
+
+	settings := runtime.RawExtension{Raw: jsonSettings}
+
 	return &exoscalev1.MySQLParameters{
 		Maintenance: exoscalev1.MaintenanceSpec{
 			DayOfWeek: in.Maintenance.Dow,
 			TimeOfDay: exoscalev1.TimeOfDay(in.Maintenance.Time),
 		},
-		Backup:  mapper.ToBackupSpec(in.BackupSchedule),
-		Zone:    exoscalev1.Zone(zone),
-		Version: *in.Version,
+		Backup:  toBackupSpec(in.BackupSchedule),
+		Zone:    zone,
+		Version: in.Version,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref(in.TerminationProtection, false),
+			TerminationProtection: *in.TerminationProtection,
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},
-			IPFilter: mapper.ToSlice(in.IpFilter),
+			IPFilter: in.IPFilter,
 		},
 		MySQLSettings: settings,
 	}, nil
+}
+
+func toBackupSpec(schedule *exoscalesdk.DBAASServiceMysqlBackupSchedule) exoscalev1.BackupSpec {
+	if schedule == nil {
+		return exoscalev1.BackupSpec{}
+	}
+	hour, min := schedule.BackupHour, schedule.BackupMinute
+	return exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay(fmt.Sprintf("%02d:%02d:00", hour, min))}
 }

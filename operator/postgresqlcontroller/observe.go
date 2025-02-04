@@ -2,15 +2,19 @@ package postgresqlcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"k8s.io/utils/ptr"
 	"net/url"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
@@ -22,122 +26,122 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("Observing resource")
 
-	pgInstance := fromManaged(mg)
+	pgInstance := mg.(*exoscalev1.PostgreSQL)
 
-	resp, err := p.exo.GetDbaasServicePgWithResponse(ctx, oapi.DbaasServiceName(pgInstance.GetInstanceName()))
+	pg, err := p.exo.GetDBAASServicePG(ctx, pgInstance.GetInstanceName())
 	if err != nil {
-		return managed.ExternalObservation{}, ignoreNotFound(err)
+		if errors.Is(err, exoscalesdk.ErrNotFound) {
+			return managed.ExternalObservation{ResourceExists: false}, nil
+		}
+		return managed.ExternalObservation{}, fmt.Errorf("cannot observe pgInstance: %w", err)
 	}
-	pgExo := *resp.JSON200
-	log.V(2).Info("Response", "raw", resp.JSON200)
-	log.V(1).Info("Retrieved instance", "state", pgExo.State)
 
-	pgInstance.Status.AtProvider, err = mapObservation(pgExo)
+	log.V(1).Info("Retrieved instance", "state", pg.State)
+
+	pgInstance.Status.AtProvider, err = mapObservation(pg)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot parse instance status")
 	}
 
-	setConditionFromState(pgExo, pgInstance)
+	setConditionFromState(*pg, pgInstance)
 
-	ca, err := p.exo.GetDatabaseCACertificate(ctx, pgInstance.Spec.ForProvider.Zone.String())
+	caCert, err := p.exo.GetDBAASCACertificate(ctx)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot retrieve CA certificate")
 	}
 
-	pp, err := mapParameters(pgExo, pgInstance.Spec.ForProvider.Zone)
+	params, err := mapParameters(pg, pgInstance.Spec.ForProvider.Zone)
 	if err != nil {
 		return managed.ExternalObservation{}, err
 	}
 
-	connDetails, err := connectionDetails(pgExo, ca)
+	connDetails, err := connectionDetails(ctx, pg, caCert.Certificate, p.exo)
 	if err != nil {
 		return managed.ExternalObservation{}, errors.Wrap(err, "cannot read connection details")
 	}
 
-	currentParams, err := setSettingsDefaults(ctx, p.exo, &pgInstance.Spec.ForProvider)
+	currentParams, err := setSettingsDefaults(ctx, *p.exo, &pgInstance.Spec.ForProvider)
 	if err != nil {
 		log.Error(err, "unable to set postgres settings schema")
 		currentParams = &pgInstance.Spec.ForProvider
 	}
 	return managed.ExternalObservation{
 		ResourceExists:    true,
-		ResourceUpToDate:  isUpToDate(currentParams, pp, log),
+		ResourceUpToDate:  isUpToDate(currentParams, params, log),
 		ConnectionDetails: connDetails,
 	}, nil
 }
 
-// mapParameters converts a oapi.DbaasServicePg to the internal exoscalev1.PostgreSQLParameters type.
-func mapParameters(in oapi.DbaasServicePg, zone exoscalev1.Zone) (*exoscalev1.PostgreSQLParameters, error) {
-	settings, err := mapper.ToRawExtension(in.PgSettings)
+// mapParameters converts a exoscalesdk.DBAASServicePG to the internal exoscalev1.PostgreSQLParameters type.
+func mapParameters(in *exoscalesdk.DBAASServicePG, zone exoscalev1.Zone) (*exoscalev1.PostgreSQLParameters, error) {
+
+	jsonSettings, err := json.Marshal(in.PGSettings)
 	if err != nil {
-		return nil, fmt.Errorf("unable to parse settings: %w", err)
+		return nil, fmt.Errorf("cannot parse pgInstance settings: %w", err)
 	}
+
+	settings := runtime.RawExtension{Raw: jsonSettings}
 
 	return &exoscalev1.PostgreSQLParameters{
 		Maintenance: exoscalev1.MaintenanceSpec{
 			DayOfWeek: in.Maintenance.Dow,
 			TimeOfDay: exoscalev1.TimeOfDay(in.Maintenance.Time),
 		},
-		Backup: mapper.ToBackupSpec(in.BackupSchedule),
+		Backup: toBackupSpec(in.BackupSchedule),
 		Zone:   zone,
 		DBaaSParameters: exoscalev1.DBaaSParameters{
 			TerminationProtection: ptr.Deref(in.TerminationProtection, false),
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},
-			IPFilter: *in.IpFilter,
+			IPFilter: in.IPFilter,
 		},
-		Version:    ptr.Deref(in.Version, ""),
+		Version:    in.Version,
 		PGSettings: settings,
 	}, nil
 }
 
-func ignoreNotFound(err error) error {
-	var urlErr *url.Error
-	if errors.As(err, &urlErr) && urlErr.Err.Error() == "resource not found" {
-		return nil
-	}
-	return errors.Wrap(err, "cannot observe instance")
-}
-
-func setConditionFromState(pgExo oapi.DbaasServicePg, pgInstance *exoscalev1.PostgreSQL) {
-	switch *pgExo.State {
-	case oapi.EnumServiceStateRunning:
+func setConditionFromState(pgExo exoscalesdk.DBAASServicePG, pgInstance *exoscalev1.PostgreSQL) {
+	switch pgExo.State {
+	case exoscalesdk.EnumServiceStateRunning:
 		pgInstance.SetConditions(exoscalev1.Running())
-	case oapi.EnumServiceStateRebuilding:
+	case exoscalesdk.EnumServiceStateRebuilding:
 		pgInstance.SetConditions(exoscalev1.Rebuilding())
-	case oapi.EnumServiceStatePoweroff:
+	case exoscalesdk.EnumServiceStatePoweroff:
 		pgInstance.SetConditions(exoscalev1.PoweredOff())
-	case oapi.EnumServiceStateRebalancing:
+	case exoscalesdk.EnumServiceStateRebalancing:
 		pgInstance.SetConditions(exoscalev1.Rebalancing())
 	}
 }
 
-var variantAiven = oapi.EnumPgVariantAiven
+var variantAiven = exoscalesdk.EnumPGVariantAiven
 
 // mapObservation fills the status fields from the given response body.
-func mapObservation(pg oapi.DbaasServicePg) (exoscalev1.PostgreSQLObservation, error) {
-	observation := exoscalev1.PostgreSQLObservation{
-		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref(pg.TerminationProtection, false),
-			Size: exoscalev1.SizeSpec{
-				Plan: pg.Plan,
-			},
-			IPFilter: *pg.IpFilter,
-		},
-		Version: ptr.Deref(pg.Version, ""),
-		Maintenance: exoscalev1.MaintenanceSpec{
-			DayOfWeek: pg.Maintenance.Dow,
-			TimeOfDay: exoscalev1.TimeOfDay(pg.Maintenance.Time),
-		},
-		Backup:     mapper.ToBackupSpec(pg.BackupSchedule),
-		NodeStates: mapper.ToNodeStates(pg.NodeStates),
+func mapObservation(instance *exoscalesdk.DBAASServicePG) (exoscalev1.PostgreSQLObservation, error) {
+	jsonSettings, err := json.Marshal(instance.PGSettings)
+	if err != nil {
+		return exoscalev1.PostgreSQLObservation{}, fmt.Errorf("error parsing PgSettings")
 	}
 
-	settings, err := mapper.ToRawExtension(pg.PgSettings)
-	if err != nil {
-		return observation, errors.Wrap(err, "cannot marshal json")
+	settings := runtime.RawExtension{Raw: jsonSettings}
+
+	observation := exoscalev1.PostgreSQLObservation{
+		DBaaSParameters: exoscalev1.DBaaSParameters{
+			TerminationProtection: ptr.Deref(instance.TerminationProtection, false),
+			Size: exoscalev1.SizeSpec{
+				Plan: instance.Plan,
+			},
+			IPFilter: instance.IPFilter,
+		},
+		Version: instance.Version,
+		Maintenance: exoscalev1.MaintenanceSpec{
+			DayOfWeek: instance.Maintenance.Dow,
+			TimeOfDay: exoscalev1.TimeOfDay(instance.Maintenance.Time),
+		},
+		Backup:     toBackupSpec(instance.BackupSchedule),
+		NodeStates: mapper.ToNodeStates(&instance.NodeStates),
 	}
+
 	observation.PGSettings = settings
 
 	return observation, nil
@@ -173,20 +177,38 @@ func isUpToDate(current, external *exoscalev1.PostgreSQLParameters, log logr.Log
 }
 
 // connectionDetails parses the connection details from the given observation.
-func connectionDetails(pgExo oapi.DbaasServicePg, ca string) (managed.ConnectionDetails, error) {
-	raw := ptr.Deref(pgExo.Uri, "")
-	parsed, err := url.Parse(raw)
+func connectionDetails(ctx context.Context, in *exoscalesdk.DBAASServicePG, ca string, client *exoscalesdk.Client) (managed.ConnectionDetails, error) {
+	uri := in.URI
+	// uri may be absent
+	if uri == "" {
+		if in.ConnectionInfo == nil || in.ConnectionInfo.URI == nil || len(in.ConnectionInfo.URI) == 0 {
+			return map[string][]byte{}, nil
+		}
+		uri = in.ConnectionInfo.URI[0]
+	}
+	parsed, err := url.Parse(uri)
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse connection URL: %w", err)
 	}
-	password, _ := parsed.User.Password()
+	password, err := client.RevealDBAASPostgresUserPassword(ctx, string(in.Name), parsed.User.Username())
+	if err != nil {
+		return nil, fmt.Errorf("cannot reveal password for PostgreSQL instance: %w", err)
+	}
 	return map[string][]byte{
 		"POSTGRESQL_USER":     []byte(parsed.User.Username()),
-		"POSTGRESQL_PASSWORD": []byte(password),
-		"POSTGRESQL_URL":      []byte(raw),
+		"POSTGRESQL_PASSWORD": []byte(password.Password),
+		"POSTGRESQL_URL":      []byte(uri),
 		"POSTGRESQL_DB":       []byte(strings.TrimPrefix(parsed.Path, "/")),
 		"POSTGRESQL_HOST":     []byte(parsed.Hostname()),
 		"POSTGRESQL_PORT":     []byte(parsed.Port()),
 		"ca.crt":              []byte(ca),
 	}, nil
+}
+
+func toBackupSpec(schedule *exoscalesdk.DBAASServicePGBackupSchedule) exoscalev1.BackupSpec {
+	if schedule == nil {
+		return exoscalev1.BackupSpec{}
+	}
+	hour, min := schedule.BackupHour, schedule.BackupMinute
+	return exoscalev1.BackupSpec{TimeOfDay: exoscalev1.TimeOfDay(fmt.Sprintf("%02d:%02d:00", hour, min))}
 }

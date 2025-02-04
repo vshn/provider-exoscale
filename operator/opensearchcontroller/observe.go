@@ -2,17 +2,18 @@ package opensearchcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscaleapi "github.com/exoscale/egoscale/v2/api"
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+	"k8s.io/apimachinery/pkg/runtime"
+
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
-	"k8s.io/utils/ptr"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -23,40 +24,38 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 
 	openSearchInstance := mg.(*exoscalev1.OpenSearch)
 
-	resp, err := p.exo.GetDbaasServiceOpensearchWithResponse(ctx, oapi.DbaasServiceName(openSearchInstance.GetInstanceName()))
+	opensearch, err := p.exo.GetDBAASServiceOpensearch(ctx, openSearchInstance.GetInstanceName())
 	if err != nil {
-		if errors.Is(err, exoscaleapi.ErrNotFound) {
+		if errors.Is(err, exoscalesdk.ErrNotFound) {
 			return managed.ExternalObservation{ResourceExists: false}, nil
 		}
 		return managed.ExternalObservation{}, fmt.Errorf("cannot observe openSearchInstance: %w", err)
 	}
 
-	opensearch := *resp.JSON200
-	log.V(2).Info("response", "raw", string(resp.Body))
 	log.V(1).Info("retrieved openSearchInstance", "state", opensearch.State)
 
 	openSearchInstance.Status.AtProvider, err = mapObservation(opensearch)
 	if err != nil {
 		log.Error(err, "cannot map openSearchInstance observation, ignoring")
 	}
-	var state oapi.EnumServiceState
-	if opensearch.State != nil {
-		state = *opensearch.State
+	var state exoscalesdk.EnumServiceState
+	if opensearch.State != "" {
+		state = opensearch.State
 	}
 	switch state {
-	case oapi.EnumServiceStateRunning:
+	case exoscalesdk.EnumServiceStateRunning:
 		openSearchInstance.SetConditions(exoscalev1.Running())
-	case oapi.EnumServiceStateRebuilding:
+	case exoscalesdk.EnumServiceStateRebuilding:
 		openSearchInstance.SetConditions(exoscalev1.Rebuilding())
-	case oapi.EnumServiceStatePoweroff:
+	case exoscalesdk.EnumServiceStatePoweroff:
 		openSearchInstance.SetConditions(exoscalev1.PoweredOff())
-	case oapi.EnumServiceStateRebalancing:
+	case exoscalesdk.EnumServiceStateRebalancing:
 		openSearchInstance.SetConditions(exoscalev1.Rebalancing())
 	default:
 		log.V(2).Info("ignoring unknown openSearchInstance state", "state", state)
 	}
 
-	connDetails, err := connectionDetails(opensearch)
+	connDetails, err := connectionDetails(ctx, opensearch, p.exo)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse connection details: %w", err)
 	}
@@ -66,7 +65,7 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 		return managed.ExternalObservation{}, fmt.Errorf("cannot parse parameters: %w", err)
 	}
 
-	currentParams, err := setSettingsDefaults(ctx, p.exo, &openSearchInstance.Spec.ForProvider)
+	currentParams, err := setSettingsDefaults(ctx, *p.exo, &openSearchInstance.Spec.ForProvider)
 	if err != nil {
 		log.Error(err, "unable to set opensearch settings schema")
 		currentParams = &openSearchInstance.Spec.ForProvider
@@ -79,16 +78,20 @@ func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.Ex
 	}, nil
 }
 
-func connectionDetails(in oapi.DbaasServiceOpensearch) (managed.ConnectionDetails, error) {
-	uriParams := *in.UriParams
+func connectionDetails(ctx context.Context, in *exoscalesdk.DBAASServiceOpensearch, client *exoscalesdk.Client) (managed.ConnectionDetails, error) {
+	uriParams := in.URIParams
 
+	password, err := client.RevealDBAASOpensearchUserPassword(ctx, string(in.Name), in.ConnectionInfo.Username)
+	if err != nil {
+		return nil, fmt.Errorf("cannot reveal password for OpenSearch instance: %w", err)
+	}
 	return map[string][]byte{
-		"OPENSEARCH_USER":          []byte(*in.ConnectionInfo.Username),
-		"OPENSEARCH_PASSWORD":      []byte(*in.ConnectionInfo.Password),
+		"OPENSEARCH_USER":          []byte(in.ConnectionInfo.Username),
+		"OPENSEARCH_PASSWORD":      []byte(password.Password),
 		"OPENSEARCH_HOST":          []byte(uriParams["host"].(string)),
 		"OPENSEARCH_PORT":          []byte(uriParams["port"].(string)),
-		"OPENSEARCH_URI":           []byte(*in.Uri),
-		"OPENSEARCH_DASHBOARD_URI": []byte(*in.ConnectionInfo.DashboardUri),
+		"OPENSEARCH_URI":           []byte(in.URI),
+		"OPENSEARCH_DASHBOARD_URI": []byte(in.ConnectionInfo.DashboardURI),
 	}, nil
 }
 
@@ -116,20 +119,25 @@ func isUpToDate(current, external *exoscalev1.OpenSearchParameters, log logr.Log
 	return ok
 }
 
-func mapObservation(instance oapi.DbaasServiceOpensearch) (exoscalev1.OpenSearchObservation, error) {
+func mapObservation(instance *exoscalesdk.DBAASServiceOpensearch) (exoscalev1.OpenSearchObservation, error) {
 	observation := exoscalev1.OpenSearchObservation{
-		MajorVersion: ptr.Deref(instance.Version, ""),
-		NodeStates:   mapper.ToNodeStates(instance.NodeStates),
+		MajorVersion: instance.Version,
+		NodeStates:   mapper.ToNodeStates(&instance.NodeStates),
 	}
 
-	settings, err := mapper.ToRawExtension(instance.OpensearchSettings)
+	jsonSettings, err := json.Marshal(instance.OpensearchSettings)
+	if err != nil {
+		return exoscalev1.OpenSearchObservation{}, fmt.Errorf("error parsing OpenSearchSettings")
+	}
+
+	settings := runtime.RawExtension{Raw: jsonSettings}
 	if err != nil {
 		return observation, fmt.Errorf("openSearchInstance settings: %w", err)
 	}
 	observation.OpenSearchSettings = settings
 
 	observation.Maintenance = mapper.ToMaintenance(instance.Maintenance)
-	observation.DBaaSParameters = mapper.ToDBaaSParameters(instance.TerminationProtection, instance.Plan, instance.IpFilter)
+	observation.DBaaSParameters = mapper.ToDBaaSParameters(instance.TerminationProtection, instance.Plan, &instance.IPFilter)
 	notifications, err := mapper.ToNotifications(instance.Notifications)
 	if err != nil {
 		return observation, fmt.Errorf("openSearchInstance notifications: %w", err)
@@ -139,11 +147,15 @@ func mapObservation(instance oapi.DbaasServiceOpensearch) (exoscalev1.OpenSearch
 	return observation, nil
 }
 
-func mapParameters(in oapi.DbaasServiceOpensearch, zone string) (*exoscalev1.OpenSearchParameters, error) {
-	settings, err := mapper.ToRawExtension(in.OpensearchSettings)
+func mapParameters(in *exoscalesdk.DBAASServiceOpensearch, zone string) (*exoscalev1.OpenSearchParameters, error) {
+	jsonSettings, err := json.Marshal(in.OpensearchSettings)
+
 	if err != nil {
 		return nil, fmt.Errorf("cannot parse openSearchInstance settings: %w", err)
 	}
+
+	settings := runtime.RawExtension{Raw: jsonSettings}
+
 	return &exoscalev1.OpenSearchParameters{
 		Maintenance: exoscalev1.MaintenanceSpec{
 			DayOfWeek: in.Maintenance.Dow,
@@ -154,7 +166,7 @@ func mapParameters(in oapi.DbaasServiceOpensearch, zone string) (*exoscalev1.Ope
 			Size: exoscalev1.SizeSpec{
 				Plan: in.Plan,
 			},
-			IPFilter: mapper.ToSlice(in.IpFilter),
+			IPFilter: in.IPFilter,
 		},
 		OpenSearchSettings: settings,
 	}, nil

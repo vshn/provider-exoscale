@@ -6,7 +6,8 @@ import (
 
 	pipeline "github.com/ccremer/go-command-pipeline"
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
-	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+	"github.com/exoscale/egoscale/v3/credentials"
 	providerv1 "github.com/vshn/provider-exoscale/apis/provider/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -95,7 +96,8 @@ func validateSecret(ctx *connectContext) error {
 }
 
 func createExoscaleClient(ctx *connectContext) error {
-	ec, err := exoscalesdk.NewClient(ctx.apiKey, ctx.apiSecret, ctx.opts...)
+	creds := credentials.NewStaticCredentials(ctx.apiKey, ctx.apiSecret)
+	ec, err := exoscalesdk.NewClient(creds, ctx.opts...)
 	ctx.exoscaleClient = ec
 	return err
 }

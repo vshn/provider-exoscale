@@ -1,7 +1,8 @@
-package postgresqlcontroller
+package kafkacontroller
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
@@ -15,20 +16,24 @@ import (
 )
 
 type connector struct {
-	kube     client.Client
-	recorder event.Recorder
+	Kube     client.Client
+	Recorder event.Recorder
 }
 
-// Connect implements managed.ExternalConnecter.
+// Connect to the exoscale kafka provider.
 func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
 	log := ctrl.LoggerFrom(ctx)
-	log.V(1).Info("Connecting resource")
+	log.V(1).Info("connecting resource")
 
-	pgInstance := mg.(*exoscalev1.PostgreSQL)
+	kafkaInstance, ok := mg.(*exoscalev1.Kafka)
+	if !ok {
+		return nil, fmt.Errorf("invalid managed resource type %T for kafka connector", mg)
+	}
 
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, pgInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[pgInstance.Spec.ForProvider.Zone]))
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.Kube, kafkaInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[kafkaInstance.Spec.ForProvider.Zone]))
 	if err != nil {
 		return nil, err
 	}
-	return newPipeline(c.kube, c.recorder, exo.Exoscale), nil
+	return newPipeline(c.Kube, c.Recorder, exo.Exoscale), nil
+
 }

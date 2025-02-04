@@ -2,12 +2,14 @@ package mysqlcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+
 	"github.com/vshn/provider-exoscale/operator/mapper"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
@@ -21,39 +23,36 @@ func (p *pipeline) Update(ctx context.Context, mg resource.Managed) (managed.Ext
 
 	spec := mySQLInstance.Spec.ForProvider
 	ipFilter := []string(spec.IPFilter)
-	settings, err := mapper.ToMap(spec.MySQLSettings)
-	if err != nil {
-		return managed.ExternalUpdate{}, fmt.Errorf("cannot map mySQLInstance settings: %w", err)
+	settings := exoscalesdk.JSONSchemaMysql{}
+	if len(spec.MySQLSettings.Raw) != 0 {
+		err := json.Unmarshal(spec.MySQLSettings.Raw, &settings)
+		if err != nil {
+			return managed.ExternalUpdate{}, fmt.Errorf("cannot map mySQLInstance settings: %w", err)
+		}
 	}
 	backupSchedule, err := mapper.ToBackupSchedule(spec.Backup.TimeOfDay)
 	if err != nil {
 		return managed.ExternalUpdate{}, fmt.Errorf("cannot parse mySQLInstance backup schedule: %w", err)
 	}
 
-	body := oapi.UpdateDbaasServiceMysqlJSONRequestBody{
-		Maintenance: &struct {
-			Dow  oapi.UpdateDbaasServiceMysqlJSONBodyMaintenanceDow `json:"dow"`
-			Time string                                             `json:"time"`
-		}{
-			Dow:  oapi.UpdateDbaasServiceMysqlJSONBodyMaintenanceDow(spec.Maintenance.DayOfWeek),
+	body := exoscalesdk.UpdateDBAASServiceMysqlRequest{
+		Maintenance: &exoscalesdk.UpdateDBAASServiceMysqlRequestMaintenance{
+			Dow:  exoscalesdk.UpdateDBAASServiceMysqlRequestMaintenanceDow(spec.Maintenance.DayOfWeek),
 			Time: spec.Maintenance.TimeOfDay.String(),
 		},
-		BackupSchedule: &struct {
-			BackupHour   *int64 `json:"backup-hour,omitempty"`
-			BackupMinute *int64 `json:"backup-minute,omitempty"`
-		}{
+		BackupSchedule: &exoscalesdk.UpdateDBAASServiceMysqlRequestBackupSchedule{
 			BackupHour:   backupSchedule.BackupHour,
 			BackupMinute: backupSchedule.BackupMinute,
 		},
 		TerminationProtection: &spec.TerminationProtection,
-		Plan:                  &spec.Size.Plan,
-		IpFilter:              &ipFilter,
-		MysqlSettings:         &settings,
+		Plan:                  spec.Size.Plan,
+		IPFilter:              ipFilter,
+		MysqlSettings:         settings,
 	}
-	resp, err := p.exo.UpdateDbaasServiceMysqlWithResponse(ctx, oapi.DbaasServiceName(mySQLInstance.GetInstanceName()), body)
+	resp, err := p.exo.UpdateDBAASServiceMysql(ctx, mySQLInstance.GetInstanceName(), body)
 	if err != nil {
 		return managed.ExternalUpdate{}, fmt.Errorf("cannot update mySQLInstance: %w", err)
 	}
-	log.V(1).Info("response", "body", string(resp.Body))
+	log.V(1).Info("response", "message", string(resp.Message))
 	return managed.ExternalUpdate{}, nil
 }

@@ -3,7 +3,7 @@ package v1
 import (
 	"testing"
 
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -70,44 +70,44 @@ func TestMaintenanceSpec_Equals(t *testing.T) {
 		},
 		"same equals": {
 			ms: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:00",
 			},
 			other: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:00",
 			},
 			want: true,
 		},
 		"day diff": {
 			ms: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowMonday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowMonday,
 				TimeOfDay: "12:00:00",
 			},
 			other: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:00",
 			},
 			want: false,
 		},
 		"time diff": {
 			ms: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:01",
 			},
 			other: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:00",
 			},
 			want: false,
 		},
 		"date & time diff": {
 			ms: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowFriday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:01",
 			},
 			other: MaintenanceSpec{
-				DayOfWeek: oapi.DbaasServiceMaintenanceDowMonday,
+				DayOfWeek: exoscalesdk.DBAASServiceMaintenanceDowFriday,
 				TimeOfDay: "12:00:00",
 			},
 			want: false,

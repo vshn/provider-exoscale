@@ -3,10 +3,12 @@ package postgresqlcontroller
 import (
 	"context"
 	"fmt"
+
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/common"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	"github.com/vshn/provider-exoscale/operator/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -36,7 +38,7 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 		return nil, err
 	}
 
-	err = v.validateVersion(ctx, obj, *availableVersions)
+	err = v.validateVersion(ctx, obj, availableVersions)
 	if err != nil {
 		return nil, err
 	}
@@ -44,27 +46,26 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 	return nil, v.validateSpec(instance)
 }
 
-func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) (*[]string, error) {
+func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) ([]string, error) {
 	instance := obj.(*exoscalev1.PostgreSQL)
 
 	v.log.V(1).Info("get postgres available versions")
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", instance.Spec.ForProvider.Zone)))
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[instance.Spec.ForProvider.Zone]))
 	if err != nil {
 		return nil, fmt.Errorf("open exoscale client failed: %w", err)
 	}
 
-	resp, err := exo.Exoscale.GetDbaasServiceTypeWithResponse(ctx, serviceType)
+	resp, err := exo.Exoscale.GetDBAASServiceType(ctx, serviceType)
 	if err != nil {
 		return nil, fmt.Errorf("get DBaaS service type failed: %w", err)
 	}
 
-	v.log.V(1).Info("DBaaS service type", "body", string(resp.Body))
+	v.log.V(1).Info("DBaaS service type", "name", string(resp.Name), "description", string(resp.Description))
 
-	serviceType := *resp.JSON200
-	if serviceType.AvailableVersions == nil {
+	if resp.AvailableVersions == nil {
 		return nil, fmt.Errorf("postgres available versions not found")
 	}
-	return serviceType.AvailableVersions, nil
+	return resp.AvailableVersions, nil
 }
 
 func (v *Validator) validateVersion(ctx context.Context, obj runtime.Object, availableVersions []string) error {

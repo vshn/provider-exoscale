@@ -5,6 +5,7 @@ import (
 
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	exov1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
@@ -20,7 +21,12 @@ func (p *IAMKeyPipeline) Update(ctx context.Context, mg resource.Managed) (manag
 
 	role := createRole(iamKey.Spec.ForProvider.KeyName, iamKey.Spec.ForProvider.Services.SOS.Buckets)
 
-	_, err := executeRequest(ctx, "PUT", iamKey.Spec.ForProvider.Zone, "/v2/iam-role/"+iamKey.Status.AtProvider.RoleID+":policy", p.apiKey, p.apiSecret, role.Policy)
+	updateRole := exoscalesdk.UpdateIAMRoleRequest{
+		Description: role.Description,
+		Labels:      role.Labels,
+		Permissions: role.Permissions,
+	}
+	_, err := p.exoscaleClient.UpdateIAMRole(ctx, iamKey.Status.AtProvider.RoleID, updateRole)
 
 	return managed.ExternalUpdate{}, err
 }

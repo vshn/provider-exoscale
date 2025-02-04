@@ -2,15 +2,17 @@ package postgresqlcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"strings"
 
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
 	"github.com/vshn/provider-exoscale/operator/mapper"
 
 	"github.com/crossplane/crossplane-runtime/pkg/errors"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	"github.com/exoscale/egoscale/v2/oapi"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 )
 
@@ -19,7 +21,7 @@ func (p *pipeline) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	log := controllerruntime.LoggerFrom(ctx)
 	log.Info("Creating resource")
 
-	pgInstance := fromManaged(mg)
+	pgInstance := mg.(*exoscalev1.PostgreSQL)
 
 	spec := pgInstance.Spec.ForProvider
 
@@ -27,43 +29,51 @@ func (p *pipeline) Create(ctx context.Context, mg resource.Managed) (managed.Ext
 	if err != nil {
 		return managed.ExternalCreation{}, errors.Wrap(err, "cannot map spec to API request")
 	}
-	resp, err := p.exo.CreateDbaasServicePgWithResponse(ctx, oapi.DbaasServiceName(pgInstance.Name), body)
+	resp, err := p.exo.CreateDBAASServicePG(ctx, pgInstance.Name, body)
 	if err != nil {
+		if strings.Contains(err.Error(), "Service name is already taken") {
+			// According to the ExternalClient Interface, create needs to be idempotent.
+			// However the exoscale client doesn't return very helpful errors, so we need to make this brittle matching to find if we get an already exits error
+			return managed.ExternalCreation{}, nil
+		}
 		return managed.ExternalCreation{}, errors.Wrap(err, "cannot create instance")
 	}
-	log.V(1).Info("Response", "json", resp.JSON200)
+	log.V(1).Info("Response", "message", resp.Message)
 	return managed.ExternalCreation{}, nil
 }
 
 // fromSpecToCreateBody places the given spec into the request body.
-func fromSpecToCreateBody(spec exoscalev1.PostgreSQLParameters) (oapi.CreateDbaasServicePgJSONRequestBody, error) {
+func fromSpecToCreateBody(spec exoscalev1.PostgreSQLParameters) (exoscalesdk.CreateDBAASServicePGRequest, error) {
 	/**
 	NOTE: If you change anything below, also update fromSpecToCreateBody().
 	Unfortunately the generated openapi-types in exoscale are unusable for reusing same properties.
 	*/
 	backupSchedule, err := mapper.ToBackupSchedule(spec.Backup.TimeOfDay)
 	if err != nil {
-		return oapi.CreateDbaasServicePgJSONRequestBody{}, fmt.Errorf("invalid backup schedule: %w", err)
+		return exoscalesdk.CreateDBAASServicePGRequest{}, fmt.Errorf("invalid backup schedule: %w", err)
 	}
-	settings, err := mapper.ToMap(spec.PGSettings)
-	if err != nil {
-		return oapi.CreateDbaasServicePgJSONRequestBody{}, fmt.Errorf("invalid pgsettings: %w", err)
+	settings := exoscalesdk.JSONSchemaPG{}
+	if len(spec.PGSettings.Raw) != 0 {
+		err = json.Unmarshal(spec.PGSettings.Raw, &settings)
+		if err != nil {
+			return exoscalesdk.CreateDBAASServicePGRequest{}, fmt.Errorf("invalid pgsettings: %w", err)
+		}
 	}
 
-	return oapi.CreateDbaasServicePgJSONRequestBody{
-		Plan:                  spec.Size.Plan,
-		BackupSchedule:        &backupSchedule,
-		Variant:               &variantAiven,
-		Version:               &spec.Version,
+	return exoscalesdk.CreateDBAASServicePGRequest{
+		Plan: spec.Size.Plan,
+		BackupSchedule: &exoscalesdk.CreateDBAASServicePGRequestBackupSchedule{
+			BackupHour:   backupSchedule.BackupHour,
+			BackupMinute: backupSchedule.BackupMinute,
+		},
+		Variant:               variantAiven,
+		Version:               exoscalesdk.DBAASPGTargetVersions(spec.Version),
 		TerminationProtection: &spec.TerminationProtection,
-		Maintenance: &struct {
-			Dow  oapi.CreateDbaasServicePgJSONBodyMaintenanceDow `json:"dow"`
-			Time string                                          `json:"time"`
-		}{
-			Dow:  oapi.CreateDbaasServicePgJSONBodyMaintenanceDow(spec.Maintenance.DayOfWeek),
+		Maintenance: &exoscalesdk.CreateDBAASServicePGRequestMaintenance{
+			Dow:  exoscalesdk.CreateDBAASServicePGRequestMaintenanceDow(spec.Maintenance.DayOfWeek),
 			Time: spec.Maintenance.TimeOfDay.String(),
 		},
-		IpFilter:   mapper.ToSlicePtr(spec.IPFilter),
-		PgSettings: &settings,
+		IPFilter:   spec.IPFilter,
+		PGSettings: settings,
 	}, nil
 }

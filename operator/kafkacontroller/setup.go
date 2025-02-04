@@ -1,8 +1,6 @@
 package kafkacontroller
 
 import (
-	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -10,41 +8,9 @@ import (
 	"github.com/crossplane/crossplane-runtime/pkg/logging"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscalesdk "github.com/exoscale/egoscale/v2"
-	"github.com/exoscale/egoscale/v2/oapi"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
-	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 	ctrl "sigs.k8s.io/controller-runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
-
-type connector struct {
-	kube     client.Client
-	recorder event.Recorder
-}
-
-type connection struct {
-	exo oapi.ClientWithResponsesInterface
-}
-
-// Connect to the exoscale kafka provider.
-func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.ExternalClient, error) {
-	log := ctrl.LoggerFrom(ctx)
-	log.V(1).Info("connecting resource")
-
-	kafkaInstance, ok := mg.(*exoscalev1.Kafka)
-	if !ok {
-		return nil, fmt.Errorf("invalid managed resource type %T for kafka connector", mg)
-	}
-
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, kafkaInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", kafkaInstance.Spec.ForProvider.Zone)))
-	if err != nil {
-		return nil, err
-	}
-	return connection{
-		exo: exo.Exoscale,
-	}, nil
-}
 
 // SetupController adds a controller that reconciles kafka resources.
 func SetupController(mgr ctrl.Manager) error {
@@ -56,8 +22,8 @@ func SetupController(mgr ctrl.Manager) error {
 	r := managed.NewReconciler(mgr,
 		resource.ManagedKind(exoscalev1.KafkaGroupVersionKind),
 		managed.WithExternalConnecter(&connector{
-			kube:     mgr.GetClient(),
-			recorder: recorder,
+			Kube:     mgr.GetClient(),
+			Recorder: recorder,
 		}),
 		managed.WithLogger(logging.NewLogrLogger(mgr.GetLogger().WithValues("controller", name))),
 		managed.WithRecorder(recorder),
@@ -69,4 +35,15 @@ func SetupController(mgr ctrl.Manager) error {
 		Named(name).
 		For(&exoscalev1.Kafka{}).
 		Complete(r)
+}
+
+// SetupWebhook adds a webhook for kafka resources.
+func SetupWebhook(mgr ctrl.Manager) error {
+	return ctrl.NewWebhookManagedBy(mgr).
+		For(&exoscalev1.Kafka{}).
+		WithValidator(&Validator{
+			log:  mgr.GetLogger().WithName("webhook").WithName(strings.ToLower(exoscalev1.KafkaKind)),
+			kube: mgr.GetClient(),
+		}).
+		Complete()
 }

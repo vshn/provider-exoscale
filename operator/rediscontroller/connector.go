@@ -2,15 +2,15 @@ package rediscontroller
 
 import (
 	"context"
-	"fmt"
 
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/common"
 	"github.com/vshn/provider-exoscale/operator/pipelineutil"
 
 	"github.com/crossplane/crossplane-runtime/pkg/event"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscalesdk "github.com/exoscale/egoscale/v2"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -18,7 +18,6 @@ import (
 type connector struct {
 	kube     client.Client
 	recorder event.Recorder
-	p        *pipeline
 }
 
 // Connect implements managed.ExternalConnecter.
@@ -26,13 +25,9 @@ func (c *connector) Connect(ctx context.Context, mg resource.Managed) (managed.E
 	log := ctrl.LoggerFrom(ctx)
 	log.V(1).Info("connecting resource")
 
-	if c.p != nil {
-		return c.p, nil
-	}
-
 	redisInstance := mg.(*exoscalev1.Redis)
 
-	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, redisInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithAPIEndpoint(fmt.Sprintf("https://api-%s.exoscale.com", redisInstance.Spec.ForProvider.Zone)))
+	exo, err := pipelineutil.OpenExoscaleClient(ctx, c.kube, redisInstance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[redisInstance.Spec.ForProvider.Zone]))
 	if err != nil {
 		return nil, err
 	}

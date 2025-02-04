@@ -2,16 +2,19 @@ package kafkacontroller
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
-	"k8s.io/utils/ptr"
 	"strings"
+
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/utils/ptr"
 
 	xpv1 "github.com/crossplane/crossplane-runtime/apis/common/v1"
 	"github.com/crossplane/crossplane-runtime/pkg/reconciler/managed"
 	"github.com/crossplane/crossplane-runtime/pkg/resource"
-	exoscaleapi "github.com/exoscale/egoscale/v2/api"
-	"github.com/exoscale/egoscale/v2/oapi"
+	exoscalesdk "github.com/exoscale/egoscale/v3"
+
 	"github.com/google/go-cmp/cmp"
 	controllerruntime "sigs.k8s.io/controller-runtime"
 
@@ -22,7 +25,7 @@ import (
 // Observe the external kafka instance.
 // Will return wether the the instance exits and if it is up-to-date.
 // Observe will also update the status to the observed state and return connection details to connect to the instance.
-func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
+func (p *pipeline) Observe(ctx context.Context, mg resource.Managed) (managed.ExternalObservation, error) {
 	log := controllerruntime.LoggerFrom(ctx)
 	log.V(1).Info("observing resource")
 
@@ -31,48 +34,42 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 		return managed.ExternalObservation{}, fmt.Errorf("invalid managed resource type %T for kafka connection", mg)
 	}
 
-	res, err := c.exo.GetDbaasServiceKafkaWithResponse(ctx, oapi.DbaasServiceName(instance.GetInstanceName()))
+	res, err := p.exo.GetDBAASServiceKafka(ctx, instance.GetInstanceName())
 	if err != nil {
-		if errors.Is(err, exoscaleapi.ErrNotFound) {
+		if errors.Is(err, exoscalesdk.ErrNotFound) {
 			return managed.ExternalObservation{ResourceExists: false}, nil
 		}
 		return managed.ExternalObservation{}, err
 	}
 
-	external := res.JSON200
-
-	instance.Status.AtProvider, err = getObservation(external)
+	instance.Status.AtProvider, err = getObservation(res)
 	if err != nil {
 		log.Error(err, "failed to observe kafka instance")
 	}
 
-	condition, err := getCondition(external)
+	condition, err := getCondition(res)
 	if err != nil {
 		log.Error(err, "failed to update kafka condition")
 	}
 	instance.SetConditions(condition)
 
-	caRes, err := c.exo.GetDbaasCaCertificateWithResponse(ctx)
+	caCert, err := p.exo.GetDBAASCACertificate(ctx)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("cannot retrieve CA certificate: %w", err)
 	}
-	ca := ""
-	if caRes.JSON200 != nil && caRes.JSON200.Certificate != nil {
-		ca = *caRes.JSON200.Certificate
-	}
 
-	connDetails, err := getConnectionDetails(external, ca)
+	connDetails, err := getConnectionDetails(res, caCert.Certificate)
 	if err != nil {
 		return managed.ExternalObservation{}, fmt.Errorf("failed to get kafka connection details: %w", err)
 	}
 
-	currentParams, err := setSettingsDefaults(ctx, c.exo, &instance.Spec.ForProvider)
+	currentParams, err := setSettingsDefaults(ctx, *p.exo, &instance.Spec.ForProvider)
 	if err != nil {
 		log.Error(err, "unable to set kafka settings schema")
 		currentParams = &instance.Spec.ForProvider
 	}
 
-	upToDate, diff := diffParameters(external, *currentParams)
+	upToDate, diff := diffParameters(res, *currentParams)
 
 	return managed.ExternalObservation{
 		ResourceExists:    true,
@@ -82,28 +79,31 @@ func (c connection) Observe(ctx context.Context, mg resource.Managed) (managed.E
 	}, nil
 }
 
-func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservation, error) {
+func getObservation(external *exoscalesdk.DBAASServiceKafka) (exoscalev1.KafkaObservation, error) {
 	notifications, err := mapper.ToNotifications(external.Notifications)
 	if err != nil {
 		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing notifications: %w", err)
 	}
-	settings, err := mapper.ToRawExtension(external.KafkaSettings)
+	jsonSettings, err := json.Marshal(external.KafkaSettings)
 	if err != nil {
-		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing kafka settings: %w", err)
+		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing KafkaSettings")
 	}
+
+	settings := runtime.RawExtension{Raw: jsonSettings}
 
 	nodeStates := []exoscalev1.NodeState{}
 	if external.NodeStates != nil {
-		nodeStates = mapper.ToNodeStates(external.NodeStates)
+		nodeStates = mapper.ToNodeStates(&external.NodeStates)
 	}
 
-	restSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
+	jsonRestSettings, err := json.Marshal(external.KafkaRestSettings)
 	if err != nil {
 		return exoscalev1.KafkaObservation{}, fmt.Errorf("error parsing kafka REST settings: %w", err)
 	}
+	restSettings := runtime.RawExtension{Raw: jsonRestSettings}
 
 	return exoscalev1.KafkaObservation{
-		Version:           ptr.Deref(external.Version, ""),
+		Version:           external.Version,
 		KafkaSettings:     settings,
 		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
 		KafkaRestSettings: restSettings,
@@ -111,51 +111,51 @@ func getObservation(external *oapi.DbaasServiceKafka) (exoscalev1.KafkaObservati
 		Notifications:     notifications,
 	}, nil
 }
-func getCondition(external *oapi.DbaasServiceKafka) (xpv1.Condition, error) {
-	var state oapi.EnumServiceState
-	if external.State != nil {
-		state = *external.State
+func getCondition(external *exoscalesdk.DBAASServiceKafka) (xpv1.Condition, error) {
+	var state exoscalesdk.EnumServiceState
+	if external.State != "" {
+		state = external.State
 	}
 	switch state {
-	case oapi.EnumServiceStateRunning:
+	case exoscalesdk.EnumServiceStateRunning:
 		return exoscalev1.Running(), nil
-	case oapi.EnumServiceStateRebuilding:
+	case exoscalesdk.EnumServiceStateRebuilding:
 		return exoscalev1.Rebuilding(), nil
-	case oapi.EnumServiceStatePoweroff:
+	case exoscalesdk.EnumServiceStatePoweroff:
 		return exoscalev1.PoweredOff(), nil
-	case oapi.EnumServiceStateRebalancing:
+	case exoscalesdk.EnumServiceStateRebalancing:
 		return exoscalev1.Rebalancing(), nil
 	default:
 		return xpv1.Condition{}, fmt.Errorf("unknown state %q", state)
 	}
 }
-func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[string][]byte, error) {
+func getConnectionDetails(external *exoscalesdk.DBAASServiceKafka, ca string) (map[string][]byte, error) {
 	if external.ConnectionInfo == nil {
 		return nil, errors.New("no connection details")
 	}
 	nodes := ""
 	if external.ConnectionInfo.Nodes != nil {
-		nodes = strings.Join(*external.ConnectionInfo.Nodes, " ")
+		nodes = strings.Join(external.ConnectionInfo.Nodes, " ")
 	}
 
-	if external.ConnectionInfo.AccessCert == nil {
+	if external.ConnectionInfo.AccessCert == "" {
 		return nil, errors.New("no certificate returned")
 	}
-	cert := *external.ConnectionInfo.AccessCert
+	cert := external.ConnectionInfo.AccessCert
 
-	if external.ConnectionInfo.AccessKey == nil {
+	if external.ConnectionInfo.AccessKey == "" {
 		return nil, errors.New("no key returned")
 	}
-	key := *external.ConnectionInfo.AccessKey
+	key := external.ConnectionInfo.AccessKey
 
-	if external.Uri == nil {
+	if external.URI == "" {
 		return nil, errors.New("no URI returned")
 	}
-	uri := *external.Uri
+	uri := external.URI
 	host := ""
 	port := ""
-	if external.UriParams != nil {
-		uriParams := *external.UriParams
+	if external.URIParams != nil {
+		uriParams := external.URIParams
 		host, _ = uriParams["host"].(string)
 		port, _ = uriParams["port"].(string)
 	}
@@ -170,42 +170,38 @@ func getConnectionDetails(external *oapi.DbaasServiceKafka, ca string) (map[stri
 		"ca.crt":       []byte(ca),
 	}
 
-	if external.KafkaRestEnabled != nil && *external.KafkaRestEnabled && external.ConnectionInfo.RestUri != nil {
-		details["KAFKA_REST_URI"] = []byte(*external.ConnectionInfo.RestUri)
+	if external.KafkaRestEnabled != nil && *external.KafkaRestEnabled && external.ConnectionInfo.RestURI != "" {
+		details["KAFKA_REST_URI"] = []byte(external.ConnectionInfo.RestURI)
 	}
 
 	return details, nil
 }
 
-func diffParameters(external *oapi.DbaasServiceKafka, expected exoscalev1.KafkaParameters) (bool, string) {
+func diffParameters(external *exoscalesdk.DBAASServiceKafka, expected exoscalev1.KafkaParameters) (bool, string) {
 	actualIPFilter := []string{}
-	if external.IpFilter != nil {
-		actualIPFilter = *external.IpFilter
+	if external.IPFilter != nil {
+		actualIPFilter = external.IPFilter
 	}
 
-	actualKafkaSettings, err := mapper.ToRawExtension(external.KafkaSettings)
+	jsonKafkaSettings, err := json.Marshal(external.KafkaSettings)
 	if err != nil {
 		return false, err.Error()
 	}
+	actualKafkaSettings := runtime.RawExtension{Raw: jsonKafkaSettings}
 
-	actualKafkaRestSettings, err := mapper.ToRawExtension(external.KafkaRestSettings)
+	jsonKafkaRestSettings, err := json.Marshal(external.KafkaRestSettings)
 	if err != nil {
 		return false, err.Error()
 	}
+	actualKafkaRestSettings := runtime.RawExtension{Raw: jsonKafkaRestSettings}
 
 	actual := exoscalev1.KafkaParameters{
 		Maintenance: exoscalev1.MaintenanceSpec{
 			DayOfWeek: external.Maintenance.Dow,
 			TimeOfDay: exoscalev1.TimeOfDay(external.Maintenance.Time),
 		},
-		Zone: expected.Zone,
-		DBaaSParameters: exoscalev1.DBaaSParameters{
-			TerminationProtection: ptr.Deref(external.TerminationProtection, false),
-			Size: exoscalev1.SizeSpec{
-				Plan: external.Plan,
-			},
-			IPFilter: actualIPFilter,
-		},
+		Zone:              expected.Zone,
+		DBaaSParameters:   mapper.ToDBaaSParameters(external.TerminationProtection, external.Plan, &actualIPFilter),
 		Version:           expected.Version, // We should never mark somthing as out of date if the versions don't match as update can't modify the version anyway
 		KafkaSettings:     actualKafkaSettings,
 		KafkaRestEnabled:  ptr.Deref(external.KafkaRestEnabled, false),
