@@ -2,7 +2,7 @@ module github.com/vshn/provider-exoscale
 
 go 1.23.0
 
-replace github.com/imdario/mergo => github.com/imdario/mergo v0.3.16
+replace github.com/imdario/mergo => github.com/imdario/mergo v1.0.2
 
 require (
 	github.com/ccremer/go-command-pipeline v0.20.0
