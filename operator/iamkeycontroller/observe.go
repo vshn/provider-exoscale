@@ -82,9 +82,9 @@ func (p *IAMKeyPipeline) Observe(ctx context.Context, mg resource.Managed) (mana
 	iamKey.Status.AtProvider.KeyName = pctx.iamExoscaleKey.Name
 
 	if iamKey.Status.AtProvider.RoleID == "" {
-		iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = getBuckets(pctx.iamExoscaleKey.Resources)
+		iamKey.Status.AtProvider.SOS.Buckets = getBuckets(pctx.iamExoscaleKey.Resources)
 	} else {
-		iamKey.Status.AtProvider.ServicesSpec.SOS.Buckets = iamKey.Spec.ForProvider.Services.SOS.Buckets
+		iamKey.Status.AtProvider.SOS.Buckets = iamKey.Spec.ForProvider.Services.SOS.Buckets
 	}
 
 	connDetails, err := toConnectionDetails(pctx.iamExoscaleKey)
