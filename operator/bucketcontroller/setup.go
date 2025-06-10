@@ -28,7 +28,9 @@ func SetupController(mgr ctrl.Manager) error {
 		managed.WithLogger(logging.NewLogrLogger(mgr.GetLogger().WithValues("controller", name))),
 		managed.WithRecorder(recorder),
 		managed.WithPollInterval(1*time.Hour), // buckets are rather static
-		managed.WithConnectionPublishers(cps...))
+		managed.WithConnectionPublishers(cps...),
+		managed.WithDeterministicExternalName(true),
+	)
 
 	return ctrl.NewControllerManagedBy(mgr).
 		Named(name).
