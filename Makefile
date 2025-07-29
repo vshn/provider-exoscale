@@ -65,7 +65,7 @@ git-diff:
 
 .PHONY: golangci-lint
 golangci-lint: $(golangci_bin) ## Run golangci linters
-	$(golangci_bin) run --timeout 5m --out-format colored-line-number ./...
+	$(golangci_bin) run --timeout 5m ./...
 
 .PHONY: generate
 generate: ## Generate additional code and artifacts
