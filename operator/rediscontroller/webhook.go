@@ -20,9 +20,15 @@ type Validator struct {
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *Validator) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	instance := obj.(*exoscalev1.Redis)
 	v.log.V(1).Info("validate create")
+
+	// Validate zone exists
+	err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
+	if err != nil {
+		return nil, err
+	}
 
 	return nil, v.validateSpec(instance)
 }

@@ -121,9 +121,8 @@ func (s SizeSpec) Equals(other SizeSpec) bool {
 // A value of `0.0.0.0/0` will open the service to all addresses on the public internet.
 type IPFilter []string
 
-// +kubebuilder:validation:Enum=ch-gva-2;ch-dk-2;de-fra-1;de-muc-1;at-vie-1;bg-sof-1
-
 // Zone is the datacenter identifier in which the instance runs in.
+// Zone names are validated dynamically via webhook against the Exoscale API.
 type Zone string
 
 func (z Zone) String() string {

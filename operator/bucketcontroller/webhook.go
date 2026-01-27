@@ -7,6 +7,7 @@ import (
 
 	"github.com/go-logr/logr"
 	exoscalev1 "github.com/vshn/provider-exoscale/apis/exoscale/v1"
+	"github.com/vshn/provider-exoscale/operator/webhook"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -16,7 +17,7 @@ type BucketValidator struct {
 }
 
 // ValidateCreate implements admission.CustomValidator.
-func (v *BucketValidator) ValidateCreate(_ context.Context, obj runtime.Object) (admission.Warnings, error) {
+func (v *BucketValidator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	bucket := obj.(*exoscalev1.Bucket)
 	v.log.V(1).Info("Validate create", "name", bucket.Name)
 
@@ -24,6 +25,13 @@ func (v *BucketValidator) ValidateCreate(_ context.Context, obj runtime.Object) 
 	if providerConfigRef == nil || providerConfigRef.Name == "" {
 		return nil, fmt.Errorf(".spec.providerConfigRef.name is required")
 	}
+
+	// Validate zone exists
+	err := webhook.ValidateZoneExists(ctx, string(bucket.Spec.ForProvider.Zone))
+	if err != nil {
+		return nil, err
+	}
+
 	return nil, nil
 }
 

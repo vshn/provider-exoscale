@@ -33,6 +33,12 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 
 	v.log.V(1).Info("validate create")
 
+	// Validate zone exists
+	err := webhook.ValidateZoneExists(ctx, string(mySQLInstance.Spec.ForProvider.Zone))
+	if err != nil {
+		return nil, err
+	}
+
 	availableVersions, err := v.getAvailableVersions(ctx, obj)
 	if err != nil {
 		return nil, err

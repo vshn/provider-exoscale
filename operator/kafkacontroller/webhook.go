@@ -28,6 +28,13 @@ type Validator struct {
 // ValidateCreate validates the spec of a created kafka resource.
 func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (admission.Warnings, error) {
 	instance := obj.(*exoscalev1.Kafka)
+
+	// Validate zone exists
+	err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
+	if err != nil {
+		return nil, err
+	}
+
 	v.log.V(1).Info("get kafka available versions")
 	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[instance.Spec.ForProvider.Zone]))
 	if err != nil {
