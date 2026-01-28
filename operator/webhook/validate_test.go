@@ -125,3 +125,52 @@ func TestValidateVersions(t *testing.T) {
 		})
 	}
 }
+
+func TestValidateZone(t *testing.T) {
+	tests := map[string]struct {
+		requestedZone  string
+		availableZones []string
+		expectedError  string
+	}{
+		"GivenValidZone_ThenExpectNoError": {
+			requestedZone:  "ch-gva-2",
+			availableZones: []string{"ch-gva-2", "ch-dk-2", "de-fra-1"},
+			expectedError:  "",
+		},
+		"GivenValidZone_WithMultipleZones_ThenExpectNoError": {
+			requestedZone:  "de-fra-1",
+			availableZones: []string{"ch-gva-2", "ch-dk-2", "de-fra-1"},
+			expectedError:  "",
+		},
+		"GivenEmptyZone_ThenExpectError": {
+			requestedZone:  "",
+			availableZones: []string{"ch-gva-2"},
+			expectedError:  "zone must be provided",
+		},
+		"GivenInvalidZone_ThenExpectError": {
+			requestedZone:  "invalid-zone",
+			availableZones: []string{"ch-gva-2", "ch-dk-2"},
+			expectedError:  `zone "invalid-zone" is not valid, available zones: [ch-gva-2 ch-dk-2]`,
+		},
+		"GivenZoneNotInList_ThenExpectError": {
+			requestedZone:  "us-east-1",
+			availableZones: []string{"ch-gva-2"},
+			expectedError:  `zone "us-east-1" is not valid, available zones: [ch-gva-2]`,
+		},
+		"GivenEmptyAvailableZones_ThenExpectError": {
+			requestedZone:  "ch-gva-2",
+			availableZones: []string{},
+			expectedError:  `zone "ch-gva-2" is not valid, available zones: []`,
+		},
+	}
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			err := ValidateZone(tc.requestedZone, tc.availableZones)
+			if tc.expectedError != "" {
+				assert.EqualError(t, err, tc.expectedError)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
+	}
+}

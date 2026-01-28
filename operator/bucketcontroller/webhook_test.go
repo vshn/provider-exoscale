@@ -34,7 +34,10 @@ func TestBucketValidator_ValidateCreate_RequireProviderConfig(t *testing.T) {
 					ResourceSpec: xpv1.ResourceSpec{
 						ProviderConfigReference: &xpv1.Reference{Name: tc.providerName},
 					},
-					ForProvider: exoscalev1.BucketParameters{BucketName: "bucket"},
+					ForProvider: exoscalev1.BucketParameters{
+						BucketName: "bucket",
+						Zone:       "ch-gva-2",
+					},
 				},
 			}
 			v := &BucketValidator{log: logr.Discard()}
