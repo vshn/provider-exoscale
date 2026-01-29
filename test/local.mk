@@ -3,10 +3,10 @@ registry_sentinel = $(kind_dir)/registry_sentinel
 
 .PHONY: local-install
 local-install: export KUBECONFIG = $(KIND_KUBECONFIG)
-# for ControllerConfig:
+# for DeploymentRuntimeConfig:
 local-install: export INTERNAL_PACKAGE_IMG = registry.registry-system.svc.cluster.local:5000/$(ORG)/$(APP_NAME):$(IMG_TAG)
 local-install: local-debug ## Install Operator in local cluster
-	yq e '.spec.metadata.annotations."local.dev/installed"="$(shell date)"' test/controllerconfig-exoscale.yaml | kubectl apply -f -
+	kubectl apply -f test/deploymentruntimeconfig-exoscale.yaml
 	yq e '.spec.package=strenv(INTERNAL_PACKAGE_IMG)' test/provider-exoscale.yaml | kubectl apply -f -
 	kubectl wait --for condition=Healthy provider.pkg.crossplane.io/provider-exoscale --timeout 60s
 	kubectl -n crossplane-system wait --for condition=Ready $$(kubectl -n crossplane-system get pods -o name -l pkg.crossplane.io/provider=provider-exoscale) --timeout 60s
@@ -26,7 +26,6 @@ $(crossplane_sentinel): $(KIND_KUBECONFIG)
 		--create-namespace \
 		--namespace crossplane-system \
 		--set "args[0]='--debug'" \
-		--set "args[1]='--enable-composition-revisions'" \
 		--set webhooks.enabled=true \
 		--wait
 	@touch $@
@@ -36,7 +35,7 @@ registry-setup: $(registry_sentinel) ## Installs an image registry required for 
 
 $(registry_sentinel): export KUBECONFIG = $(KIND_KUBECONFIG)
 $(registry_sentinel): $(KIND_KUBECONFIG)
-	helm repo add twuni https://helm.twun.io
+	helm repo add twuni https://twuni.github.io/docker-registry.helm
 	helm upgrade --install registry twuni/docker-registry \
 		--create-namespace \
 		--namespace registry-system \

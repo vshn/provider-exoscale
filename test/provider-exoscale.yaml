@@ -7,6 +7,6 @@ metadata:
   name: provider-exoscale
 spec:
   package: "" # patched
-  controllerConfigRef:
-    name: providerconfig-exoscale
+  runtimeConfigRef:
+    name: provider-exoscale
   packagePullPolicy: Always
