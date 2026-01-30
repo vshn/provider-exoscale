@@ -30,17 +30,17 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 	instance := obj.(*exoscalev1.Kafka)
 
 	// Validate zone exists
-	err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
+	warnings, err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
 	v.log.V(1).Info("get kafka available versions")
 	exo, err := pipelineutil.OpenExoscaleClient(ctx, v.kube, instance.GetProviderConfigName(), exoscalesdk.ClientOptWithEndpoint(common.ZoneTranslation[instance.Spec.ForProvider.Zone]))
 	if err != nil {
-		return nil, fmt.Errorf("open exoscale client failed: %w", err)
+		return warnings, fmt.Errorf("open exoscale client failed: %w", err)
 	}
-	return nil, v.validateCreateWithExoClient(ctx, obj, exo.Exoscale)
+	return warnings, v.validateCreateWithExoClient(ctx, obj, exo.Exoscale)
 }
 
 func (v *Validator) validateCreateWithExoClient(ctx context.Context, obj runtime.Object, exo *exoscalesdk.Client) error {

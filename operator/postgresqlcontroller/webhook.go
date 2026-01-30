@@ -34,22 +34,22 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 	v.log.V(1).Info("Validate create")
 
 	// Validate zone exists
-	err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
+	warnings, err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
 	availableVersions, err := v.getAvailableVersions(ctx, obj)
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
 	err = v.validateVersion(ctx, obj, availableVersions)
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
-	return nil, v.validateSpec(instance)
+	return warnings, v.validateSpec(instance)
 }
 
 func (v *Validator) getAvailableVersions(ctx context.Context, obj runtime.Object) ([]string, error) {

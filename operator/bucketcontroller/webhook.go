@@ -27,12 +27,12 @@ func (v *BucketValidator) ValidateCreate(ctx context.Context, obj runtime.Object
 	}
 
 	// Validate zone exists
-	err := webhook.ValidateZoneExists(ctx, string(bucket.Spec.ForProvider.Zone))
+	warnings, err := webhook.ValidateZoneExists(ctx, string(bucket.Spec.ForProvider.Zone))
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
-	return nil, nil
+	return warnings, nil
 }
 
 // ValidateUpdate implements admission.CustomValidator.

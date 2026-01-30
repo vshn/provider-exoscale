@@ -4,12 +4,17 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/go-version"
 	"github.com/vshn/provider-exoscale/operator/mapper"
 
 	"k8s.io/apimachinery/pkg/runtime"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 )
 
 func ValidateRawExtension(raw runtime.RawExtension) error {
@@ -96,26 +101,62 @@ type zonesResponse struct {
 }
 
 // GetAvailableZones fetches the list of available zones from the Exoscale API.
+// It tries multiple zone endpoints as fallback in case one is unavailable.
 func GetAvailableZones(ctx context.Context) ([]string, error) {
+	// Default endpoints to try, ordered by preference
+	endpoints := []string{
+		"https://api-ch-gva-2.exoscale.com/v2/zone",
+		"https://api-de-fra-1.exoscale.com/v2/zone",
+		"https://api-ch-dk-2.exoscale.com/v2/zone",
+		"https://api-at-vie-1.exoscale.com/v2/zone",
+	}
+
+	// Allow overriding via environment variable
+	if envEndpoints := os.Getenv("EXOSCALE_ZONES_API_ENDPOINTS"); envEndpoints != "" {
+		endpoints = strings.Split(envEndpoints, ",")
+		for i, e := range endpoints {
+			endpoints[i] = strings.TrimSpace(e)
+		}
+	}
+
+	var lastErr error
 	// we do a direct http request here because the sdk validates credentials at client creation
-	req, err := http.NewRequestWithContext(ctx, "GET", "https://api-ch-gva-2.exoscale.com/v2/zone", nil)
+	client := &http.Client{
+		Timeout: 5 * time.Second,
+	}
+
+	for _, endpoint := range endpoints {
+		zones, err := tryFetchZones(ctx, client, endpoint)
+		if err == nil {
+			return zones, nil
+		}
+		lastErr = err
+	}
+
+	// If all endpoints failed, return the last error
+	return nil, fmt.Errorf("failed to fetch zones from all endpoints: %w", lastErr)
+}
+
+func tryFetchZones(ctx context.Context, client *http.Client, endpoint string) ([]string, error) {
+	req, err := http.NewRequestWithContext(ctx, "GET", endpoint, nil)
 	if err != nil {
 		return nil, fmt.Errorf("create request failed: %w", err)
 	}
 
-	resp, err := http.DefaultClient.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("list zones request failed: %w", err)
+		return nil, fmt.Errorf("list zones request to %s failed: %w", endpoint, err)
 	}
 	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("list zones failed with status %d", resp.StatusCode)
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("list zones from %s failed with status %d, body: %s", endpoint, resp.StatusCode, string(body))
 	}
 
 	var zonesResp zonesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&zonesResp); err != nil {
-		return nil, fmt.Errorf("decode zones response failed: %w", err)
+		return nil, fmt.Errorf("decode zones response from %s failed: %w", endpoint, err)
 	}
 
 	zones := make([]string, 0, len(zonesResp.Zones))
@@ -127,10 +168,12 @@ func GetAvailableZones(ctx context.Context) ([]string, error) {
 }
 
 // ValidateZoneExists fetches available zones and validates that the requested zone exists.
-func ValidateZoneExists(ctx context.Context, requestedZone string) error {
+func ValidateZoneExists(ctx context.Context, requestedZone string) (admission.Warnings, error) {
 	availableZones, err := GetAvailableZones(ctx)
 	if err != nil {
-		return err
+		// soft fail to prevent blocking operations when API is unavailable
+		warning := fmt.Sprintf("Unable to validate zone %q against Exoscale API (API may be temporarily unavailable): %v. Proceeding without validation.", requestedZone, err)
+		return admission.Warnings{warning}, nil
 	}
-	return ValidateZone(requestedZone, availableZones)
+	return nil, ValidateZone(requestedZone, availableZones)
 }

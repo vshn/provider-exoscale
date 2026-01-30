@@ -25,12 +25,12 @@ func (v *Validator) ValidateCreate(ctx context.Context, obj runtime.Object) (adm
 	v.log.V(1).Info("validate create")
 
 	// Validate zone exists
-	err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
+	warnings, err := webhook.ValidateZoneExists(ctx, string(instance.Spec.ForProvider.Zone))
 	if err != nil {
-		return nil, err
+		return warnings, err
 	}
 
-	return nil, v.validateSpec(instance)
+	return warnings, v.validateSpec(instance)
 }
 
 // ValidateUpdate implements admission.CustomValidator.
