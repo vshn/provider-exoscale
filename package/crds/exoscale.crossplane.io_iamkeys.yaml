@@ -106,13 +106,6 @@ spec:
                       Zone is the name of the zone where the IAM key is created.
                       The zone must be available in the S3 endpoint.
                       Cannot be changed after IAMKey is created.
-                    enum:
-                    - ch-gva-2
-                    - ch-dk-2
-                    - de-fra-1
-                    - de-muc-1
-                    - at-vie-1
-                    - bg-sof-1
                     type: string
                 required:
                 - services
