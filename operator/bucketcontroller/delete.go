@@ -44,14 +44,16 @@ func (p *ProvisioningPipeline) deleteAllObjects(ctx *pipelineContext) error {
 	bucketName := ctx.bucket.Status.AtProvider.BucketName
 
 	objectsCh := make(chan minio.ObjectInfo)
+	var listObjectErr error
 
 	// Send object names that are needed to be removed to objectsCh
 	go func() {
 		defer close(objectsCh)
 		for object := range p.minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{Recursive: true}) {
 			if object.Err != nil {
-				log.V(1).Info("warning: cannot list object", "key", object.Key, "error", object.Err)
-				continue
+				listObjectErr = object.Err
+
+				return
 			}
 			objectsCh <- object
 		}
@@ -65,6 +67,11 @@ func (p *ProvisioningPipeline) deleteAllObjects(ctx *pipelineContext) error {
 	for obj := range p.minioClient.RemoveObjects(ctx, bucketName, objectsCh, minio.RemoveObjectsOptions{GovernanceBypass: bypassGovernance}) {
 		return fmt.Errorf("object %q cannot be removed: %w", obj.ObjectName, obj.Err)
 	}
+
+	if listObjectErr != nil {
+		return fmt.Errorf("cannot list objects for deletion: %w", listObjectErr)
+	}
+
 	return nil
 }
 
