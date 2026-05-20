@@ -104,4 +104,4 @@ clean: .e2e-test-clean .envtest-clean kind-clean ## Cleans local build artifacts
 	$(DOCKER_CMD) rmi $(CONTAINER_IMG) || true
 
 $(golangci_bin): | $(go_bin)
-	curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b "$(go_bin)"
+	curl -sSfL https://golangci-lint.run/install.sh | sh -s -- -b "$(go_bin)"
