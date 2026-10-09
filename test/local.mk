@@ -131,11 +131,6 @@ run-single-e2e: $(kuttl_bin) $(mc_bin) local-install provider-config ## Run spec
 	@if [ -f $(KIND_KUBECONFIG) ]; then \
 		kubectl delete buckets --all || true; \
 		kubectl delete iamkeys --all || true; \
-		kubectl delete postgresql --all || true; \
-		kubectl delete mysql --all || true; \
-		kubectl delete redis --all || true; \
-		kubectl delete kafka --all || true; \
-		kubectl delete opensearch --all || true; \
 	else \
 		echo "no kubeconfig found"; \
 	fi
