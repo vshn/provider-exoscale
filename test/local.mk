@@ -23,6 +23,7 @@ $(crossplane_sentinel): $(KIND_KUBECONFIG)
 	helm repo add --force-update crossplane https://charts.crossplane.io/stable
 	helm repo update
 	helm upgrade --install crossplane crossplane/crossplane \
+		--version "$(CROSSPLANE_VERSION)" \
 		--create-namespace \
 		--namespace crossplane-system \
 		--set "args[0]='--debug'" \

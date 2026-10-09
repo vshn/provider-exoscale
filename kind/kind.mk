@@ -55,11 +55,12 @@ $(KIND_KUBECONFIG): $(kind_bin)
 mirror-setup: $(mirror_sentinel) ## Installs an image registry required for the package image in kind cluster.
 
 $(mirror_sentinel): export KUBECONFIG = $(KIND_KUBECONFIG)
-$(mirror_sentinel):
+$(mirror_sentinel): $(kind_bin) $(KIND_KUBECONFIG)
 
 	REGISTRY_DIR="/etc/containerd/certs.d/registry.registry-system.svc.cluster.local:5000" && \
 	REGISTRY_HOST='[host."http://localhost:30500"]' && \
-	for node in $$(kind get nodes -n $(KIND_CLUSTER)); do \
+	nodes=$$($(kind_bin) get nodes -n $(KIND_CLUSTER)) && \
+	for node in $$nodes; do \
 		echo $$node ; \
 	  docker exec "$${node}" mkdir -p "$${REGISTRY_DIR}" ; \
 	  echo "$${REGISTRY_HOST}" | docker exec -i "$${node}" cp /dev/stdin "$${REGISTRY_DIR}/hosts.toml" ; \
