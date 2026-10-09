@@ -29,6 +29,9 @@ KIND_IMAGE ?= docker.io/kindest/node:$(KIND_NODE_VERSION)
 KIND_KUBECONFIG ?= $(kind_dir)/kind-kubeconfig-$(KIND_NODE_VERSION)
 KIND_CLUSTER ?= $(PROJECT_NAME)-$(KIND_NODE_VERSION)
 
+# Crossplane chart version used for the local and e2e setup
+CROSSPLANE_VERSION ?= 2.3.3
+
 # TEST:integration
 ENVTEST_ADDITIONAL_FLAGS ?= --bin-dir "$(kind_dir)"
 # See https://storage.googleapis.com/kubebuilder-tools/ for list of supported K8s versions
