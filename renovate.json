@@ -32,6 +32,17 @@
         "github.com/crossplane/crossplane"
       ],
       "allowedVersions": "<2"
+    },
+    {
+      "description": "Antora image tags have four parts (3.1.14.1). The default semver-coerced versioning drops the fourth, so revision-only releases would never produce a PR.",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackageNames": [
+        "ghcr.io/vshn/antora",
+        "ghcr.io/vshn/antora-preview"
+      ],
+      "versioning": "loose"
     }
   ],
   "customManagers": [
