@@ -24,12 +24,14 @@ GHCR_PACKAGE_IMG ?= $(CONTAINER_REGISTRY)/$(PROJECT_OWNER)/$(PROJECT_NAME)/provi
 ## KIND:setup
 
 # https://hub.docker.com/r/kindest/node/tags
+# renovate: datasource=docker depName=docker.io/kindest/node
 KIND_NODE_VERSION ?= v1.28.9
 KIND_IMAGE ?= docker.io/kindest/node:$(KIND_NODE_VERSION)
 KIND_KUBECONFIG ?= $(kind_dir)/kind-kubeconfig-$(KIND_NODE_VERSION)
 KIND_CLUSTER ?= $(PROJECT_NAME)-$(KIND_NODE_VERSION)
 
 # Crossplane chart version used for the local and e2e setup
+# renovate: datasource=helm depName=crossplane registryUrl=https://charts.crossplane.io/stable
 CROSSPLANE_VERSION ?= 2.3.3
 
 # TEST:integration

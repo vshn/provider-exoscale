@@ -22,6 +22,29 @@
         "on the first day of the month"
       ],
       "automerge": true
+    },
+    {
+      "description": "crank v2 lives in the github.com/crossplane/crossplane/v2 module, so the go run path in ci.mk only resolves v1 versions.",
+      "matchDatasources": [
+        "go"
+      ],
+      "matchPackageNames": [
+        "github.com/crossplane/crossplane"
+      ],
+      "allowedVersions": "<2"
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Track Make variables annotated with a renovate: comment on the line above, such as the kind node image and the Helm charts the E2E setup installs. No built-in manager reads Makefiles.",
+      "fileMatch": [
+        "(^|/)Makefile$",
+        "\\.mk$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)( registryUrl=(?<registryUrl>\\S+))?\\n[A-Za-z_]+ \\??= (?<currentValue>\\S+)"
+      ]
     }
   ]
 }
