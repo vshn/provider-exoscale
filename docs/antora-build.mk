@@ -3,6 +3,7 @@ docs_moduleroot_dir := docs/modules/ROOT
 
 docker_opts ?= --rm --tty --user "$$(id -u)"
 
+# renovate: datasource=docker depName=ghcr.io/vshn/antora
 antora_build_version ?= 3.1.2.2
 antora_cmd ?= $(DOCKER_CMD) run $(docker_opts) --volume "$${PWD}":/antora ghcr.io/vshn/antora:$(antora_build_version)
 antora_opts ?= --cache-dir=.cache/antora
